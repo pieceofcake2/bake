@@ -218,7 +218,7 @@ class ViewTaskTest extends CakeTestCase
         $this->Task->path = TMP;
         $this->Task->Template->params['theme'] = 'default';
         $this->Task->Template->templatePaths = [
-            'default' => CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'default' . DS
+            'default' => CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'default' . DS,
         ];
     }
 
