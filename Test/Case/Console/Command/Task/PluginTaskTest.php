@@ -22,8 +22,8 @@ App::uses('ShellDispatcher', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('Shell', 'Console');
-App::uses('PluginTask', 'Console/Command/Task');
-App::uses('ModelTask', 'Console/Command/Task');
+App::uses('PluginTask', 'Bake.Console/Command/Task');
+App::uses('ModelTask', 'Bake.Console/Command/Task');
 App::uses('Folder', 'Utility');
 App::uses('File', 'Utility');
 
@@ -42,6 +42,11 @@ class PluginTaskTest extends CakeTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        CakePlugin::load('Bake', [
+            'path' => dirname(__DIR__, 5) . DS,
+        ]);
+
         $this->out = $this->getMock('ConsoleOutput', [], [], '', false);
         $this->in = $this->getMock('ConsoleInput', [], [], '', false);
 

@@ -22,7 +22,7 @@ App::uses('ShellDispatcher', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('Shell', 'Console');
-App::uses('TemplateTask', 'Console/Command/Task');
+App::uses('TemplateTask', 'Bake.Console/Command/Task');
 
 /**
  * TemplateTaskTest class
@@ -39,6 +39,11 @@ class TemplateTaskTest extends CakeTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        CakePlugin::load('Bake', [
+            'path' => dirname(__DIR__, 5) . DS,
+        ]);
+
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
 
@@ -92,7 +97,7 @@ class TemplateTaskTest extends CakeTestCase
      */
     public function testFindingInstalledThemesForBake(): void
     {
-        $consoleLibs = CAKE . 'Console' . DS;
+        $consoleLibs = CakePlugin::path('Bake') . 'Console' . DS;
         $this->Task->initialize();
         $this->assertEquals($this->Task->templatePaths['default'], $consoleLibs . 'Templates' . DS . 'default' . DS);
     }
@@ -105,7 +110,7 @@ class TemplateTaskTest extends CakeTestCase
      */
     public function testGetThemePath(): void
     {
-        $defaultTheme = CAKE . 'Console' . DS . 'Templates' . DS . 'default' . DS;
+        $defaultTheme = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'default' . DS;
         $this->Task->templatePaths = ['default' => $defaultTheme];
 
         $this->Task->expects($this->exactly(1))->method('in')->will($this->returnValue('1'));

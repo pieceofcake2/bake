@@ -177,7 +177,7 @@ class ProjectTask extends AppShell
             $skel = $this->in(
                 __d('cake_console', 'What is the path to the directory layout you wish to copy?'),
                 null,
-                CAKE . 'Console' . DS . 'Templates' . DS . 'skel',
+                CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel',
             );
             if (!$skel) {
                 $this->err(__d('cake_console', 'The directory path you supplied was empty. Please try again.'));
@@ -186,7 +186,7 @@ class ProjectTask extends AppShell
                     $skel = $this->in(
                         __d('cake_console', 'Directory path does not exist please choose another:'),
                         null,
-                        CAKE . 'Console' . DS . 'Templates' . DS . 'skel',
+                        CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel',
                     );
                 }
             }
@@ -481,7 +481,7 @@ class ProjectTask extends AppShell
             'short' => 't',
             'help' => __d('cake_console', 'Theme to use when baking code.'),
         ])->addOption('skel', [
-            'default' => current(App::core('Console')) . 'Templates' . DS . 'skel',
+            'default' => CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel',
             'help' => __d('cake_console', 'The directory layout to use for the new application skeleton.' .
                 ' Defaults to cake/Console/Templates/skel of CakePHP used to create the project.'),
         ]);

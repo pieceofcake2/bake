@@ -25,11 +25,11 @@ App::uses('ShellDispatcher', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('Shell', 'Console');
-App::uses('ViewTask', 'Console/Command/Task');
-App::uses('ControllerTask', 'Console/Command/Task');
-App::uses('TemplateTask', 'Console/Command/Task');
-App::uses('ProjectTask', 'Console/Command/Task');
-App::uses('DbConfigTask', 'Console/Command/Task');
+App::uses('ViewTask', 'Bake.Console/Command/Task');
+App::uses('ControllerTask', 'Bake.Console/Command/Task');
+App::uses('TemplateTask', 'Bake.Console/Command/Task');
+App::uses('ProjectTask', 'Bake.Console/Command/Task');
+App::uses('DbConfigTask', 'Bake.Console/Command/Task');
 App::uses('Model', 'Model');
 App::uses('Controller', 'Controller');
 App::uses('AppController', 'Controller');
@@ -197,6 +197,11 @@ class ViewTaskTest extends CakeTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        CakePlugin::load('Bake', [
+            'path' => dirname(__DIR__, 5) . DS,
+        ]);
+
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
 
@@ -212,7 +217,9 @@ class ViewTaskTest extends CakeTestCase
 
         $this->Task->path = TMP;
         $this->Task->Template->params['theme'] = 'default';
-        $this->Task->Template->templatePaths = ['default' => CAKE . 'Console' . DS . 'Templates' . DS . 'default' . DS];
+        $this->Task->Template->templatePaths = [
+            'default' => CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'default' . DS
+        ];
     }
 
     /**

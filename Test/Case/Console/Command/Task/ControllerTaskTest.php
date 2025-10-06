@@ -26,11 +26,11 @@ App::uses('Shell', 'Console');
 App::uses('CakeSchema', 'Model');
 App::uses('ClassRegistry', 'Utility');
 App::uses('Helper', 'View/Helper');
-App::uses('ProjectTask', 'Console/Command/Task');
-App::uses('ControllerTask', 'Console/Command/Task');
-App::uses('ModelTask', 'Console/Command/Task');
-App::uses('TemplateTask', 'Console/Command/Task');
-App::uses('TestTask', 'Console/Command/Task');
+App::uses('ProjectTask', 'Bake.Console/Command/Task');
+App::uses('ControllerTask', 'Bake.Console/Command/Task');
+App::uses('ModelTask', 'Bake.Console/Command/Task');
+App::uses('TemplateTask', 'Bake.Console/Command/Task');
+App::uses('TestTask', 'Bake.Console/Command/Task');
 App::uses('Model', 'Model');
 
 App::uses('BakeArticle', 'Model');

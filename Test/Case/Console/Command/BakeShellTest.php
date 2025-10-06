@@ -20,10 +20,10 @@ App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('ShellDispatcher', 'Console');
 App::uses('Shell', 'Console');
-App::uses('BakeShell', 'Console/Command');
-App::uses('ModelTask', 'Console/Command/Task');
-App::uses('ControllerTask', 'Console/Command/Task');
-App::uses('DbConfigTask', 'Console/Command/Task');
+App::uses('BakeShell', 'Bake.Console/Command');
+App::uses('ModelTask', 'Bake.Console/Command/Task');
+App::uses('ControllerTask', 'Bake.Console/Command/Task');
+App::uses('DbConfigTask', 'Bake.Console/Command/Task');
 App::uses('Controller', 'Controller');
 
 if (!class_exists('UsersController')) {
@@ -49,6 +49,11 @@ class BakeShellTest extends CakeTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        CakePlugin::load('Bake', [
+            'path' => dirname(__DIR__, 4) . DS,
+        ]);
+
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
 

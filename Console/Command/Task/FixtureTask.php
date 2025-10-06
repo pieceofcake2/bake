@@ -16,7 +16,7 @@
  */
 
 App::uses('AppShell', 'Console/Command');
-App::uses('BakeTask', 'Console/Command/Task');
+App::uses('BakeTask', 'Bake.Console/Command/Task');
 App::uses('Model', 'Model');
 
 /**

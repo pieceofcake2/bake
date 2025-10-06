@@ -68,7 +68,7 @@ class TemplateTask extends AppShell
             $paths[] = $this->_pluginPath($plugin) . 'Console' . DS;
         }
 
-        $core = current(App::core('Console'));
+        $core = dirname(__DIR__, 2) . DS;
         $separator = DS === '/' ? '/' : '\\\\';
         $core = preg_replace('#shells' . $separator . '$#', '', $core);
 

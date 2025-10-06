@@ -17,7 +17,7 @@
 
 App::uses('AppShell', 'Console/Command');
 App::uses('Controller', 'Controller');
-App::uses('BakeTask', 'Console/Command/Task');
+App::uses('BakeTask', 'Bake.Console/Command/Task');
 
 /**
  * Task class for creating and updating view files.

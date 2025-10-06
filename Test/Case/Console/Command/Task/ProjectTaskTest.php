@@ -22,7 +22,7 @@ App::uses('ShellDispatcher', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('Shell', 'Console');
-App::uses('ProjectTask', 'Console/Command/Task');
+App::uses('ProjectTask', 'Bake.Console/Command/Task');
 App::uses('Folder', 'Utility');
 App::uses('File', 'Utility');
 
@@ -41,6 +41,11 @@ class ProjectTaskTest extends CakeTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        CakePlugin::load('Bake', [
+            'path' => dirname(__DIR__, 5) . DS,
+        ]);
+
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
 
@@ -73,7 +78,7 @@ class ProjectTaskTest extends CakeTestCase
      */
     protected function _setupTestProject(): void
     {
-        $skel = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
+        $skel = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
         $this->Task->bake($this->Task->path . 'bake_test_app', $skel);
     }
@@ -141,7 +146,7 @@ class ProjectTaskTest extends CakeTestCase
     public function testExecuteWithAbsolutePath(): void
     {
         $path = $this->Task->args[0] = TMP . 'tests' . DS . 'bake_test_app';
-        $this->Task->params['skel'] = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
+        $this->Task->params['skel'] = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
         $this->Task->execute();
 
@@ -168,7 +173,7 @@ class ProjectTaskTest extends CakeTestCase
         ini_set('include_path', CAKE_CORE_INCLUDE_PATH . PATH_SEPARATOR . $restore);
 
         $path = $this->Task->args[0] = TMP . 'tests' . DS . 'bake_test_app';
-        $this->Task->params['skel'] = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
+        $this->Task->params['skel'] = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
         $this->Task->execute();
 
@@ -313,7 +318,7 @@ class ProjectTaskTest extends CakeTestCase
             ->method('in')
             ->willReturnOnConsecutiveCalls('y', 'super_duper_admin');
 
-        $skel = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
+        $skel = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->bake($this->Task->path . 'bake_test_app', $skel);
 
         $this->Task->configPath = $this->Task->path . 'bake_test_app' . DS . 'Config' . DS;
@@ -359,7 +364,7 @@ class ProjectTaskTest extends CakeTestCase
             ->method('in')
             ->willReturnOnConsecutiveCalls('y', 2);
 
-        $skel = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
+        $skel = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->bake($this->Task->path . 'bake_test_app', $skel);
 
         $this->Task->configPath = $this->Task->path . 'bake_test_app' . DS . 'Config' . DS;
@@ -375,7 +380,7 @@ class ProjectTaskTest extends CakeTestCase
      */
     public function testExecute(): void
     {
-        $this->Task->params['skel'] = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
+        $this->Task->params['skel'] = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->params['working'] = TMP . 'tests' . DS;
 
         $path = $this->Task->path . 'bake_test_app';

@@ -25,9 +25,9 @@ App::uses('ShellDispatcher', 'Console');
 App::uses('Shell', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
-App::uses('FixtureTask', 'Console/Command/Task');
-App::uses('TemplateTask', 'Console/Command/Task');
-App::uses('ModelTask', 'Console/Command/Task');
+App::uses('FixtureTask', 'Bake.Console/Command/Task');
+App::uses('TemplateTask', 'Bake.Console/Command/Task');
+App::uses('ModelTask', 'Bake.Console/Command/Task');
 
 /**
  * ModelTaskTest class
@@ -55,6 +55,11 @@ class ModelTaskTest extends CakeTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        CakePlugin::load('Bake', [
+            'path' => dirname(__DIR__, 5) . DS,
+        ]);
+
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
 
