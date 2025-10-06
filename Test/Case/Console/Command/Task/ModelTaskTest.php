@@ -43,8 +43,8 @@ class ModelTaskTest extends CakeTestCase
      * @var array
      */
     public $fixtures = [
-        'core.bake_article', 'core.bake_comment', 'core.bake_articles_bake_tag',
-        'core.bake_tag', 'core.category_thread', 'core.number_tree',
+        'plugin.Bake.bake_article', 'plugin.Bake.bake_comment', 'plugin.Bake.bake_articles_bake_tag',
+        'plugin.Bake.bake_tag', 'core.category_thread', 'core.number_tree',
     ];
 
     /**
