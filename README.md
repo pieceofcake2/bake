@@ -19,25 +19,9 @@ Install the plugin using Composer:
 composer require --dev pieceofcake2/bake
 ```
 
-### Loading the Plugin
-
-In your `app/Config/bootstrap.php`, load the plugin with bootstrap:
-
-```php
-CakePlugin::load('Bake', ['bootstrap' => true]);
-```
-
-Or load all plugins with bootstrap:
-
-```php
-CakePlugin::loadAll(['bootstrap' => true]);
-```
-
-**Note:** Loading with `bootstrap => true` allows you to use `cake bake` instead of `cake Bake.bake`.
-
 ## Usage
 
-Once installed and loaded, you can use the bake commands:
+Once installed, you can use the bake commands:
 
 ```bash
 # Bake a model
@@ -57,12 +41,6 @@ app/Console/cake bake project /path/to/new/project
 
 # Create a new plugin
 app/Console/cake bake plugin MyPlugin
-```
-
-If you don't load the plugin with bootstrap, you can use the plugin prefix:
-
-```bash
-app/Console/cake Bake.bake model User
 ```
 
 ## Features
