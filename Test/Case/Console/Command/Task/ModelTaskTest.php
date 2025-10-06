@@ -71,7 +71,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    protected function _useMockedOut()
+    protected function _useMockedOut(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -89,7 +89,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    protected function _setupOtherMocks()
+    protected function _setupOtherMocks(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -119,7 +119,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testListAllArgument()
+    public function testListAllArgument(): void
     {
         $this->_useMockedOut();
 
@@ -136,7 +136,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testListAllConnection()
+    public function testListAllConnection(): void
     {
         $this->_useMockedOut();
 
@@ -154,7 +154,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetNameQuit()
+    public function testGetNameQuit(): void
     {
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('q'));
         $this->Task->expects($this->once())->method('_stop');
@@ -166,7 +166,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetNameValidOption()
+    public function testGetNameValidOption(): void
     {
         $listing = $this->Task->listAll('test');
         $this->Task->expects($this->exactly(2))
@@ -185,7 +185,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetNameWithOutOfBoundsOption()
+    public function testGetNameWithOutOfBoundsOption(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -201,7 +201,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetTableName()
+    public function testGetTableName(): void
     {
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
         $result = $this->Task->getTable('BakeArticle', 'test');
@@ -214,7 +214,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetTableNameCustom()
+    public function testGetTableNameCustom(): void
     {
         $this->Task->expects($this->any())->method('in')->will($this->onConsecutiveCalls('n', 'my_table'));
         $result = $this->Task->getTable('BakeArticle', 'test');
@@ -227,7 +227,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetTableOddTableInteractive()
+    public function testGetTableOddTableInteractive(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -262,7 +262,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetTableOddTable()
+    public function testGetTableOddTable(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -292,7 +292,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInitValidations()
+    public function testInitValidations(): void
     {
         $result = $this->Task->initValidations();
         $this->assertTrue(in_array('notBlank', $result));
@@ -304,7 +304,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFieldValidationGuessing()
+    public function testFieldValidationGuessing(): void
     {
         $this->Task->interactive = false;
         $this->Task->initValidations();
@@ -339,7 +339,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractiveFieldValidation()
+    public function testInteractiveFieldValidation(): void
     {
         $this->Task->initValidations();
         $this->Task->interactive = true;
@@ -356,7 +356,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractiveFieldValidationWithBogusResponse()
+    public function testInteractiveFieldValidationWithBogusResponse(): void
     {
         $this->_useMockedOut();
         $this->Task->initValidations();
@@ -368,7 +368,7 @@ class ModelTaskTest extends CakeTestCase
         $outCalls = [];
         $this->Task->expects($this->any())
             ->method('out')
-            ->willReturnCallback(function ($message = '') use (&$outCalls) {
+            ->willReturnCallback(function ($message = '') use (&$outCalls): void {
                 $outCalls[] = $message;
             });
 
@@ -386,7 +386,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractiveFieldValidationWithRegexp()
+    public function testInteractiveFieldValidationWithRegexp(): void
     {
         $this->Task->initValidations();
         $this->Task->interactive = true;
@@ -403,7 +403,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testSkippingChoiceInteractiveFieldValidation()
+    public function testSkippingChoiceInteractiveFieldValidation(): void
     {
         $this->Task->initValidations();
         $this->Task->interactive = true;
@@ -420,7 +420,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testSkippingAnotherInteractiveFieldValidation()
+    public function testSkippingAnotherInteractiveFieldValidation(): void
     {
         $this->Task->initValidations();
         $this->Task->interactive = true;
@@ -438,7 +438,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractiveDoValidationWithSkipping()
+    public function testInteractiveDoValidationWithSkipping(): void
     {
         $this->Task->expects($this->any())
             ->method('in')
@@ -499,7 +499,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testNonInteractiveDoValidation()
+    public function testNonInteractiveDoValidation(): void
     {
         $Model = $this->getMock('Model');
         $Model->primaryKey = 'id';
@@ -563,7 +563,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFindPrimaryKey()
+    public function testFindPrimaryKey(): void
     {
         $fields = [
             'one' => [],
@@ -585,7 +585,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFindDisplayFieldNone()
+    public function testFindDisplayFieldNone(): void
     {
         $fields = [
             'id' => [], 'tagname' => [], 'body' => [],
@@ -601,7 +601,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFindDisplayName()
+    public function testFindDisplayName(): void
     {
         $fields = [
             'id' => [], 'tagname' => [], 'body' => [],
@@ -619,7 +619,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBelongsToGeneration()
+    public function testBelongsToGeneration(): void
     {
         $model = new Model(['ds' => 'test', 'name' => 'BakeComment']);
         $result = $this->Task->findBelongsTo($model, []);
@@ -658,7 +658,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testHasManyHasOneGeneration()
+    public function testHasManyHasOneGeneration(): void
     {
         $model = new Model(['ds' => 'test', 'name' => 'BakeArticle']);
         $this->Task->connection = 'test';
@@ -708,7 +708,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testHasAndBelongsToManyGeneration()
+    public function testHasAndBelongsToManyGeneration(): void
     {
         $model = new Model(['ds' => 'test', 'name' => 'BakeArticle']);
         $this->Task->connection = 'test';
@@ -733,7 +733,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoAssociationsNonInteractive()
+    public function testDoAssociationsNonInteractive(): void
     {
         $this->Task->connection = 'test';
         $this->Task->interactive = false;
@@ -772,7 +772,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoActsAs()
+    public function testDoActsAs(): void
     {
         $this->Task->connection = 'test';
         $this->Task->interactive = false;
@@ -787,7 +787,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeFixture()
+    public function testBakeFixture(): void
     {
         $this->Task->plugin = 'TestPlugin';
         $this->Task->interactive = true;
@@ -804,7 +804,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeTest()
+    public function testBakeTest(): void
     {
         $this->Task->plugin = 'TestPlugin';
         $this->Task->interactive = true;
@@ -822,7 +822,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testConfirmAssociations()
+    public function testConfirmAssociations(): void
     {
         $associations = [
             'hasOne' => [
@@ -865,7 +865,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInOptions()
+    public function testInOptions(): void
     {
         $this->_useMockedOut();
 
@@ -874,7 +874,7 @@ class ModelTaskTest extends CakeTestCase
         $outCalls = [];
         $this->Task->expects($this->exactly(6))
             ->method('out')
-            ->willReturnCallback(function ($message = '') use (&$outCalls) {
+            ->willReturnCallback(function ($message = '') use (&$outCalls): void {
                 $outCalls[] = $message;
             });
 
@@ -900,7 +900,7 @@ class ModelTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeValidation()
+    public function testBakeValidation(): void
     {
         $validate = [
             'name' => [
@@ -938,7 +938,7 @@ STRINGEND;
      *
      * @return void
      */
-    public function testBakeRelations()
+    public function testBakeRelations(): void
     {
         $associations = [
             'belongsTo' => [
@@ -997,7 +997,7 @@ STRINGEND;
      *
      * @return void
      */
-    public function testBakeWithPlugin()
+    public function testBakeWithPlugin(): void
     {
         $this->Task->plugin = 'ControllerTest';
 
@@ -1019,7 +1019,7 @@ STRINGEND;
      *
      * @return void
      */
-    public function testBakeWithBehaviors()
+    public function testBakeWithBehaviors(): void
     {
         $result = $this->Task->bake('NumberTree', ['actsAs' => ['Tree', 'PluginName.Sluggable']]);
         $expected = <<<TEXT
@@ -1041,7 +1041,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteWithNamedModel()
+    public function testExecuteWithNamedModel(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -1061,9 +1061,9 @@ TEXT;
     /**
      * data provider for testExecuteWithNamedModelVariations
      *
-     * @return void
+     * @return array{array{string}}
      */
-    public static function nameVariations()
+    public static function nameVariations(): array
     {
         return [
             ['BakeArticles'], ['BakeArticle'], ['bake_article'], ['bake_articles'],
@@ -1074,9 +1074,10 @@ TEXT;
      * test that execute passes with different inflections of the same name.
      *
      * @dataProvider nameVariations
+     * @param string $name
      * @return void
      */
-    public function testExecuteWithNamedModelVariations($name)
+    public function testExecuteWithNamedModelVariations(string $name): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -1095,7 +1096,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteWithNamedModelHasManyCreated()
+    public function testExecuteWithNamedModelHasManyCreated(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -1114,7 +1115,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteIntoAll()
+    public function testExecuteIntoAll(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -1132,7 +1133,7 @@ TEXT;
         $createFileCalls = [];
         $this->Task->expects($this->exactly(6))
             ->method('createFile')
-            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['filename' => $filename, 'content' => $content];
             });
 
@@ -1173,7 +1174,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteIntoAllOddTables()
+    public function testExecuteIntoAllOddTables(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -1232,7 +1233,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteIntoBakeOddTables()
+    public function testExecuteIntoBakeOddTables(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -1291,7 +1292,7 @@ TEXT;
      *
      * @return void
      */
-    public function testSkipTablesAndAll()
+    public function testSkipTablesAndAll(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -1310,7 +1311,7 @@ TEXT;
         $createFileCalls = [];
         $this->Task->expects($this->exactly(4))
             ->method('createFile')
-            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['filename' => $filename, 'content' => $content];
             });
 
@@ -1334,7 +1335,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteIntoInteractive()
+    public function testExecuteIntoInteractive(): void
     {
         $tables = $this->Task->listAll('test');
         $article = array_search('bake_articles', $tables) + 1;
@@ -1375,7 +1376,7 @@ TEXT;
      *
      * @return void
      */
-    public function testExecuteWithNonExistantTableName()
+    public function testExecuteWithNonExistantTableName(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -1395,7 +1396,7 @@ TEXT;
      *
      * @return void
      */
-    public function testForcedExecuteWithNonExistantTableName()
+    public function testForcedExecuteWithNonExistantTableName(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';

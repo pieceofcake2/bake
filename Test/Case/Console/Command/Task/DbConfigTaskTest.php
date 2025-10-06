@@ -66,7 +66,7 @@ class DbConfigTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetConfig()
+    public function testGetConfig(): void
     {
         $this->Task->expects($this->any())
             ->method('in')
@@ -81,7 +81,7 @@ class DbConfigTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInitialize()
+    public function testInitialize(): void
     {
         $this->Task->initialize();
         $this->assertFalse(empty($this->Task->path));
@@ -93,7 +93,7 @@ class DbConfigTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteIntoInteractive()
+    public function testExecuteIntoInteractive(): void
     {
         $this->Task->initialize();
 

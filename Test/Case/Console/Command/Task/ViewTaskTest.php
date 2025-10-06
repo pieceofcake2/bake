@@ -88,7 +88,7 @@ class ViewTaskCommentsController extends Controller
      *
      * @return void
      */
-    public function index()
+    public function index(): void
     {
     }
 
@@ -97,7 +97,7 @@ class ViewTaskCommentsController extends Controller
      *
      * @return void
      */
-    public function add()
+    public function add(): void
     {
     }
 }
@@ -114,7 +114,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function index()
+    public function index(): void
     {
     }
 
@@ -123,7 +123,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function add()
+    public function add(): void
     {
     }
 
@@ -132,7 +132,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function admin_index()
+    public function admin_index(): void
     {
     }
 
@@ -141,7 +141,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function admin_add()
+    public function admin_add(): void
     {
     }
 
@@ -150,7 +150,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function admin_view()
+    public function admin_view(): void
     {
     }
 
@@ -159,7 +159,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function admin_edit()
+    public function admin_edit(): void
     {
     }
 
@@ -168,7 +168,7 @@ class ViewTaskArticlesController extends Controller
      *
      * @return void
      */
-    public function admin_delete()
+    public function admin_delete(): void
     {
     }
 }
@@ -232,7 +232,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetContent()
+    public function testGetContent(): void
     {
         $vars = [
             'modelClass' => 'TestViewModel',
@@ -263,7 +263,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetContentWithAdminAction()
+    public function testGetContentWithAdminAction(): void
     {
         $_back = Configure::read('Routing');
         Configure::write('Routing.prefixes', ['admin']);
@@ -303,7 +303,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeView()
+    public function testBakeView(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
@@ -321,7 +321,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeEdit()
+    public function testBakeEdit(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
@@ -338,7 +338,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeIndex()
+    public function testBakeIndex(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
@@ -356,7 +356,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeWithNoTemplate()
+    public function testBakeWithNoTemplate(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
@@ -369,7 +369,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeWithPlugin()
+    public function testBakeWithPlugin(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
         $this->Task->plugin = 'TestTest';
@@ -395,14 +395,14 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeActions()
+    public function testBakeActions(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
         $createFileCalls = [];
         $this->Task->expects($this->exactly(3))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -423,7 +423,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testCustomAction()
+    public function testCustomAction(): void
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
@@ -444,7 +444,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteIntoAll()
+    public function testExecuteIntoAll(): void
     {
         $this->Task->args[0] = 'all';
 
@@ -454,7 +454,7 @@ class ViewTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -469,7 +469,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteIntoAllWithActionName()
+    public function testExecuteIntoAllWithActionName(): void
     {
         $this->Task->args = ['all', 'index'];
 
@@ -490,7 +490,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithActionParam()
+    public function testExecuteWithActionParam(): void
     {
         $this->Task->args[0] = 'ViewTaskComments';
         $this->Task->args[1] = 'view';
@@ -509,14 +509,14 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithController()
+    public function testExecuteWithController(): void
     {
         $this->Task->args[0] = 'ViewTaskComments';
 
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -529,9 +529,9 @@ class ViewTaskTest extends CakeTestCase
     /**
      * static dataprovider for test cases
      *
-     * @return void
+     * @return array{array{string}}
      */
-    public static function nameVariations()
+    public static function nameVariations(): array
     {
         return [['ViewTaskComments'], ['ViewTaskComment'], ['view_task_comment']];
     }
@@ -540,16 +540,17 @@ class ViewTaskTest extends CakeTestCase
      * test that both plural and singular forms can be used for baking views.
      *
      * @dataProvider nameVariations
+     * @param string $name
      * @return void
      */
-    public function testExecuteWithControllerVariations($name)
+    public function testExecuteWithControllerVariations(string $name): void
     {
         $this->Task->args = [$name];
 
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -565,7 +566,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithControllerAndAdminFlag()
+    public function testExecuteWithControllerAndAdminFlag(): void
     {
         $_back = Configure::read('Routing');
         Configure::write('Routing.prefixes', ['admin']);
@@ -579,7 +580,7 @@ class ViewTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(4))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -598,7 +599,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteInteractive()
+    public function testExecuteInteractive(): void
     {
         $this->Task->connection = 'test';
         $this->Task->args = [];
@@ -613,7 +614,7 @@ class ViewTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(4))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -637,7 +638,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithAlternateTemplates()
+    public function testExecuteWithAlternateTemplates(): void
     {
         $this->Task->connection = 'test';
         $this->Task->args = ['ViewTaskComments', 'index', 'list'];
@@ -656,7 +657,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteInteractiveWithAdmin()
+    public function testExecuteInteractiveWithAdmin(): void
     {
         Configure::write('Routing.prefixes', ['admin']);
         $this->Task->connection = 'test';
@@ -674,7 +675,7 @@ class ViewTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(4))
             ->method('createFile')
-            ->willReturnCallback(function ($path, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($path, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['path' => $path, 'content' => $content];
             });
 
@@ -698,7 +699,7 @@ class ViewTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetTemplate()
+    public function testGetTemplate(): void
     {
         $result = $this->Task->getTemplate('delete');
         $this->assertFalse($result);

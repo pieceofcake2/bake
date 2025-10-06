@@ -83,7 +83,7 @@ class PluginTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeFoldersAndFiles()
+    public function testBakeFoldersAndFiles(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -94,7 +94,7 @@ class PluginTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($file, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($file, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['file' => $file, 'content' => $content];
             });
 
@@ -144,7 +144,7 @@ class PluginTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithNoArgs()
+    public function testExecuteWithNoArgs(): void
     {
         $this->Task->expects($this->exactly(3))
             ->method('in')
@@ -155,7 +155,7 @@ class PluginTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($file, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($file, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['file' => $file, 'content' => $content];
             });
 
@@ -177,7 +177,7 @@ class PluginTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithOneArg()
+    public function testExecuteWithOneArg(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -188,7 +188,7 @@ class PluginTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($file, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($file, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['file' => $file, 'content' => $content];
             });
 
@@ -210,7 +210,7 @@ class PluginTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFindPathNonExistant()
+    public function testFindPathNonExistant(): void
     {
         $paths = App::path('plugins');
         foreach ($paths as $i => $path) {

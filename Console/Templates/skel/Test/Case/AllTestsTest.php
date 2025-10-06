@@ -23,7 +23,7 @@ class AllTestsTest extends CakeTestSuite
      *
      * @return CakeTestSuite Suite class instance.
      */
-    public static function suite()
+    public static function suite(): CakeTestSuite
     {
         $suite = new CakeTestSuite('All application tests');
         $suite->addTestDirectoryRecursive(TESTS . 'Case');

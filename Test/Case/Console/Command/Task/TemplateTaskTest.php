@@ -66,7 +66,7 @@ class TemplateTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testSet()
+    public function testSet(): void
     {
         $this->Task->set('one', 'two');
         $this->assertTrue(isset($this->Task->templateVars['one']));
@@ -90,7 +90,7 @@ class TemplateTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFindingInstalledThemesForBake()
+    public function testFindingInstalledThemesForBake(): void
     {
         $consoleLibs = CAKE . 'Console' . DS;
         $this->Task->initialize();
@@ -103,7 +103,7 @@ class TemplateTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetThemePath()
+    public function testGetThemePath(): void
     {
         $defaultTheme = CAKE . 'Console' . DS . 'Templates' . DS . 'default' . DS;
         $this->Task->templatePaths = ['default' => $defaultTheme];
@@ -129,7 +129,7 @@ class TemplateTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGenerate()
+    public function testGenerate(): void
     {
         App::build([
             'Console' => [
@@ -150,7 +150,7 @@ class TemplateTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGenerateWithTemplateFallbacks()
+    public function testGenerateWithTemplateFallbacks(): void
     {
         App::build([
             'Console' => [

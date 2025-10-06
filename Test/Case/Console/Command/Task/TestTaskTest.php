@@ -72,7 +72,7 @@ class TestTaskArticle extends Model
      *
      * @return void
      */
-    public function doSomething()
+    public function doSomething(): void
     {
     }
 
@@ -81,7 +81,7 @@ class TestTaskArticle extends Model
      *
      * @return void
      */
-    public function doSomethingElse()
+    public function doSomethingElse(): void
     {
     }
 
@@ -90,7 +90,7 @@ class TestTaskArticle extends Model
      *
      * @return void
      */
-    protected function _innerMethod()
+    protected function _innerMethod(): void
     {
     }
 }
@@ -227,7 +227,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFilePathGenerationModelRepeated()
+    public function testFilePathGenerationModelRepeated(): void
     {
         $this->Task->expects($this->never())->method('err');
         $this->Task->expects($this->never())->method('_stop');
@@ -235,7 +235,7 @@ class TestTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(3))
             ->method('createFile')
-            ->willReturnCallback(function ($file, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($file, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['file' => $file, 'content' => $content];
             });
 
@@ -256,7 +256,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testMethodIntrospection()
+    public function testMethodIntrospection(): void
     {
         $result = $this->Task->getTestableMethods('TestTaskArticle');
         $expected = ['dosomething', 'dosomethingelse'];
@@ -268,7 +268,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFixtureArrayGenerationFromModel()
+    public function testFixtureArrayGenerationFromModel(): void
     {
         $subject = ClassRegistry::init('TestTaskArticle');
         $result = $this->Task->generateFixtureList($subject);
@@ -283,7 +283,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testFixtureArrayGenerationFromController()
+    public function testFixtureArrayGenerationFromController(): void
     {
         $subject = new TestTaskCommentsController();
         $result = $this->Task->generateFixtureList($subject);
@@ -298,7 +298,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetObjectType()
+    public function testGetObjectType(): void
     {
         $this->Task->expects($this->once())->method('_stop');
 
@@ -317,7 +317,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testRegistryClearWhenBuildingTestObjects()
+    public function testRegistryClearWhenBuildingTestObjects(): void
     {
         ClassRegistry::flush();
         $model = ClassRegistry::init('TestTaskComment');
@@ -342,7 +342,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetClassName()
+    public function testGetClassName(): void
     {
         $objects = App::objects('model');
         $this->skipIf(empty($objects), 'No models in app.');
@@ -364,7 +364,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetUserFixtures()
+    public function testGetUserFixtures(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -380,7 +380,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetRealClassname()
+    public function testGetRealClassname(): void
     {
         $result = $this->Task->getRealClassname('Model', 'Post');
         $this->assertEquals('Post', $result);
@@ -416,7 +416,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeModelTest()
+    public function testBakeModelTest(): void
     {
         $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
         $this->Task->expects($this->once())->method('isLoadableClass')->will($this->returnValue(true));
@@ -448,7 +448,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeControllerTest()
+    public function testBakeControllerTest(): void
     {
         $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
         $this->Task->expects($this->once())->method('isLoadableClass')->will($this->returnValue(true));
@@ -476,7 +476,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeComponentTest()
+    public function testBakeComponentTest(): void
     {
         $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
 
@@ -500,7 +500,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeBehaviorTest()
+    public function testBakeBehaviorTest(): void
     {
         $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
 
@@ -521,7 +521,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeHelperTest()
+    public function testBakeHelperTest(): void
     {
         $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
 
@@ -543,7 +543,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGenerateConstructor()
+    public function testGenerateConstructor(): void
     {
         $result = $this->Task->generateConstructor('controller', 'PostsController', null);
         $expected = ['', '', ''];
@@ -563,7 +563,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGenerateUses()
+    public function testGenerateUses(): void
     {
         $result = $this->Task->generateUses('model', 'Model', 'Post');
         $expected = [
@@ -599,7 +599,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testMockClassGeneration()
+    public function testMockClassGeneration(): void
     {
         $result = $this->Task->hasMockClass('controller');
         $this->assertTrue($result);
@@ -610,7 +610,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeWithPlugin()
+    public function testBakeWithPlugin(): void
     {
         $this->Task->plugin = 'TestTest';
 
@@ -629,7 +629,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractiveWithPlugin()
+    public function testInteractiveWithPlugin(): void
     {
         $testApp = CAKE . 'Test' . DS . 'test_app' . DS . 'Plugin' . DS;
         App::build([
@@ -653,7 +653,7 @@ class TestTaskTest extends CakeTestCase
         $writeCalls = [];
         $this->Task->stdout->expects($this->any())
             ->method('write')
-            ->willReturnCallback(function ($message) use (&$writeCalls) {
+            ->willReturnCallback(function ($message) use (&$writeCalls): void {
                 $writeCalls[] = $message;
             });
 
@@ -663,7 +663,10 @@ class TestTaskTest extends CakeTestCase
         $this->assertEquals('1. OtherHelperHelper', $writeCalls[21]);
     }
 
-    public static function caseFileNameProvider()
+    /**
+     * @return array{array{string}}
+     */
+    public static function caseFileNameProvider(): array
     {
         return [
             ['Model', 'Post', 'Case' . DS . 'Model' . DS . 'PostTest.php'],
@@ -683,9 +686,12 @@ class TestTaskTest extends CakeTestCase
      * Test filename generation for each type + plugins
      *
      * @dataProvider caseFileNameProvider
+     * @param string $type
+     * @param string $class
+     * @param string $expected
      * @return void
      */
-    public function testTestCaseFileName($type, $class, $expected)
+    public function testTestCaseFileName(string $type, string $class, string $expected): void
     {
         $this->Task->path = DS . 'my' . DS . 'path' . DS . 'tests' . DS;
 
@@ -699,7 +705,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testTestCaseFileNamePlugin()
+    public function testTestCaseFileNamePlugin(): void
     {
         $this->Task->path = DS . 'my' . DS . 'path' . DS . 'tests' . DS;
 
@@ -715,7 +721,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithOneArg()
+    public function testExecuteWithOneArg(): void
     {
         $this->Task->args[0] = 'Model';
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('TestTaskTag'));
@@ -733,7 +739,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithTwoArgs()
+    public function testExecuteWithTwoArgs(): void
     {
         $this->Task->args = ['Model', 'TestTaskTag'];
         $this->Task->expects($this->exactly(0))
@@ -752,7 +758,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithTwoArgsLowerCase()
+    public function testExecuteWithTwoArgsLowerCase(): void
     {
         $this->Task->args = ['model', 'TestTaskTag'];
         $this->Task->expects($this->exactly(0))
@@ -771,7 +777,7 @@ class TestTaskTest extends CakeTestCase
      *
      * @return array
      */
-    public static function mapTypeProvider()
+    public static function mapTypeProvider(): array
     {
         return [
             ['controller', null, 'Controller'],
@@ -794,7 +800,7 @@ class TestTaskTest extends CakeTestCase
      * @dataProvider mapTypeProvider
      * @return void
      */
-    public function testMapType($original, $plugin, $expected)
+    public function testMapType($original, $plugin, $expected): void
     {
         $this->assertEquals($expected, $this->Task->mapType($original, $plugin));
     }

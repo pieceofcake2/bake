@@ -76,4 +76,8 @@
     <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint">
         <include-pattern>Test/Case/*</include-pattern>
     </rule>
+
+    <rule ref="Squiz.PHP.NonExecutableCode.Unreachable">
+        <exclude-pattern>Console/Templates/skel/Config/acl.ini.php</exclude-pattern>
+    </rule>
 </ruleset>

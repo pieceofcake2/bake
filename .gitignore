@@ -11,6 +11,9 @@ Thumbs.db
 /vendor/
 composer.lock
 
+# Cache
+.phpunit.result.cache
+
 #
 /Console/Templates/skel/tmp/cache/models/*
 !/Console/Templates/skel/tmp/cache/models/emoty

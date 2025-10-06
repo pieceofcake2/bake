@@ -121,7 +121,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testListAll()
+    public function testListAll(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -134,7 +134,7 @@ class ControllerTaskTest extends CakeTestCase
         $outCalls = [];
         $this->Task->expects($this->any())
             ->method('out')
-            ->willReturnCallback(function ($message = '') use (&$outCalls) {
+            ->willReturnCallback(function ($message = '') use (&$outCalls): void {
                 $outCalls[] = $message;
             });
 
@@ -163,7 +163,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetNameValidIndex()
+    public function testGetNameValidIndex(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -188,7 +188,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetNameInvalidIndex()
+    public function testGetNameInvalidIndex(): void
     {
         $this->Task->interactive = true;
         $this->Task->expects($this->exactly(2))
@@ -206,7 +206,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoHelpersNo()
+    public function testDoHelpersNo(): void
     {
         $this->Task->expects($this->any())->method('in')->will($this->returnValue('n'));
         $result = $this->Task->doHelpers();
@@ -218,7 +218,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoHelpersTrailingSpace()
+    public function testDoHelpersTrailingSpace(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -234,7 +234,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoHelpersTrailingCommas()
+    public function testDoHelpersTrailingCommas(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -250,7 +250,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoComponentsNo()
+    public function testDoComponentsNo(): void
     {
         $this->Task->expects($this->any())->method('in')->will($this->returnValue('n'));
         $result = $this->Task->doComponents();
@@ -262,7 +262,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoComponentsTrailingSpaces()
+    public function testDoComponentsTrailingSpaces(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -278,7 +278,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testDoComponentsTrailingCommas()
+    public function testDoComponentsTrailingCommas(): void
     {
         $this->Task->expects($this->exactly(2))
             ->method('in')
@@ -294,7 +294,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testConfirmController()
+    public function testConfirmController(): void
     {
         $controller = 'Posts';
         $scaffold = false;
@@ -304,7 +304,7 @@ class ControllerTaskTest extends CakeTestCase
         $outCalls = [];
         $this->Task->expects($this->any())
             ->method('out')
-            ->willReturnCallback(function ($message = '') use (&$outCalls) {
+            ->willReturnCallback(function ($message = '') use (&$outCalls): void {
                 $outCalls[] = $message;
             });
 
@@ -325,7 +325,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBake()
+    public function testBake(): void
     {
         $helpers = ['Js', 'Time'];
         $components = ['Acl', 'Auth'];
@@ -349,7 +349,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeWithPlugin()
+    public function testBakeWithPlugin(): void
     {
         $this->Task->plugin = 'ControllerTest';
 
@@ -389,7 +389,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeActionsUsingSessions()
+    public function testBakeActionsUsingSessions(): void
     {
         $result = $this->Task->bakeActions('BakeArticles', null, true);
         $expected = file_get_contents(CAKE . 'Test' . DS . 'bake_compare' . DS . 'Controller' . DS . 'ActionsUsingSessions.ctp');
@@ -408,7 +408,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeActionsWithNoSessions()
+    public function testBakeActionsWithNoSessions(): void
     {
         $result = $this->Task->bakeActions('BakeArticles', null, false);
         $expected = file_get_contents(CAKE . 'Test' . DS . 'bake_compare' . DS . 'Controller' . DS . 'ActionsWithNoSessions.ctp');
@@ -420,7 +420,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeTest()
+    public function testBakeTest(): void
     {
         $this->Task->plugin = 'ControllerTest';
         $this->Task->connection = 'test';
@@ -439,7 +439,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractive()
+    public function testInteractive(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -475,7 +475,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testInteractiveAdminMethodsNotInteractive()
+    public function testInteractiveAdminMethodsNotInteractive(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -518,7 +518,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteIntoAll()
+    public function testExecuteIntoAll(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -546,7 +546,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteIntoAllAdmin()
+    public function testExecuteIntoAllAdmin(): void
     {
         $count = count($this->Task->listAll('test'));
         if ($count != count($this->fixtures)) {
@@ -580,7 +580,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithController()
+    public function testExecuteWithController(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -598,9 +598,9 @@ class ControllerTaskTest extends CakeTestCase
     /**
      * data provider for testExecuteWithControllerNameVariations
      *
-     * @return void
+     * @return array{array{string}}
      */
-    public static function nameVariations()
+    public static function nameVariations(): array
     {
         return [
             ['BakeArticles'], ['BakeArticle'], ['bake_article'], ['bake_articles'],
@@ -611,9 +611,10 @@ class ControllerTaskTest extends CakeTestCase
      * test that both plural and singular forms work for controller baking.
      *
      * @dataProvider nameVariations
+     * @param string $name
      * @return void
      */
-    public function testExecuteWithControllerNameVariations($name)
+    public function testExecuteWithControllerNameVariations(string $name): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -632,7 +633,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithPublicParam()
+    public function testExecuteWithPublicParam(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -653,7 +654,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithControllerAndBoth()
+    public function testExecuteWithControllerAndBoth(): void
     {
         $this->Task->Project->expects($this->any())->method('getPrefix')->will($this->returnValue('admin_'));
         $this->Task->connection = 'test';
@@ -674,7 +675,7 @@ class ControllerTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithControllerAndAdmin()
+    public function testExecuteWithControllerAndAdmin(): void
     {
         $this->Task->Project->expects($this->any())->method('getPrefix')->will($this->returnValue('admin_'));
         $this->Task->connection = 'test';

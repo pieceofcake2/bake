@@ -89,7 +89,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -103,7 +103,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsSchemaRecords()
+    public function testImportOptionsSchemaRecords(): void
     {
         $this->Task->interactive = true;
 
@@ -121,7 +121,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsNothing()
+    public function testImportOptionsNothing(): void
     {
         $this->Task->interactive = true;
 
@@ -139,7 +139,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsWithCommandLineOptions()
+    public function testImportOptionsWithCommandLineOptions(): void
     {
         $this->Task->params = ['schema' => true, 'records' => true];
 
@@ -153,7 +153,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsWithCommandLineOptionsPlugin()
+    public function testImportOptionsWithCommandLineOptionsPlugin(): void
     {
         $this->Task->params = ['schema' => true, 'records' => true, 'plugin' => 'TestPlugin'];
 
@@ -167,7 +167,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsWithSchema()
+    public function testImportOptionsWithSchema(): void
     {
         $this->Task->interactive = true;
         $this->Task->params = ['schema' => true];
@@ -186,7 +186,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsWithRecords()
+    public function testImportOptionsWithRecords(): void
     {
         $this->Task->interactive = true;
         $this->Task->params = ['records' => true];
@@ -205,7 +205,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsTable()
+    public function testImportOptionsTable(): void
     {
         $this->Task->interactive = true;
 
@@ -223,7 +223,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportRecordsFromDatabaseWithConditionsPoo()
+    public function testImportRecordsFromDatabaseWithConditionsPoo(): void
     {
         $this->Task->interactive = true;
 
@@ -253,7 +253,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportOptionsAlternateConnection()
+    public function testImportOptionsAlternateConnection(): void
     {
         $this->Task->connection = 'test';
         $result = $this->Task->bake('Article', false, ['schema' => 'Article']);
@@ -265,7 +265,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testImportRecordsNoEscaping()
+    public function testImportRecordsNoEscaping(): void
     {
         $db = ConnectionManager::getDataSource('test');
         if ($db instanceof Sqlserver) {
@@ -296,7 +296,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithImportSchema()
+    public function testExecuteWithImportSchema(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -325,7 +325,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithImportRecords()
+    public function testExecuteWithImportRecords(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -354,7 +354,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithNamedModel()
+    public function testExecuteWithNamedModel(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -372,7 +372,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteIntoAll()
+    public function testExecuteIntoAll(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -384,7 +384,7 @@ class FixtureTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['filename' => $filename, 'content' => $content];
             });
 
@@ -402,7 +402,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testAllWithCountAndRecordsFlags()
+    public function testAllWithCountAndRecordsFlags(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -415,7 +415,7 @@ class FixtureTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['filename' => $filename, 'content' => $content];
             });
 
@@ -433,7 +433,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testAllWithSchemaImport()
+    public function testAllWithSchemaImport(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -446,7 +446,7 @@ class FixtureTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($filename, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['filename' => $filename, 'content' => $content];
             });
 
@@ -465,7 +465,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteInteractive()
+    public function testExecuteInteractive(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -488,7 +488,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBake()
+    public function testBake(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -523,7 +523,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testRecordGenerationForBinaryFloatAndIntegerTypes()
+    public function testRecordGenerationForBinaryFloatAndIntegerTypes(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -544,7 +544,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGenerateFixtureFile()
+    public function testGenerateFixtureFile(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
@@ -553,7 +553,7 @@ class FixtureTaskTest extends CakeTestCase
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
             ->method('createFile')
-            ->willReturnCallback(function ($fname, $content) use (&$createFileCalls) {
+            ->willReturnCallback(function ($fname, $content) use (&$createFileCalls): void {
                 $createFileCalls[] = ['filename' => $fname, 'content' => $content];
             });
 
@@ -572,7 +572,7 @@ class FixtureTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGeneratePluginFixtureFile()
+    public function testGeneratePluginFixtureFile(): void
     {
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';

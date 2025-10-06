@@ -76,7 +76,7 @@ class BakeShellTest extends CakeTestCase
      *
      * @return void
      */
-    public function testAllWithModelName()
+    public function testAllWithModelName(): void
     {
         App::uses('User', 'Model');
         $userExists = class_exists('User');
@@ -110,7 +110,7 @@ class BakeShellTest extends CakeTestCase
         $outCalls = [];
         $this->Shell->expects($this->any())
             ->method('out')
-            ->willReturnCallback(function ($message = '') use (&$outCalls) {
+            ->willReturnCallback(function ($message = '') use (&$outCalls): void {
                 $outCalls[] = $message;
             });
 

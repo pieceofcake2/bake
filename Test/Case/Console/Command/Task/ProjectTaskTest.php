@@ -71,7 +71,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    protected function _setupTestProject()
+    protected function _setupTestProject(): void
     {
         $skel = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
@@ -83,7 +83,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBake()
+    public function testBake(): void
     {
         $this->_setupTestProject();
         $path = $this->Task->path . 'bake_test_app';
@@ -138,7 +138,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithAbsolutePath()
+    public function testExecuteWithAbsolutePath(): void
     {
         $path = $this->Task->args[0] = TMP . 'tests' . DS . 'bake_test_app';
         $this->Task->params['skel'] = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
@@ -159,7 +159,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecuteWithCakeOnIncludePath()
+    public function testExecuteWithCakeOnIncludePath(): void
     {
         if (!function_exists('ini_set')) {
             $this->markTestAsSkipped('Not access to ini_set, cannot proceed.');
@@ -187,7 +187,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testBakeEmptyFlag()
+    public function testBakeEmptyFlag(): void
     {
         $this->Task->params['empty'] = true;
         $this->_setupTestProject();
@@ -226,7 +226,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testSecuritySaltGeneration()
+    public function testSecuritySaltGeneration(): void
     {
         $this->_setupTestProject();
 
@@ -244,7 +244,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testSecurityCipherSeedGeneration()
+    public function testSecurityCipherSeedGeneration(): void
     {
         $this->_setupTestProject();
 
@@ -262,7 +262,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testCachePrefixGeneration()
+    public function testCachePrefixGeneration(): void
     {
         $this->_setupTestProject();
 
@@ -281,7 +281,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testIndexPhpGeneration()
+    public function testIndexPhpGeneration(): void
     {
         $this->_setupTestProject();
 
@@ -301,7 +301,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetPrefix()
+    public function testGetPrefix(): void
     {
         Configure::write('Routing.prefixes', ['admin']);
         $result = $this->Task->getPrefix();
@@ -330,7 +330,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testCakeAdmin()
+    public function testCakeAdmin(): void
     {
         $File = new File(CONFIG . 'core.php');
         $contents = $File->read();
@@ -351,7 +351,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testGetPrefixWithMultiplePrefixes()
+    public function testGetPrefixWithMultiplePrefixes(): void
     {
         Configure::write('Routing.prefixes', ['admin', 'ninja', 'shinobi']);
 
@@ -373,7 +373,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->Task->params['skel'] = CAKE . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->params['working'] = TMP . 'tests' . DS;
@@ -401,7 +401,7 @@ class ProjectTaskTest extends CakeTestCase
      *
      * @return void
      */
-    public function testConsolePath()
+    public function testConsolePath(): void
     {
         $this->_setupTestProject();
 
