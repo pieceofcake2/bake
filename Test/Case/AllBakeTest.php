@@ -25,7 +25,7 @@ use PHPUnit\Framework\TestSuite;
  *
  * @package       Bake.Test.Case
  */
-class AllTestsTest extends TestSuite
+class AllBakeTest extends TestSuite
 {
     /**
      * suite method, defines tests for this suite.
