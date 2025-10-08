@@ -83,7 +83,7 @@ app/Console/cake bake controller Users --theme myTheme
 ## Requirements
 
 - PHP 8.0+
-- CakePHP 2.10.24+
+- CakePHP 2.11+
 
 ## License
 

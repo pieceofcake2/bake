@@ -720,7 +720,7 @@ class ViewTaskTest extends CakeTestCase
         $this->assertEquals('form', $result);
 
         $this->Task->Template->templatePaths = [
-            'test' => CAKE . 'Test' . DS . 'test_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
+            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
         ];
         $this->Task->Template->params['theme'] = 'test';
 
