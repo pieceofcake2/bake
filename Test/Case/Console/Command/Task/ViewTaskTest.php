@@ -349,7 +349,7 @@ class ViewTaskTest extends CakeTestCase
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
-        $expected = file_get_contents(CAKE . 'Test' . DS . 'bake_compare' . DS . 'View' . DS . 'index.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'index.ctp');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'index.ctp',
