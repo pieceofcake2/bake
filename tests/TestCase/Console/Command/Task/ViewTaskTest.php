@@ -235,6 +235,33 @@ class ViewTaskTest extends CakeTestCase
     }
 
     /**
+     * Test that initialize() uses the top-level templates/ directory
+     * of the modern layout.
+     *
+     * @return void
+     */
+    public function testInitializeModernLayout(): void
+    {
+        $this->Task->initialize();
+        $this->assertEquals(ROOT . DS . 'templates' . DS, $this->Task->path);
+    }
+
+    /**
+     * Test that initialize() falls back to the first View path
+     * for the legacy layout.
+     *
+     * @return void
+     */
+    public function testInitializeLegacyLayout(): void
+    {
+        $viewPath = TMP . 'View' . DS;
+        App::build(['View' => [$viewPath]], App::RESET);
+
+        $this->Task->initialize();
+        $this->assertEquals($viewPath, $this->Task->path);
+    }
+
+    /**
      * Test getContent and parsing of Templates.
      *
      * @return void

@@ -75,6 +75,47 @@ class BakeTask extends AppShell
     }
 
     /**
+     * Gets the tests directory of a plugin.
+     *
+     * Plugins using the modern layout keep their tests in `tests/`,
+     * while legacy plugins use `Test/`.
+     *
+     * @param string $pluginName The plugin name.
+     * @return string Path to the plugin's tests directory.
+     */
+    protected function _pluginTestsPath($pluginName)
+    {
+        $pluginPath = $this->_pluginPath($pluginName);
+        if (is_dir($pluginPath . 'tests')) {
+            return $pluginPath . 'tests' . DS;
+        }
+
+        return $pluginPath . 'Test' . DS;
+    }
+
+    /**
+     * Checks whether the given tests directory uses the modern layout
+     * (`tests/TestCase`) or the legacy one (`Test/Case`).
+     *
+     * An existing `TestCase` or `Case` directory wins. Otherwise a directory
+     * named `tests` is treated as the modern layout.
+     *
+     * @param string $testsPath Path to the tests directory.
+     * @return bool
+     */
+    protected function _isModernTestsPath($testsPath)
+    {
+        if (is_dir($testsPath . 'TestCase')) {
+            return true;
+        }
+        if (is_dir($testsPath . 'Case')) {
+            return false;
+        }
+
+        return basename(rtrim($testsPath, DS)) === 'tests';
+    }
+
+    /**
      * Base execute method parses some parameters and sets some properties on the bake tasks.
      * call when overriding execute()
      *

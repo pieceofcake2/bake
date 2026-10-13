@@ -572,6 +572,21 @@ class TestTask extends BakeTask
     }
 
     /**
+     * Gets the path to the tests directory. Uses `tests/` for plugins
+     * with the modern layout and `Test/` otherwise.
+     *
+     * @return string Path to the tests directory.
+     */
+    public function getPath()
+    {
+        if (isset($this->plugin)) {
+            return $this->_pluginTestsPath($this->plugin);
+        }
+
+        return $this->path;
+    }
+
+    /**
      * Make the filename for the test case. resolve the suffixes for controllers
      * and get the plugin path if needed.
      *
@@ -581,7 +596,8 @@ class TestTask extends BakeTask
      */
     public function testCaseFileName($type, $className)
     {
-        $path = $this->getPath() . 'Case' . DS;
+        $testsPath = $this->getPath();
+        $path = $testsPath . ($this->_isModernTestsPath($testsPath) ? 'TestCase' : 'Case') . DS;
         $type = Inflector::camelize($type);
         if (isset($this->classTypes[$type])) {
             $path .= $this->classTypes[$type] . DS;
