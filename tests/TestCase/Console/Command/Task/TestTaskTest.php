@@ -22,6 +22,7 @@ App::uses('ShellDispatcher', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('Shell', 'Console');
+App::uses('Folder', 'Utility');
 App::uses('TestTask', 'Bake.Console/Command/Task');
 App::uses('TemplateTask', 'Bake.Console/Command/Task');
 App::uses('Controller', 'Controller');
@@ -248,8 +249,8 @@ class TestTaskTest extends CakeTestCase
         $this->Task->bake('Model', 'MyClass');
         $this->Task->bake('Controller', 'Comments');
 
-        $modelFile = TESTS . 'Case' . DS . 'Model' . DS . 'MyClassTest.php';
-        $controllerFile = TESTS . 'Case' . DS . 'Controller' . DS . 'CommentsControllerTest.php';
+        $modelFile = TESTS . 'TestCase' . DS . 'Model' . DS . 'MyClassTest.php';
+        $controllerFile = TESTS . 'TestCase' . DS . 'Controller' . DS . 'CommentsControllerTest.php';
         $this->assertEquals($modelFile, $createFileCalls[0]['file']);
         $this->assertEquals($modelFile, $createFileCalls[1]['file']);
         $this->assertEquals($controllerFile, $createFileCalls[2]['file']);
@@ -673,36 +674,68 @@ class TestTaskTest extends CakeTestCase
      */
     public static function caseFileNameProvider(): array
     {
-        return [
-            ['Model', 'Post', 'Case' . DS . 'Model' . DS . 'PostTest.php'],
-            ['Helper', 'Form', 'Case' . DS . 'View' . DS . 'Helper' . DS . 'FormHelperTest.php'],
-            ['Controller', 'Posts', 'Case' . DS . 'Controller' . DS . 'PostsControllerTest.php'],
-            ['Behavior', 'Containable', 'Case' . DS . 'Model' . DS . 'Behavior' . DS . 'ContainableBehaviorTest.php'],
-            ['Component', 'Auth', 'Case' . DS . 'Controller' . DS . 'Component' . DS . 'AuthComponentTest.php'],
-            ['model', 'Post', 'Case' . DS . 'Model' . DS . 'PostTest.php'],
-            ['helper', 'Form', 'Case' . DS . 'View' . DS . 'Helper' . DS . 'FormHelperTest.php'],
-            ['controller', 'Posts', 'Case' . DS . 'Controller' . DS . 'PostsControllerTest.php'],
-            ['behavior', 'Containable', 'Case' . DS . 'Model' . DS . 'Behavior' . DS . 'ContainableBehaviorTest.php'],
-            ['component', 'Auth', 'Case' . DS . 'Controller' . DS . 'Component' . DS . 'AuthComponentTest.php'],
+        $cases = [
+            ['Model', 'Post', 'Model' . DS . 'PostTest.php'],
+            ['Helper', 'Form', 'View' . DS . 'Helper' . DS . 'FormHelperTest.php'],
+            ['Controller', 'Posts', 'Controller' . DS . 'PostsControllerTest.php'],
+            ['Behavior', 'Containable', 'Model' . DS . 'Behavior' . DS . 'ContainableBehaviorTest.php'],
+            ['Component', 'Auth', 'Controller' . DS . 'Component' . DS . 'AuthComponentTest.php'],
+            ['model', 'Post', 'Model' . DS . 'PostTest.php'],
+            ['helper', 'Form', 'View' . DS . 'Helper' . DS . 'FormHelperTest.php'],
+            ['controller', 'Posts', 'Controller' . DS . 'PostsControllerTest.php'],
+            ['behavior', 'Containable', 'Model' . DS . 'Behavior' . DS . 'ContainableBehaviorTest.php'],
+            ['component', 'Auth', 'Controller' . DS . 'Component' . DS . 'AuthComponentTest.php'],
         ];
+
+        $result = [];
+        foreach ($cases as [$type, $class, $file]) {
+            $result[] = [$type, $class, DS . 'my' . DS . 'path' . DS . 'tests' . DS, 'TestCase' . DS . $file];
+            $result[] = [$type, $class, DS . 'my' . DS . 'path' . DS . 'Test' . DS, 'Case' . DS . $file];
+        }
+
+        return $result;
     }
 
     /**
-     * Test filename generation for each type + plugins
+     * Test filename generation for each type, for both the modern (tests/TestCase)
+     * and the legacy (Test/Case) layout.
      *
      * @dataProvider caseFileNameProvider
      * @param string $type
      * @param string $class
+     * @param string $path
      * @param string $expected
      * @return void
      */
-    public function testTestCaseFileName(string $type, string $class, string $expected): void
+    public function testTestCaseFileName(string $type, string $class, string $path, string $expected): void
     {
-        $this->Task->path = DS . 'my' . DS . 'path' . DS . 'tests' . DS;
+        $this->Task->path = $path;
 
         $result = $this->Task->testCaseFileName($type, $class);
         $expected = $this->Task->path . $expected;
         $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test that an existing Case or TestCase directory decides the layout.
+     *
+     * @return void
+     */
+    public function testTestCaseFileNameExistingDirectory(): void
+    {
+        $base = TMP . 'bake_test_task' . DS;
+        $Folder = new Folder($base . 'tests' . DS . 'Case', true);
+
+        $this->Task->path = $base . 'tests' . DS;
+        $result = $this->Task->testCaseFileName('Model', 'Post');
+        $this->assertEquals($base . 'tests' . DS . 'Case' . DS . 'Model' . DS . 'PostTest.php', $result);
+
+        $Folder->create($base . 'Test' . DS . 'TestCase');
+        $this->Task->path = $base . 'Test' . DS;
+        $result = $this->Task->testCaseFileName('Model', 'Post');
+        $this->assertEquals($base . 'Test' . DS . 'TestCase' . DS . 'Model' . DS . 'PostTest.php', $result);
+
+        $Folder->delete($base);
     }
 
     /**
@@ -718,6 +751,25 @@ class TestTaskTest extends CakeTestCase
         $this->Task->plugin = 'TestTest';
         $result = $this->Task->testCaseFileName('Model', 'Post');
         $expected = APP . 'Plugin' . DS . 'TestTest' . DS . 'Test' . DS . 'Case' . DS . 'Model' . DS . 'PostTest.php';
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test filename generation for plugins using the modern layout (tests/TestCase).
+     *
+     * @return void
+     */
+    public function testTestCaseFileNameModernPlugin(): void
+    {
+        $pluginPath = TMP . 'BakeModernPlugin' . DS;
+        $Folder = new Folder($pluginPath . 'tests', true);
+
+        CakePlugin::load('BakeModernPlugin', ['path' => $pluginPath]);
+        $this->Task->plugin = 'BakeModernPlugin';
+        $result = $this->Task->testCaseFileName('Model', 'Post');
+        $Folder->delete($pluginPath);
+
+        $expected = $pluginPath . 'tests' . DS . 'TestCase' . DS . 'Model' . DS . 'PostTest.php';
         $this->assertEquals($expected, $result);
     }
 

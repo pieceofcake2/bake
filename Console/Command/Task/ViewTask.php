@@ -76,7 +76,14 @@ class ViewTask extends BakeTask
      */
     public function initialize()
     {
-        $this->path = current(App::path('View'));
+        $paths = App::path('View');
+        $this->path = current($paths);
+
+        // Prefer the top-level templates/ directory used by the modern layout.
+        $templates = ROOT . DS . 'templates' . DS;
+        if (in_array($templates, $paths, true) && is_dir($templates)) {
+            $this->path = $templates;
+        }
     }
 
     /**

@@ -21,6 +21,7 @@ App::uses('Shell', 'Console');
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('ModelTask', 'Bake.Console/Command/Task');
+App::uses('Folder', 'Utility');
 App::uses('FixtureTask', 'Bake.Console/Command/Task');
 App::uses('TemplateTask', 'Bake.Console/Command/Task');
 App::uses('DbConfigTask', 'Bake.Console/Command/Task');
@@ -100,7 +101,7 @@ class FixtureTaskTest extends CakeTestCase
         $in = $this->getMock('ConsoleInput', [], [], '', false);
 
         $Task = new FixtureTask($out, $out, $in);
-        $this->assertEquals(APP . 'Test' . DS . 'Fixture' . DS, $Task->path);
+        $this->assertEquals(TESTS . 'Fixture' . DS, $Task->path);
     }
 
     /**
@@ -591,5 +592,29 @@ class FixtureTaskTest extends CakeTestCase
 
         $this->Task->generateFixtureFile('Article', []);
         CakePlugin::unload();
+    }
+
+    /**
+     * test generating files into plugins using the modern layout (tests/Fixture).
+     *
+     * @return void
+     */
+    public function testGenerateModernPluginFixtureFile(): void
+    {
+        $pluginPath = TMP . 'BakeModernPlugin' . DS;
+        $Folder = new Folder($pluginPath . 'tests', true);
+
+        $this->Task->connection = 'test';
+        $this->Task->path = '/my/path/';
+        $this->Task->plugin = 'BakeModernPlugin';
+        $filename = $pluginPath . 'tests' . DS . 'Fixture' . DS . 'ArticleFixture.php';
+
+        CakePlugin::load('BakeModernPlugin', ['path' => $pluginPath]);
+        $this->Task->expects($this->once())->method('createFile')
+            ->with($filename, $this->stringContains('class Article'));
+
+        $this->Task->generateFixtureFile('Article', []);
+        CakePlugin::unload();
+        $Folder->delete($pluginPath);
     }
 }
