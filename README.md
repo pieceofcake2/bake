@@ -8,89 +8,32 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/pieceofcake2/bake/CI.yml?label=CI)](https://github.com/pieceofcake2/bake/actions/workflows/CI.yml)
 [![Codecov](https://img.shields.io/codecov/c/gh/pieceofcake2/bake?label=Coverage)](https://codecov.io/gh/pieceofcake2/bake)
 
-The Bake plugin provides code generation and scaffolding capabilities for CakePHP 2.x applications.
+The Bake plugin provides the `bake` console shell, which generates models, controllers,
+views, fixtures, tests, plugins and projects for CakePHP 2 applications running on
+[pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp).
+
+## Requirements
+
+- PHP 8.0+
+- pieceofcake2/cakephp 2.12+
 
 ## Installation
-
-### Using Composer
-
-Install the plugin using Composer:
 
 ```bash
 composer require --dev pieceofcake2/bake
 ```
 
-## Usage
+Then load the plugin with `CakePlugin::load('Bake')` and run `bin/cake bake`
+(legacy layout: `app/Console/cake bake`).
 
-Once installed, you can use the bake commands:
+## Documentation
 
-```bash
-# Bake a model
-app/Console/cake bake model User
+Documentation: https://pieceofcake2.github.io/bake/
 
-# Bake a controller
-app/Console/cake bake controller Users
+## Contributing
 
-# Bake views
-app/Console/cake bake view Users
-
-# Bake everything for a model
-app/Console/cake bake all User
-
-# Create a new project
-app/Console/cake bake project /path/to/new/project
-
-# Create a new plugin
-app/Console/cake bake plugin MyPlugin
-```
-
-## Features
-
-- **Model Generation**: Create models with associations and validation
-- **Controller Generation**: Create controllers with CRUD actions
-- **View Generation**: Create views for index, view, add, and edit actions
-- **Test Generation**: Create test cases for your code
-- **Fixture Generation**: Create fixtures for testing
-- **Plugin Generation**: Scaffold new plugins
-- **Project Generation**: Create new CakePHP projects
-- **Custom Templates**: Use custom bake templates for code generation
-
-## Bake Templates
-
-The Bake plugin uses templates for code generation. You can customize these templates by creating your own bake theme.
-
-### Custom Bake Themes
-
-Create a directory structure in your app:
-
-```
-app/Console/Templates/myTheme/
-├── classes/
-│   ├── controller.ctp
-│   ├── model.ctp
-│   └── fixture.ctp
-└── views/
-    ├── index.ctp
-    ├── view.ctp
-    └── form.ctp
-```
-
-Then use your theme:
-
-```bash
-app/Console/cake bake controller Users --theme myTheme
-```
-
-## Requirements
-
-- PHP 8.0+
-- CakePHP 2.12+
+See the [contribution guidelines](https://github.com/pieceofcake2/.github/blob/master/CONTRIBUTING.md).
 
 ## License
 
-MIT License
-
-## Support
-
-- Issues: https://github.com/pieceofcake2/bake/issues
-- Documentation: https://book.cakephp.org/2.0/en/console-and-shells/code-generation-with-bake.html
+Licensed under the MIT License. See [LICENSE](LICENSE).

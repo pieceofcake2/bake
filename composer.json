@@ -1,6 +1,6 @@
 {
     "name": "pieceofcake2/bake",
-    "description": "Bake plugin for CakePHP 2.x - Code generation tool",
+    "description": "Code generation console (bake) for CakePHP 2 applications",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "cakephp2", "bake", "code generation", "scaffolding"],
     "license": "MIT",
