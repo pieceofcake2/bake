@@ -53,6 +53,13 @@ if (!$imported) {
 }
 
 /**
+ * A class with a model-like name that is not a Model
+ */
+class BakeNotAModel
+{
+}
+
+/**
  * ControllerTaskTest class
  *
  * @package       Cake.Test.Case.Console.Command.Task
@@ -692,5 +699,64 @@ class ControllerTaskTest extends CakeTestCase
             $this->stringContains('admin_index'),
         );
         $this->Task->execute();
+    }
+
+    /**
+     * test that interactive mode does not bake duplicate components
+     *
+     * @return void
+     */
+    public function testInteractiveDuplicateComponents(): void
+    {
+        $this->Task->connection = 'test';
+        $this->Task->path = '/my/path/';
+
+        $this->Task->expects($this->any())->method('in')
+            ->will($this->onConsecutiveCalls(
+                'BakeArticles', // controller name
+                'y', // build interactive
+                'n', // build no scaffolds
+                'n', // build normal methods
+                'n', // build admin methods
+                'n', // helpers?
+                'y', // components?
+                'Session, Flash', // components
+                'y', // sessions ?
+                'y', // looks good?
+            ));
+
+        $this->Task->expects($this->once())->method('createFile')->with(
+            '/my/path/BakeArticlesController.php',
+            $this->stringContains("public \$components = array('Paginator', 'Session', 'Flash');"),
+        )->will($this->returnValue(true));
+
+        $this->Task->execute();
+    }
+
+    /**
+     * test bakeActions() when the model class is not a Model
+     *
+     * @return void
+     */
+    public function testBakeActionsWithNonModelClass(): void
+    {
+        $this->Task->expects($this->once())->method('err');
+        $this->Task->expects($this->once())->method('_stop');
+
+        $this->assertNull($this->Task->bakeActions('BakeNotAModels'));
+    }
+
+    /**
+     * test getName() when the user quits
+     *
+     * @return void
+     */
+    public function testGetNameQuit(): void
+    {
+        $this->Task->connection = 'test';
+        $this->Task->expects($this->once())->method('in')->will($this->returnValue('q'));
+        $this->Task->expects($this->once())->method('_stop');
+
+        $this->assertNull($this->Task->getName('test'));
     }
 }

@@ -128,4 +128,48 @@ class BakeShellTest extends CakeTestCase
         $this->assertEquals('<success>Bake All complete</success>', $outCalls[2]);
         $this->assertEquals('User', $this->Shell->View->args[0]);
     }
+
+    /**
+     * test that main() stops when the user quits
+     *
+     * @return void
+     */
+    public function testMainQuit(): void
+    {
+        $this->Shell->DbConfig = $this->getMock('DbConfigTask', [], [&$this->Dispatcher]);
+        $this->Shell->DbConfig->path = CONFIG;
+        $this->Shell->expects($this->once())
+            ->method('in')
+            ->will($this->returnValue('Q'));
+        $this->Shell->expects($this->once())->method('_stop');
+
+        $this->assertNull($this->Shell->main());
+    }
+
+    /**
+     * test that main() bakes a database configuration when there is none
+     *
+     * @return void
+     */
+    public function testMainWithoutDatabaseConfig(): void
+    {
+        $file = CONFIG . 'database.php';
+        $backup = CONFIG . 'database.php.bake-test';
+        $this->skipIf(!file_exists($file), 'database.php does not exist.');
+
+        $this->Shell->DbConfig = $this->getMock('DbConfigTask', [], [&$this->Dispatcher]);
+        $this->Shell->DbConfig->path = CONFIG;
+        $this->Shell->DbConfig->expects($this->once())->method('execute');
+        $this->Shell->args = ['foo'];
+
+        rename($file, $backup);
+        try {
+            $result = $this->Shell->main();
+        } finally {
+            rename($backup, $file);
+        }
+
+        $this->assertNull($result);
+        $this->assertSame([], $this->Shell->args);
+    }
 }

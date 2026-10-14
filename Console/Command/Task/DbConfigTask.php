@@ -27,7 +27,7 @@ class DbConfigTask extends AppShell
     /**
      * path to CONFIG directory
      *
-     * @var string
+     * @var string|null
      */
     public $path = null;
 
@@ -77,15 +77,14 @@ class DbConfigTask extends AppShell
     {
         if (empty($this->args)) {
             $this->_interactive();
-
-            return $this->_stop();
+            $this->_stop();
         }
     }
 
     /**
      * Interactive interface
      *
-     * @return void
+     * @return bool
      */
     protected function _interactive()
     {
@@ -190,7 +189,7 @@ class DbConfigTask extends AppShell
             $dbConfigs[] = $config;
             $doneYet = $this->in(__d('cake_console', 'Do you wish to add another database configuration?'), null, 'n');
 
-            if (strtolower($doneYet === 'n')) {
+            if (strtolower($doneYet) === 'n') {
                 $done = true;
             }
         }
@@ -205,12 +204,22 @@ class DbConfigTask extends AppShell
      * Output verification message and bake if it looks good
      *
      * @param array $config The config data.
-     * @return bool True if user says it looks good, false otherwise
+     * @return array|false The config if user says it looks good, false otherwise
      */
     protected function _verify($config)
     {
         $config += $this->_defaultConfig;
-        extract($config);
+        $name = $config['name'];
+        $datasource = $config['datasource'];
+        $persistent = $config['persistent'];
+        $host = $config['host'];
+        $port = $config['port'];
+        $login = $config['login'];
+        $password = $config['password'];
+        $database = $config['database'];
+        $prefix = $config['prefix'];
+        $schema = $config['schema'];
+        $encoding = $config['encoding'];
         $this->out();
         $this->hr();
         $this->out(__d('cake_console', 'The following database configuration will be created:'));
@@ -317,7 +326,17 @@ class DbConfigTask extends AppShell
 
         foreach ($configs as $config) {
             $config += $this->_defaultConfig;
-            extract($config);
+            $name = $config['name'];
+            $datasource = $config['datasource'];
+            $persistent = $config['persistent'];
+            $host = $config['host'];
+            $port = $config['port'];
+            $login = $config['login'];
+            $password = $config['password'];
+            $database = $config['database'];
+            $prefix = $config['prefix'];
+            $schema = $config['schema'];
+            $encoding = $config['encoding'];
 
             if (!str_contains($datasource, 'Database/')) {
                 $datasource = "Database/{$datasource}";
@@ -359,7 +378,7 @@ class DbConfigTask extends AppShell
     /**
      * Get a user specified Connection name
      *
-     * @return void
+     * @return string|null The connection name, or null when no connection is configured.
      */
     public function getConfig()
     {
@@ -367,8 +386,10 @@ class DbConfigTask extends AppShell
         $configs = ConnectionManager::enumConnectionObjects();
 
         $useDbConfig = key($configs);
-        if (!is_array($configs) || empty($configs)) {
-            return $this->execute();
+        if (empty($configs)) {
+            $this->execute();
+
+            return null;
         }
         $connections = array_keys($configs);
 

@@ -1,0 +1,20 @@
+includes:
+    - vendor/pieceofcake2/phpstan-cakephp2/extension.neon
+
+parameters:
+    level: 5
+    phpVersion: 80000
+    paths:
+        - Console/Command
+    bootstrapFiles:
+        - tests/bootstrap.php
+    ignoreErrors:
+        # phpstan-cakephp2's ClassModelsExtension resolves $this->Model on a Shell to the
+        # core Model class, ahead of the Model task (ClassTasksExtension and the @property
+        # tags), so calls to ModelTask are reported as undefined Model members.
+        -
+            message: '#^(Call to an undefined method|Access to an undefined property) Model::#'
+            paths:
+                - Console/Command/BakeShell.php
+                - Console/Command/Task/ControllerTask.php
+                - Console/Command/Task/FixtureTask.php

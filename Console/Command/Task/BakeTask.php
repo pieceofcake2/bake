@@ -34,9 +34,16 @@ class BakeTask extends AppShell
     /**
      * The db connection being used for baking
      *
-     * @var string
+     * @var string|null
      */
     public $connection = null;
+
+    /**
+     * Path to the output directory
+     *
+     * @var string|null
+     */
+    public $path = null;
 
     /**
      * Flag for interactive mode
@@ -67,7 +74,7 @@ class BakeTask extends AppShell
     public function getPath()
     {
         $path = $this->path;
-        if (isset($this->plugin)) {
+        if (!empty($this->plugin)) {
             $path = $this->_pluginPath($this->plugin) . $this->name . DS;
         }
 

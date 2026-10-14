@@ -69,7 +69,7 @@ class TemplateTask extends AppShell
         }
 
         $core = dirname(__DIR__, 2) . DS;
-        $separator = DS === '/' ? '/' : '\\\\';
+        $separator = DIRECTORY_SEPARATOR === '/' ? '/' : '\\\\';
         $core = preg_replace('#shells' . $separator . '$#', '', $core);
 
         $Folder = new Folder($core . 'Templates' . DS . 'default');
@@ -126,7 +126,7 @@ class TemplateTask extends AppShell
         }
 
         if (!$data) {
-            return false;
+            return;
         }
         $this->templateVars = $data + $this->templateVars;
     }
@@ -152,7 +152,7 @@ class TemplateTask extends AppShell
         if ($templateFile) {
             extract($this->templateVars);
             ob_start();
-            ob_implicit_flush(0);
+            ob_implicit_flush(false);
             include $templateFile;
             $content = ob_get_clean();
 
@@ -193,7 +193,7 @@ class TemplateTask extends AppShell
             $indexedPaths[$i] = $path;
             $i++;
         }
-        $index = $this->in(__d('cake_console', 'Which bake theme would you like to use?'), range(1, $i - 1), 1);
+        $index = $this->in(__d('cake_console', 'Which bake theme would you like to use?'), range(1, $i - 1), '1');
         $themeNames = array_keys($this->templatePaths);
         $this->params['theme'] = $themeNames[$index - 1];
 
@@ -207,7 +207,7 @@ class TemplateTask extends AppShell
      * @param string $path The initial path to look for the file on. If it is not found fallbacks will be used.
      * @param string $directory Subdirectory to look for ie. 'views', 'objects'
      * @param string $filename lower_case_underscored filename you want.
-     * @return string filename will exit program if template is not found.
+     * @return string|false filename, or false if template is not found.
      */
     protected function _findTemplate($path, $directory, $filename)
     {

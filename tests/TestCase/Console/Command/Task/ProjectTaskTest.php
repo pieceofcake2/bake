@@ -468,4 +468,14 @@ class ProjectTaskTest extends CakeTestCase
         $contents = $File->read();
         $this->assertDoesNotMatchRegularExpression('/__CAKE_PATH__/', $contents, 'Console path placeholder left behind.');
     }
+
+    /**
+     * test corePath() when the project sits directly in the core include path
+     *
+     * @return void
+     */
+    public function testCorePathInsideCoreIncludePath(): void
+    {
+        $this->assertFalse($this->Task->corePath(CAKE_CORE_INCLUDE_PATH . DS . 'app' . DS));
+    }
 }
