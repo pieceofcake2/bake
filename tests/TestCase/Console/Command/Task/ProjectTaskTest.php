@@ -148,6 +148,7 @@ class ProjectTaskTest extends CakeTestCase
         $path = $this->Task->args[0] = TMP . 'tests' . DS . 'bake_test_app';
         $this->Task->params['skel'] = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
+        $this->Task->expects($this->never())->method('err');
         $this->Task->execute();
 
         $this->assertTrue(is_dir($this->Task->args[0]), 'No project dir');
@@ -157,6 +158,38 @@ class ProjectTaskTest extends CakeTestCase
         $File = new File($path . DS . 'webroot' . DS . 'test.php');
         $contents = $File->read();
         $this->assertMatchesRegularExpression('/define\(\'VENDORS\', .*?DS/', $contents);
+    }
+
+    /**
+     * The baked dispatchers must load CakePHP through Composer, not through the include_path.
+     *
+     * @return void
+     */
+    public function testBakedDispatchersUseComposerAutoload(): void
+    {
+        $this->_setupTestProject();
+
+        $path = $this->Task->path . 'bake_test_app' . DS;
+        $files = [
+            'webroot' . DS . 'index.php',
+            'webroot' . DS . 'test.php',
+            'Console' . DS . 'cake',
+        ];
+        foreach ($files as $file) {
+            $contents = file_get_contents($path . $file);
+            $this->assertDoesNotMatchRegularExpression("/require_once\\s+'Cake'/", $contents, $file);
+            $this->assertStringNotContainsString("'vendors'", $contents, $file);
+            $this->assertStringContainsString("define('VENDORS', ROOT . DS . 'vendor' . DS);", $contents, $file);
+            $this->assertStringContainsString("require_once VENDORS . 'autoload.php';", $contents, $file);
+        }
+        foreach (['index.php', 'test.php'] as $file) {
+            $contents = file_get_contents($path . 'webroot' . DS . $file);
+            $this->assertStringContainsString(
+                "InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php'",
+                $contents,
+                $file,
+            );
+        }
     }
 
     /**
