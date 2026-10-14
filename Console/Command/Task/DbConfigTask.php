@@ -51,6 +51,13 @@ class DbConfigTask extends AppShell
     ];
 
     /**
+     * Datasources offered by the interactive prompt, spelled as their class names.
+     *
+     * @var array<string>
+     */
+    protected $_datasources = ['Mysql', 'Postgres', 'Sqlite', 'Sqlserver'];
+
+    /**
      * String name of the database config class name.
      * Used for testing.
      *
@@ -108,7 +115,8 @@ class DbConfigTask extends AppShell
                 }
             }
 
-            $datasource = $this->in(__d('cake_console', 'Datasource:'), ['Mysql', 'Postgres', 'Sqlite', 'Sqlserver'], 'Mysql');
+            $datasource = $this->in(__d('cake_console', 'Datasource:'), $this->_datasources, 'Mysql');
+            $datasource = $this->_normalizeDatasource($datasource);
 
             $persistent = $this->in(__d('cake_console', 'Persistent Connection?'), ['y', 'n'], 'n');
             if (strtolower($persistent) === 'n') {
@@ -338,6 +346,7 @@ class DbConfigTask extends AppShell
             $schema = $config['schema'];
             $encoding = $config['encoding'];
 
+            $datasource = $this->_normalizeDatasource($datasource);
             if (!str_contains($datasource, 'Database/')) {
                 $datasource = "Database/{$datasource}";
             }
@@ -373,6 +382,35 @@ class DbConfigTask extends AppShell
         $filename = $this->path . 'database.php';
 
         return $this->createFile($filename, $out);
+    }
+
+    /**
+     * Normalizes the case of a core datasource name.
+     *
+     * The datasource is loaded by its class name, so `mysql` or `Database/mysql`
+     * would not be found on a case-sensitive filesystem. Core datasources are
+     * matched case-insensitively and returned with their canonical spelling;
+     * anything else is returned untouched.
+     *
+     * @param string $datasource Datasource name, with or without the `Database/` prefix.
+     * @return string
+     */
+    protected function _normalizeDatasource($datasource)
+    {
+        $prefix = '';
+        $name = (string)$datasource;
+        if (strncasecmp($name, 'Database/', 9) === 0) {
+            $prefix = 'Database/';
+            $name = substr($name, 9);
+        }
+
+        foreach ($this->_datasources as $canonical) {
+            if (strcasecmp($name, $canonical) === 0) {
+                return $prefix . $canonical;
+            }
+        }
+
+        return (string)$datasource;
     }
 
     /**

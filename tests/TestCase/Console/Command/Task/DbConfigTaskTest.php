@@ -145,7 +145,7 @@ class DbConfigTaskTest extends CakeTestCase
             ->with([
                 [
                     'name' => 'default',
-                    'datasource' => 'mysql',
+                    'datasource' => 'Mysql',
                     'persistent' => 'false',
                     'host' => 'localhost',
                     'login' => 'root',
@@ -224,7 +224,7 @@ class DbConfigTaskTest extends CakeTestCase
             ->with([
                 [
                     'name' => 'default',
-                    'datasource' => $answer,
+                    'datasource' => 'Postgres',
                     'persistent' => 'false',
                     'host' => 'localhost',
                     'login' => 'postgres',
@@ -285,6 +285,107 @@ class DbConfigTaskTest extends CakeTestCase
 
         $this->Task->execute();
         $this->assertSame(count($inReturns), $inCallIndex);
+    }
+
+    /**
+     * Data provider for datasource name normalization
+     *
+     * @return array<string, array{string, string}>
+     */
+    public static function datasourceProvider(): array
+    {
+        return [
+            'Mysql' => ['Mysql', 'Database/Mysql'],
+            'mysql' => ['mysql', 'Database/Mysql'],
+            'MYSQL' => ['MYSQL', 'Database/Mysql'],
+            'postgres' => ['postgres', 'Database/Postgres'],
+            'sqlite' => ['sqlite', 'Database/Sqlite'],
+            'sqlserver' => ['sqlserver', 'Database/Sqlserver'],
+            'SQLServer' => ['SQLServer', 'Database/Sqlserver'],
+            'Database/mysql' => ['Database/mysql', 'Database/Mysql'],
+            'database/postgres' => ['database/postgres', 'Database/Postgres'],
+            'custom datasource' => ['Database/MyCustomDriver', 'Database/MyCustomDriver'],
+            'plugin datasource' => ['MyPlugin.Database/myDriver', 'MyPlugin.Database/myDriver'],
+        ];
+    }
+
+    /**
+     * test that the interactive datasource answer is normalized to the class name
+     *
+     * @param string $answer Datasource answer
+     * @param string $expected Expected datasource written to database.php
+     * @return void
+     * @dataProvider datasourceProvider
+     */
+    public function testExecuteIntoInteractiveNormalizesDatasource(string $answer, string $expected): void
+    {
+        $out = $this->getMock('ConsoleOutput', [], [], '', false);
+        $in = $this->getMock('ConsoleInput', [], [], '', false);
+        $this->Task = $this->getMock(
+            'DbConfigTask',
+            ['in', '_stop', 'createFile', 'bake'],
+            [$out, $out, $in],
+        );
+
+        $answers = [
+            'Name:' => 'default',
+            'Datasource:' => $answer,
+            'Database Host:' => 'localhost',
+            'User:' => 'root',
+            'Password:' => 'password',
+            'Database Name:' => 'cake_test',
+            'Look okay?' => 'y',
+        ];
+        $this->Task->expects($this->any())
+            ->method('in')
+            ->willReturnCallback(function ($prompt) use ($answers) {
+                return $answers[$prompt] ?? 'n';
+            });
+
+        $this->Task->expects($this->once())
+            ->method('bake')
+            ->with($this->callback(function ($configs) use ($expected) {
+                $datasource = $configs[0]['datasource'];
+                if (!str_contains($datasource, 'Database/')) {
+                    $datasource = 'Database/' . $datasource;
+                }
+
+                return $datasource === $expected;
+            }));
+
+        $this->Task->execute();
+    }
+
+    /**
+     * test that bake writes core datasources with their class name spelling
+     *
+     * @param string $datasource Datasource passed to bake()
+     * @param string $expected Expected datasource written to database.php
+     * @return void
+     * @dataProvider datasourceProvider
+     */
+    public function testBakeNormalizesDatasource(string $datasource, string $expected): void
+    {
+        $path = TMP . 'tests' . DS . 'bake_db_config' . DS;
+        new Folder($path, true);
+        $this->Task->path = $path;
+
+        $this->Task->expects($this->once())
+            ->method('createFile')
+            ->with(
+                $path . 'database.php',
+                $this->stringContains("'datasource' => '{$expected}',", false),
+            )
+            ->will($this->returnValue(true));
+
+        $result = $this->Task->bake([[
+            'name' => 'default',
+            'datasource' => $datasource,
+        ]]);
+        $this->assertTrue($result);
+
+        $Folder = new Folder($path);
+        $Folder->delete();
     }
 
     /**
