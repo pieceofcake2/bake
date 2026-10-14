@@ -754,4 +754,20 @@ class ViewTaskTest extends CakeTestCase
         $result = $this->Task->getTemplate('admin_edit');
         $this->assertEquals('admin_edit', $result);
     }
+
+    /**
+     * test getContent() when the controller does not exist
+     *
+     * @return void
+     */
+    public function testGetContentMissingController(): void
+    {
+        $this->Task->controllerName = 'BakeMissings';
+        $this->Task->expects($this->once())->method('err');
+        $this->Task->expects($this->once())->method('_stop');
+
+        $method = new ReflectionMethod($this->Task, '_loadController');
+        $method->setAccessible(true);
+        $this->assertNull($method->invoke($this->Task));
+    }
 }

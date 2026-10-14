@@ -44,6 +44,7 @@ class ProjectTask extends AppShell
     public function execute()
     {
         $project = null;
+        $suggestedPath = null;
         if (isset($this->args[0])) {
             $project = $this->args[0];
         } else {
@@ -60,7 +61,7 @@ class ProjectTask extends AppShell
             $project = $this->in($prompt, null, $suggestedPath);
         }
 
-        if ($project && !Folder::isAbsolute($project) && isset($_SERVER['PWD'])) {
+        if (!Folder::isAbsolute($project) && isset($_SERVER['PWD'])) {
             $project = $_SERVER['PWD'] . DS . $project;
         }
 
@@ -165,7 +166,7 @@ class ProjectTask extends AppShell
      *
      * @param string $path Project path
      * @param string $skel Path to copy from
-     * @param string $skip array of directories to skip when copying
+     * @param array $skip array of directories to skip when copying
      * @return mixed
      */
     public function bake($path, $skel = null, $skip = ['empty'])
@@ -347,6 +348,8 @@ class ProjectTask extends AppShell
 
             return true;
         }
+
+        return false;
     }
 
     /**
@@ -405,7 +408,7 @@ class ProjectTask extends AppShell
     /**
      * Checks for Configure::read('Routing.prefixes') and forces user to input it if not enabled
      *
-     * @return string Admin route to use
+     * @return string|null Admin route to use, or null when the prefix could not be written.
      */
     public function getPrefix()
     {
@@ -426,7 +429,7 @@ class ProjectTask extends AppShell
                     $this->out($i + 1 . '. ' . $prefix);
                 }
             }
-            $selection = $this->in(__d('cake_console', 'Please choose a prefix to bake with.'), $options, 1);
+            $selection = $this->in(__d('cake_console', 'Please choose a prefix to bake with.'), $options, '1');
 
             return $prefixes[$selection - 1] . '_';
         }
@@ -451,8 +454,9 @@ class ProjectTask extends AppShell
                     'Configure::write(\'Routing.prefixes\', [\'admin\'])',
                     (empty($this->configPath) ? CONFIG : $this->configPath) . 'core.php',
                 ));
+                $this->_stop();
 
-                return $this->_stop();
+                return null;
             }
 
             return $admin . '_';

@@ -23,6 +23,10 @@ App::uses('BakeTask', 'Bake.Console/Command/Task');
  * Task class for creating and updating view files.
  *
  * @package       Cake.Console.Command.Task
+ * @property ProjectTask $Project
+ * @property ControllerTask $Controller
+ * @property DbConfigTask $DbConfig
+ * @property TemplateTask $Template
  */
 class ViewTask extends BakeTask
 {
@@ -36,7 +40,7 @@ class ViewTask extends BakeTask
     /**
      * path to View directory
      *
-     * @var array
+     * @var string|null
      */
     public $path = null;
 
@@ -108,7 +112,9 @@ class ViewTask extends BakeTask
 
         $this->Project->interactive = false;
         if (strtolower($this->args[0]) === 'all') {
-            return $this->all();
+            $this->all();
+
+            return null;
         }
 
         if (isset($this->args[1])) {
@@ -177,7 +183,7 @@ class ViewTask extends BakeTask
     public function all()
     {
         $this->Controller->interactive = false;
-        $tables = $this->Controller->listAll($this->connection, false);
+        $tables = $this->Controller->listAll($this->connection);
 
         $actions = null;
         if (isset($this->args[1])) {
@@ -261,7 +267,7 @@ class ViewTask extends BakeTask
      *  'singularHumanName', 'pluralHumanName', 'fields', 'foreignKeys',
      *  'belongsTo', 'hasOne', 'hasMany', 'hasAndBelongsToMany'
      *
-     * @return array Returns a variables to be made available to a view template
+     * @return array|null Returns a variables to be made available to a view template, or null when the controller does not exist
      */
     protected function _loadController()
     {
@@ -279,8 +285,9 @@ class ViewTask extends BakeTask
         if (!class_exists($controllerClassName)) {
             $file = $controllerClassName . '.php';
             $this->err(__d('cake_console', "The file '%s' could not be found.\nIn order to bake a view, you'll need to first create the controller.", $file));
+            $this->_stop();
 
-            return $this->_stop();
+            return null;
         }
         $controllerObj = new $controllerClassName();
         $controllerObj->plugin = $this->plugin;
@@ -359,8 +366,9 @@ class ViewTask extends BakeTask
         $looksGood = $this->in(__d('cake_console', 'Look okay?'), ['y', 'n'], 'y');
         if (strtolower($looksGood) === 'y') {
             $this->bake($action, ' ');
+            $this->_stop();
 
-            return $this->_stop();
+            return;
         }
         $this->out(__d('cake_console', 'Bake Aborted.'));
     }
@@ -369,7 +377,7 @@ class ViewTask extends BakeTask
      * Assembles and writes bakes the view file.
      *
      * @param string $action Action to bake
-     * @param string $content Content to write
+     * @param string|bool $content Content to write, or true to generate it from the template
      * @return bool Success
      */
     public function bake($action, $content = '')
@@ -392,7 +400,7 @@ class ViewTask extends BakeTask
      *
      * @param string $action name to generate content to
      * @param array $vars passed for use in templates
-     * @return string content from template
+     * @return string|false content from template, or false when there is no template
      */
     public function getContent($action, $vars = null)
     {
@@ -415,7 +423,7 @@ class ViewTask extends BakeTask
      * Gets the template name based on the action name
      *
      * @param string $action name
-     * @return string template name
+     * @return string|false template name, or false when the action needs no template
      */
     public function getTemplate($action)
     {

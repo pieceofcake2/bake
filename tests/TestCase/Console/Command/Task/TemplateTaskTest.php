@@ -175,4 +175,16 @@ class TemplateTaskTest extends CakeTestCase
         $result = $this->Task->generate('classes', 'fixture');
         $this->assertMatchesRegularExpression('/ArticleFixture extends CakeTestFixture/', $result);
     }
+
+    /**
+     * test that set() ignores empty data
+     *
+     * @return void
+     */
+    public function testSetEmpty(): void
+    {
+        $this->Task->templateVars = ['one' => 'two'];
+        $this->Task->set([]);
+        $this->assertEquals(['one' => 'two'], $this->Task->templateVars);
+    }
 }

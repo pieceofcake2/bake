@@ -27,7 +27,7 @@ class PluginTask extends AppShell
     /**
      * path to plugins directory
      *
-     * @var array
+     * @var string|null
      */
     public $path = null;
 
@@ -52,7 +52,7 @@ class PluginTask extends AppShell
     /**
      * Execution method always used for tasks
      *
-     * @return void
+     * @return false|null False when the plugin already exists.
      */
     public function execute()
     {
@@ -67,8 +67,10 @@ class PluginTask extends AppShell
             }
             $this->_interactive($plugin);
         } else {
-            return $this->_interactive();
+            $this->_interactive();
         }
+
+        return null;
     }
 
     /**
@@ -215,7 +217,7 @@ class PluginTask extends AppShell
                 $this->out($i + 1 . '. ' . $option);
             }
             $prompt = __d('cake_console', 'Choose a plugin path from the paths above.');
-            $choice = $this->in($prompt, null, 1);
+            $choice = $this->in($prompt, null, '1');
             if ((int)$choice > 0 && (int)$choice <= $max) {
                 $valid = true;
             }

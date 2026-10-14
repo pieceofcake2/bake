@@ -25,6 +25,10 @@ App::uses('Validation', 'Utility');
  * Task class for creating and updating model files.
  *
  * @package    Cake.Console.Command.Task
+ * @property DbConfigTask $DbConfig
+ * @property FixtureTask $Fixture
+ * @property TestTask $Test
+ * @property TemplateTask $Template
  */
 class ModelTask extends BakeTask
 {
@@ -99,7 +103,9 @@ class ModelTask extends BakeTask
                 $this->connection = 'default';
             }
             if (strtolower($this->args[0]) === 'all') {
-                return $this->all();
+                $this->all();
+
+                return;
             }
             $model = $this->_modelName($this->args[0]);
             $this->listAll($this->connection);
@@ -166,7 +172,7 @@ class ModelTask extends BakeTask
      *
      * @param array $options Array of options to use for the selections. indexes must start at 0
      * @param string $prompt Prompt to use for options list.
-     * @param int $default The default option for the given prompt.
+     * @param string|null $default The default option for the given prompt.
      * @return int Result of user choice.
      */
     public function inOptions($options, $prompt = null, $default = null)
@@ -174,7 +180,7 @@ class ModelTask extends BakeTask
         $valid = false;
         $max = count($options);
         while (!$valid) {
-            $len = strlen(count($options) + 1);
+            $len = strlen((string)($max + 1));
             foreach ($options as $i => $option) {
                 $this->out(sprintf("%{$len}d. %s", $i + 1, $option));
             }
@@ -211,7 +217,10 @@ class ModelTask extends BakeTask
         $currentModelName = $this->getName();
         $useTable = $this->getTable($currentModelName);
         $db = ConnectionManager::getDataSource($this->connection);
-        $fullTableName = $db->fullTableName($useTable);
+        $fullTableName = $useTable;
+        if ($db instanceof DboSource) {
+            $fullTableName = $db->fullTableName($useTable);
+        }
         if (!in_array($useTable, $this->_tables)) {
             $prompt = __d('cake_console', "The table %s doesn't exist or could not be automatically detected\ncontinue anyway?", $useTable);
             $continue = $this->in($prompt, ['y', 'n']);
@@ -290,9 +299,11 @@ class ModelTask extends BakeTask
                     $this->bakeTest($currentModelName);
                 }
             }
-        } else {
-            return false;
+
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -300,7 +311,7 @@ class ModelTask extends BakeTask
      *
      * @param string $modelName Name of the model relations belong to.
      * @param string $type Name of association you want to see. i.e. 'belongsTo'
-     * @param string $associations Collection of associations.
+     * @param array $associations Collection of associations.
      * @return void
      */
     protected function _printAssociation($modelName, $type, $associations)
@@ -355,14 +366,10 @@ class ModelTask extends BakeTask
      * Handles Generation and user interaction for creating validation.
      *
      * @param Model $model Model to have validations generated for.
-     * @return array validate Array of user selected validations.
+     * @return array|false validate Array of user selected validations, or false when the model has no schema.
      */
     public function doValidation($model)
     {
-        if (!$model instanceof Model) {
-            return false;
-        }
-
         $fields = $model->schema();
         if (empty($fields)) {
             return false;
@@ -391,7 +398,7 @@ class ModelTask extends BakeTask
     /**
      * Populate the _validations array
      *
-     * @return void
+     * @return array
      */
     public function initValidations()
     {
@@ -545,9 +552,6 @@ class ModelTask extends BakeTask
      */
     public function doAssociations($model)
     {
-        if (!$model instanceof Model) {
-            return false;
-        }
         if ($this->interactive === true) {
             $this->out(__d('cake_console', 'One moment while the associations are detected.'));
         }
@@ -599,9 +603,6 @@ class ModelTask extends BakeTask
      */
     public function doActsAs($model)
     {
-        if (!$model instanceof Model) {
-            return false;
-        }
         $behaviors = [];
         $fields = $model->schema(true);
         if (empty($fields)) {
@@ -732,7 +733,7 @@ class ModelTask extends BakeTask
     /**
      * Interact with the user and confirm associations.
      *
-     * @param array $model Temporary Model instance.
+     * @param Model $model Temporary Model instance.
      * @param array $associations Array of associations to be confirmed.
      * @return array Array of confirmed associations
      */
@@ -943,7 +944,7 @@ class ModelTask extends BakeTask
         }
         if ($this->interactive === true) {
             $this->out(__d('cake_console', 'Possible Models based on your current database:'));
-            $len = strlen($count + 1);
+            $len = strlen((string)($count + 1));
             for ($i = 0; $i < $count; $i++) {
                 $this->out(sprintf("%{$len}d. %s", $i + 1, $this->_modelNames[$i]));
             }
@@ -972,7 +973,10 @@ class ModelTask extends BakeTask
                 $useDbConfig = $this->connection;
             }
             $db = ConnectionManager::getDataSource($useDbConfig);
-            $fullTableName = $db->fullTableName($useTable, false);
+            $fullTableName = $useTable;
+            if ($db instanceof DboSource) {
+                $fullTableName = $db->fullTableName($useTable, false);
+            }
             $tableIsGood = false;
             if (array_search($useTable, $this->_tables) === false) {
                 $this->out();
@@ -992,7 +996,7 @@ class ModelTask extends BakeTask
      * will halt the script if no tables are found.
      *
      * @param string $useDbConfig Connection name to scan.
-     * @return array Array of tables in the database.
+     * @return array|null Array of tables in the database, or null when there are none.
      */
     public function getAllTables($useDbConfig = null)
     {
@@ -1015,8 +1019,9 @@ class ModelTask extends BakeTask
         }
         if (empty($tables)) {
             $this->err(__d('cake_console', 'Your database does not have any tables.'));
+            $this->_stop();
 
-            return $this->_stop();
+            return null;
         }
         sort($tables);
 
@@ -1027,7 +1032,7 @@ class ModelTask extends BakeTask
      * Forces the user to specify the model he wants to bake, and returns the selected model name.
      *
      * @param string $useDbConfig Database config name
-     * @return string The model name
+     * @return string|null The model name, or null when the user quits.
      */
     public function getName($useDbConfig = null)
     {
@@ -1041,8 +1046,9 @@ class ModelTask extends BakeTask
 
             if ($enteredModel === 'q') {
                 $this->out(__d('cake_console', 'Exit'));
+                $this->_stop();
 
-                return $this->_stop();
+                return null;
             }
 
             if (!$enteredModel || (int)$enteredModel > count($this->_modelNames)) {

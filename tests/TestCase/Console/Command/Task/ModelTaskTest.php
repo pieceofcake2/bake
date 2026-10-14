@@ -1417,4 +1417,27 @@ TEXT;
 
         $this->Task->execute();
     }
+
+    /**
+     * test getAllTables() when the connection has no tables
+     *
+     * @return void
+     */
+    public function testGetAllTablesEmpty(): void
+    {
+        $this->skipIf(!extension_loaded('pdo_sqlite'), 'pdo_sqlite is not available.');
+        ConnectionManager::create('bake_empty', [
+            'datasource' => 'Database/Sqlite',
+            'database' => ':memory:',
+        ]);
+
+        $this->Task->expects($this->once())->method('err');
+        $this->Task->expects($this->once())->method('_stop');
+
+        try {
+            $this->assertNull($this->Task->getAllTables('bake_empty'));
+        } finally {
+            ConnectionManager::drop('bake_empty');
+        }
+    }
 }

@@ -27,6 +27,7 @@ if (!defined('TESTS')) {
  * Task class for creating and updating test files.
  *
  * @package       Cake.Console.Command.Task
+ * @property TemplateTask $Template
  */
 class TestTask extends BakeTask
 {
@@ -197,7 +198,7 @@ class TestTask extends BakeTask
     /**
      * Interact with the user and get their chosen type. Can exit the script.
      *
-     * @return string Users chosen type.
+     * @return string|null Users chosen type, or null when the user quits.
      */
     public function getObjectType()
     {
@@ -214,7 +215,9 @@ class TestTask extends BakeTask
         $keys[] = 'q';
         $selection = $this->in(__d('cake_console', 'Enter the type of object to bake a test for or (q)uit'), $keys, 'q');
         if ($selection === 'q') {
-            return $this->_stop();
+            $this->_stop();
+
+            return null;
         }
         $types = array_keys($this->classTypes);
 
@@ -579,7 +582,7 @@ class TestTask extends BakeTask
      */
     public function getPath()
     {
-        if (isset($this->plugin)) {
+        if (!empty($this->plugin)) {
             return $this->_pluginTestsPath($this->plugin);
         }
 

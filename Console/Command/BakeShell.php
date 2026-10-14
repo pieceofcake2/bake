@@ -31,6 +31,14 @@ App::uses('Model', 'Model');
  *
  * @package       Cake.Console.Command
  * @link          https://book.cakephp.org/2.0/en/console-and-shells/code-generation-with-bake.html
+ * @property ProjectTask $Project
+ * @property DbConfigTask $DbConfig
+ * @property ModelTask $Model
+ * @property ControllerTask $Controller
+ * @property ViewTask $View
+ * @property PluginTask $Plugin
+ * @property FixtureTask $Fixture
+ * @property TestTask $Test
  */
 class BakeShell extends AppShell
 {
@@ -44,7 +52,7 @@ class BakeShell extends AppShell
     /**
      * The connection being used.
      *
-     * @var string
+     * @var string|null
      */
     public $connection = 'default';
 
@@ -88,9 +96,10 @@ class BakeShell extends AppShell
 
         if (!config('database')) {
             $this->out(__d('cake_console', 'Your database configuration was not found. Take a moment to create one.'));
-            $this->args = null;
+            $this->args = [];
+            $this->DbConfig->execute();
 
-            return $this->DbConfig->execute();
+            return null;
         }
         $this->out(__d('cake_console', 'Interactive Bake Shell'));
         $this->hr();
@@ -127,7 +136,9 @@ class BakeShell extends AppShell
                 $this->Test->execute();
                 break;
             case 'Q':
-                return $this->_stop();
+                $this->_stop();
+
+                return null;
             default:
                 $this->out(__d('cake_console', 'You have made an invalid selection. Please choose a type of class to Bake by entering D, M, V, F, T, or C.'));
         }
@@ -149,7 +160,9 @@ class BakeShell extends AppShell
             $this->connection = $this->DbConfig->getConfig();
         }
 
-        if (empty($this->args)) {
+        if (!empty($this->args[0])) {
+            $name = $this->args[0];
+        } else {
             $this->Model->interactive = true;
             $name = $this->Model->getName($this->connection);
         }
@@ -157,10 +170,6 @@ class BakeShell extends AppShell
         foreach (['Model', 'Controller', 'View'] as $task) {
             $this->{$task}->connection = $this->connection;
             $this->{$task}->interactive = false;
-        }
-
-        if (!empty($this->args[0])) {
-            $name = $this->args[0];
         }
 
         $modelExists = false;
@@ -204,7 +213,7 @@ class BakeShell extends AppShell
             $this->error(__d('cake_console', 'Bake All could not continue without a valid model'));
         }
 
-        return $this->_stop();
+        $this->_stop();
     }
 
     /**

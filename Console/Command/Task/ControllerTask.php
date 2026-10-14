@@ -23,6 +23,11 @@ App::uses('AppModel', 'Model');
  * Task class for creating and updating controller files.
  *
  * @package       Cake.Console.Command.Task
+ * @property ModelTask $Model
+ * @property TestTask $Test
+ * @property TemplateTask $Template
+ * @property DbConfigTask $DbConfig
+ * @property ProjectTask $Project
  */
 class ControllerTask extends BakeTask
 {
@@ -36,9 +41,23 @@ class ControllerTask extends BakeTask
     /**
      * path to Controller directory
      *
-     * @var array
+     * @var string|null
      */
     public $path = null;
+
+    /**
+     * Tables found by listAll()
+     *
+     * @var array
+     */
+    protected $_tables = [];
+
+    /**
+     * Controller names listed by listAll() in interactive mode
+     *
+     * @var array
+     */
+    protected $_controllerNames = [];
 
     /**
      * Override initialize
@@ -53,7 +72,7 @@ class ControllerTask extends BakeTask
     /**
      * Execution method always used for tasks
      *
-     * @return void
+     * @return string|false|null The baked controller or false in interactive mode, null otherwise.
      */
     public function execute()
     {
@@ -67,7 +86,9 @@ class ControllerTask extends BakeTask
                 $this->connection = 'default';
             }
             if (strtolower($this->args[0]) === 'all') {
-                return $this->all();
+                $this->all();
+
+                return null;
             }
 
             $controller = $this->_controllerName($this->args[0]);
@@ -94,6 +115,8 @@ class ControllerTask extends BakeTask
                 }
             }
         }
+
+        return null;
     }
 
     /**
@@ -114,7 +137,7 @@ class ControllerTask extends BakeTask
         }
 
         $controllersCreated = 0;
-        foreach ($this->__tables as $table) {
+        foreach ($this->_tables as $table) {
             $model = $this->_modelName($table);
             $controller = $this->_controllerName($model);
             App::uses($model, 'Model');
@@ -139,7 +162,7 @@ class ControllerTask extends BakeTask
     /**
      * Interactive
      *
-     * @return void
+     * @return string|false The baked controller, or false when nothing was baked.
      */
     protected function _interactive()
     {
@@ -196,7 +219,7 @@ class ControllerTask extends BakeTask
                 if (strtolower($wannaUseSession) === 'y') {
                     array_push($components, 'Session', 'Flash');
                 }
-                array_unique($components);
+                $components = array_values(array_unique($components));
             }
         } else {
             [$wannaBakeCrud, $wannaBakeAdminCrud] = $this->_askAboutMethods();
@@ -299,9 +322,9 @@ class ControllerTask extends BakeTask
      * Bake scaffold actions
      *
      * @param string $controllerName Controller name
-     * @param string $admin Admin route to use
+     * @param string|null $admin Admin route to use
      * @param bool $wannaUseSession Set to true to use sessions, false otherwise
-     * @return string Baked actions
+     * @return string|null Baked actions, or null when the model does not exist.
      */
     public function bakeActions($controllerName, $admin = null, $wannaUseSession = true)
     {
@@ -311,13 +334,16 @@ class ControllerTask extends BakeTask
             $plugin .= '.';
         }
         App::uses($modelImport, $plugin . 'Model');
-        if (!class_exists($modelImport)) {
-            $this->err(__d('cake_console', 'You must have a model for this class to build basic methods. Please try again.'));
-
-            return $this->_stop();
+        $modelObj = null;
+        if (class_exists($modelImport)) {
+            $modelObj = ClassRegistry::init($currentModelName);
         }
+        if (!$modelObj instanceof Model) {
+            $this->err(__d('cake_console', 'You must have a model for this class to build basic methods. Please try again.'));
+            $this->_stop();
 
-        $modelObj = ClassRegistry::init($currentModelName);
+            return null;
+        }
         $controllerPath = $this->_controllerPath($controllerName);
         $pluralName = $this->_pluralName($currentModelName);
         $singularName = Inflector::variable($currentModelName);
@@ -352,7 +378,7 @@ class ControllerTask extends BakeTask
      * @param string $actions Actions to add, or set the whole controller to use $scaffold (set $actions to 'scaffold')
      * @param array $helpers Helpers to use in controller
      * @param array $components Components to use in controller
-     * @return string Baked controller
+     * @return string|false Baked controller, or false when the file was not written.
      */
     public function bake($controllerName, $actions = '', $helpers = null, $components = null)
     {
@@ -461,29 +487,29 @@ class ControllerTask extends BakeTask
         if ($useDbConfig === null) {
             $useDbConfig = $this->connection;
         }
-        $this->__tables = $this->Model->getAllTables($useDbConfig);
+        $this->_tables = $this->Model->getAllTables($useDbConfig);
 
         if ($this->interactive) {
             $this->out(__d('cake_console', 'Possible Controllers based on your current database:'));
             $this->hr();
             $this->_controllerNames = [];
-            $count = count($this->__tables);
+            $count = count($this->_tables);
             for ($i = 0; $i < $count; $i++) {
-                $this->_controllerNames[] = $this->_controllerName($this->_modelName($this->__tables[$i]));
+                $this->_controllerNames[] = $this->_controllerName($this->_modelName($this->_tables[$i]));
                 $this->out(sprintf('%2d. %s', $i + 1, $this->_controllerNames[$i]));
             }
 
             return $this->_controllerNames;
         }
 
-        return $this->__tables;
+        return $this->_tables;
     }
 
     /**
      * Forces the user to specify the controller he wants to bake, and returns the selected controller name.
      *
      * @param string $useDbConfig Connection name to get a controller name for.
-     * @return string Controller name
+     * @return string|null Controller name, or null when the user quits.
      */
     public function getName($useDbConfig = null)
     {
@@ -494,8 +520,9 @@ class ControllerTask extends BakeTask
             $enteredController = $this->in(__d('cake_console', "Enter a number from the list above,\ntype in the name of another controller, or 'q' to exit"), null, 'q');
             if ($enteredController === 'q') {
                 $this->out(__d('cake_console', 'Exit'));
+                $this->_stop();
 
-                return $this->_stop();
+                return null;
             }
 
             if (!$enteredController || (int)$enteredController > count($controllers)) {

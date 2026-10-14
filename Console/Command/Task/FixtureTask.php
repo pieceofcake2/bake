@@ -23,6 +23,9 @@ App::uses('Model', 'Model');
  * Task class for creating and updating fixtures files.
  *
  * @package       Cake.Console.Command.Task
+ * @property DbConfigTask $DbConfig
+ * @property ModelTask $Model
+ * @property TemplateTask $Template
  */
 class FixtureTask extends BakeTask
 {
@@ -125,7 +128,9 @@ class FixtureTask extends BakeTask
                 $this->connection = 'default';
             }
             if (strtolower($this->args[0]) === 'all') {
-                return $this->all();
+                $this->all();
+
+                return;
             }
             $model = $this->_modelName($this->args[0]);
             $importOptions = $this->importOptions($model);
@@ -221,7 +226,7 @@ class FixtureTask extends BakeTask
      * Assembles and writes a Fixture file
      *
      * @param string $model Name of model to bake.
-     * @param string $useTable Name of table to use.
+     * @param string|false $useTable Name of table to use, or false to use the model's default table.
      * @param array $importOptions Options for public $import
      * @return string|null Baked fixture content, otherwise null.
      */
@@ -246,7 +251,7 @@ class FixtureTask extends BakeTask
                 $importBits[] = "'records' => true";
             }
             if ($this->connection !== 'default') {
-                $importBits[] .= "'connection' => '{$this->connection}'";
+                $importBits[] = "'connection' => '{$this->connection}'";
             }
             if (!empty($importBits)) {
                 $import = sprintf('array(%s)', implode(', ', $importBits));
@@ -285,7 +290,7 @@ class FixtureTask extends BakeTask
      * Generate the fixture file, and write to disk
      *
      * @param string $model name of the model being generated
-     * @param string $otherVars Contents of the fixture file.
+     * @param array $otherVars Contents of the fixture file.
      * @return string Content saved into fixture file.
      */
     public function generateFixtureFile($model, $otherVars)
@@ -314,7 +319,7 @@ class FixtureTask extends BakeTask
     public function getPath()
     {
         $path = $this->path;
-        if (isset($this->plugin)) {
+        if (!empty($this->plugin)) {
             $path = $this->_pluginTestsPath($this->plugin) . 'Fixture' . DS;
         }
 
@@ -458,7 +463,7 @@ class FixtureTask extends BakeTask
             ]);
 
             $prompt = __d('cake_console', 'How many records do you want to import?');
-            $recordCount = $this->in($prompt, null, $recordsFound < 10 ? $recordsFound : 10);
+            $recordCount = $this->in($prompt, null, (string)min($recordsFound, 10));
         } else {
             $condition = 'WHERE 1=1';
             $recordCount = ($this->params['count'] ?? 10);
