@@ -171,7 +171,7 @@ class DbConfigTask extends AppShell
             }
 
             $schema = '';
-            if ($datasource === 'postgres') {
+            if (strtolower($datasource) === 'postgres') {
                 while (!$schema) {
                     $schema = $this->in(__d('cake_console', 'Table schema?'), null, 'n');
                 }
