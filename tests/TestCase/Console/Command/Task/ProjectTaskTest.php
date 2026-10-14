@@ -331,6 +331,31 @@ class ProjectTaskTest extends CakeTestCase
     }
 
     /**
+     * test getPrefix() when core.php has no Routing.prefixes setting to enable
+     *
+     * @return void
+     */
+    public function testGetPrefixUnableToWrite(): void
+    {
+        Configure::write('Routing.prefixes', null);
+        $path = TMP . 'tests' . DS . 'core.php';
+        file_put_contents($path, "<?php\n");
+        $this->Task->configPath = TMP . 'tests' . DS;
+
+        $this->Task->expects($this->once())
+            ->method('in')
+            ->willReturn('admin');
+        $this->Task->expects($this->once())
+            ->method('_stop');
+
+        $this->Task->getPrefix();
+
+        $this->assertNull(Configure::read('Routing.prefixes'));
+        $this->assertSame("<?php\n", file_get_contents($path));
+        unlink($path);
+    }
+
+    /**
      * test cakeAdmin() writing core.php
      *
      * @return void
