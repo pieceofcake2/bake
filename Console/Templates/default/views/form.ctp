@@ -14,50 +14,52 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 ?>
-<div class="<?php echo $pluralVar; ?> form">
-<?php echo "<?php echo \$this->Form->create('{$modelClass}'); ?>\n"; ?>
-	<fieldset>
-		<legend><?php printf("<?php echo __('%s %s'); ?>", Inflector::humanize($action), $singularHumanName); ?></legend>
-<?php
-		echo "\t<?php\n";
-		foreach ($fields as $field) {
-			if (strpos($action, 'add') !== false && $field === $primaryKey) {
-				continue;
-			} elseif (!in_array($field, array('created', 'modified', 'updated'))) {
-				echo "\t\techo \$this->Form->input('{$field}');\n";
-			}
-		}
-		if (!empty($associations['hasAndBelongsToMany'])) {
-			foreach ($associations['hasAndBelongsToMany'] as $assocName => $assocData) {
-				echo "\t\techo \$this->Form->input('{$assocName}');\n";
-			}
-		}
-		echo "\t?>\n";
-?>
-	</fieldset>
-<?php
-	echo "<?php echo \$this->Form->end(__('Submit')); ?>\n";
-?>
-</div>
-<div class="actions">
-	<h3><?php echo "<?php echo __('Actions'); ?>"; ?></h3>
-	<ul>
-
+<div class="row">
+    <aside class="column">
+        <div class="side-nav">
+            <h4 class="heading"><?php echo "<?php echo __('Actions'); ?>"; ?></h4>
 <?php if (strpos($action, 'add') === false): ?>
-		<li><?php echo "<?php echo \$this->Form->postLink(__('Delete'), array('action' => 'delete', \$this->Form->value('{$modelClass}.{$primaryKey}')), array('confirm' => __('Are you sure you want to delete # %s?', \$this->Form->value('{$modelClass}.{$primaryKey}')))); ?>"; ?></li>
+            <?php echo "<?php echo \$this->Form->postLink(__('Delete'), array('action' => 'delete', \$this->Form->value('{$modelClass}.{$primaryKey}')), array('class' => 'side-nav-item', 'confirm' => __('Are you sure you want to delete # %s?', \$this->Form->value('{$modelClass}.{$primaryKey}')))); ?>\n"; ?>
 <?php endif; ?>
-		<li><?php echo "<?php echo \$this->Html->link(__('List " . $pluralHumanName . "'), array('action' => 'index')); ?>"; ?></li>
+            <?php echo "<?php echo \$this->Html->link(__('List {$pluralHumanName}'), array('action' => 'index'), array('class' => 'side-nav-item')); ?>\n"; ?>
 <?php
-		$done = array();
-		foreach ($associations as $type => $data) {
-			foreach ($data as $alias => $details) {
-				if ($details['controller'] != $this->name && !in_array($details['controller'], $done)) {
-					echo "\t\t<li><?php echo \$this->Html->link(__('List " . Inflector::humanize($details['controller']) . "'), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
-					echo "\t\t<li><?php echo \$this->Html->link(__('New " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'add')); ?> </li>\n";
-					$done[] = $details['controller'];
-				}
-			}
-		}
+$done = array();
+foreach ($associations as $type => $data) {
+    foreach ($data as $alias => $details) {
+        if ($details['controller'] != $this->name && !in_array($details['controller'], $done)) {
+            echo "            <?php echo \$this->Html->link(__('List " . Inflector::humanize($details['controller']) . "'), array('controller' => '{$details['controller']}', 'action' => 'index'), array('class' => 'side-nav-item')); ?>\n";
+            echo "            <?php echo \$this->Html->link(__('New " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'add'), array('class' => 'side-nav-item')); ?>\n";
+            $done[] = $details['controller'];
+        }
+    }
+}
 ?>
-	</ul>
+        </div>
+    </aside>
+    <div class="column column-80">
+        <div class="<?php echo $pluralVar; ?> form content">
+            <?php echo "<?php echo \$this->Form->create('{$modelClass}'); ?>\n"; ?>
+            <fieldset>
+                <legend><?php printf("<?php echo __('%s %s'); ?>", Inflector::humanize($action), $singularHumanName); ?></legend>
+                <?php echo "<?php\n"; ?>
+<?php
+foreach ($fields as $field) {
+    if (strpos($action, 'add') !== false && $field === $primaryKey) {
+        continue;
+    } elseif (!in_array($field, array('created', 'modified', 'updated'))) {
+        echo "                echo \$this->Form->input('{$field}');\n";
+    }
+}
+if (!empty($associations['hasAndBelongsToMany'])) {
+    foreach ($associations['hasAndBelongsToMany'] as $assocName => $assocData) {
+        echo "                echo \$this->Form->input('{$assocName}');\n";
+    }
+}
+?>
+                ?>
+            </fieldset>
+            <?php echo "<?php echo \$this->Form->button(__('Submit')); ?>\n"; ?>
+            <?php echo "<?php echo \$this->Form->end(); ?>\n"; ?>
+        </div>
+    </div>
 </div>

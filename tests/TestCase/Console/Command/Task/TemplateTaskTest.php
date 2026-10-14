@@ -130,6 +130,51 @@ class TemplateTaskTest extends CakeTestCase
     }
 
     /**
+     * test that the bundled legacy theme is found but only used when it is requested
+     *
+     * @return void
+     */
+    public function testGetThemePathLegacyTheme(): void
+    {
+        $templates = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS;
+        $this->Task->initialize();
+        $this->assertEquals($templates . 'legacy' . DS, $this->Task->templatePaths['legacy']);
+
+        $this->Task->templatePaths = [
+            'default' => $templates . 'default' . DS,
+            'legacy' => $templates . 'legacy' . DS,
+        ];
+        $this->Task->expects($this->never())->method('in');
+
+        $this->Task->params = [];
+        $this->assertEquals($templates . 'default' . DS, $this->Task->getThemePath());
+
+        $this->Task->params = ['theme' => 'legacy'];
+        $this->assertEquals($templates . 'legacy' . DS, $this->Task->getThemePath());
+    }
+
+    /**
+     * test that the bundled legacy theme is not offered when choosing between several themes
+     *
+     * @return void
+     */
+    public function testGetThemePathPromptSkipsLegacyTheme(): void
+    {
+        $templates = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS;
+        $this->Task->templatePaths = [
+            'other' => '/some/path/',
+            'default' => $templates . 'default' . DS,
+            'legacy' => $templates . 'legacy' . DS,
+        ];
+        $this->Task->expects($this->once())->method('in')
+            ->with($this->anything(), [1, 2], '1')
+            ->will($this->returnValue('2'));
+
+        $this->assertEquals($templates . 'default' . DS, $this->Task->getThemePath());
+        $this->assertEquals('default', $this->Task->params['theme']);
+    }
+
+    /**
      * test generate
      *
      * @return void

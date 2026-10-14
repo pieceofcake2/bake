@@ -386,6 +386,48 @@ class ViewTaskTest extends CakeTestCase
     }
 
     /**
+     * test baking an index with the legacy theme, which keeps the markup for cake.generic.css
+     *
+     * @return void
+     */
+    public function testBakeIndexLegacyTheme(): void
+    {
+        $this->Task->controllerName = 'ViewTaskComments';
+        $this->Task->Template->templatePaths['legacy'] = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS . 'legacy' . DS;
+        $this->Task->Template->params['theme'] = 'legacy';
+
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'legacy_index.ctp');
+        $this->Task->expects($this->once())->method('createFile')
+            ->with(
+                TMP . 'ViewTaskComments' . DS . 'index.ctp',
+                $expected,
+            );
+        $this->Task->bake('index', true);
+    }
+
+    /**
+     * test that the legacy theme falls back to the default theme for the templates it does not have
+     *
+     * @return void
+     */
+    public function testBakeEditLegacyTheme(): void
+    {
+        $this->Task->controllerName = 'ViewTaskComments';
+        $this->Task->Template->templatePaths['legacy'] = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS . 'legacy' . DS;
+        $this->Task->Template->params['theme'] = 'legacy';
+
+        $this->Task->expects($this->once())->method('createFile')
+            ->with(
+                TMP . 'ViewTaskComments' . DS . 'edit.ctp',
+                $this->logicalAnd(
+                    $this->stringContains('<div class="actions">'),
+                    $this->stringContains("echo \$this->Form->end(__('Submit'));"),
+                ),
+            );
+        $this->Task->bake('edit', true);
+    }
+
+    /**
      * test that baking a view with no template doesn't make a file.
      *
      * @return void
