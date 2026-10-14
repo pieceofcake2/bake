@@ -34,7 +34,7 @@ class FixtureTask extends BakeTask
      *
      * @var array
      */
-    public $tasks = ['DbConfig', 'Model', 'Template'];
+    public $tasks = ['Bake.DbConfig', 'Bake.Model', 'Bake.Template'];
 
     /**
      * path to fixtures directory
@@ -147,7 +147,7 @@ class FixtureTask extends BakeTask
     {
         $this->interactive = false;
         $this->Model->interactive = false;
-        $tables = $this->Model->listAll($this->connection, false);
+        $tables = $this->Model->listAll($this->connection);
 
         foreach ($tables as $table) {
             $model = $this->_modelName($table);

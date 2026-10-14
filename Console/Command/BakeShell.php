@@ -47,7 +47,7 @@ class BakeShell extends AppShell
      *
      * @var array
      */
-    public $tasks = ['Project', 'DbConfig', 'Model', 'Controller', 'View', 'Plugin', 'Fixture', 'Test'];
+    public $tasks = ['Bake.Project', 'Bake.DbConfig', 'Bake.Model', 'Bake.Controller', 'Bake.View', 'Bake.Plugin', 'Bake.Fixture', 'Bake.Test'];
 
     /**
      * The connection being used.

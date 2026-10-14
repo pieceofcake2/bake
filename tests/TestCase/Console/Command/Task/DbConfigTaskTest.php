@@ -162,6 +162,86 @@ class DbConfigTaskTest extends CakeTestCase
     }
 
     /**
+     * Data provider for testExecuteIntoInteractivePostgresAsksSchema
+     *
+     * @return array<string, array{string}>
+     */
+    public static function postgresAnswerProvider(): array
+    {
+        return [
+            'as listed' => ['Postgres'],
+            'lower case' => ['postgres'],
+            'upper case' => ['POSTGRES'],
+        ];
+    }
+
+    /**
+     * test that choosing the Postgres datasource asks for the table schema
+     *
+     * @param string $answer Datasource answer
+     * @return void
+     * @dataProvider postgresAnswerProvider
+     */
+    public function testExecuteIntoInteractivePostgresAsksSchema(string $answer): void
+    {
+        $out = $this->getMock('ConsoleOutput', [], [], '', false);
+        $in = $this->getMock('ConsoleInput', [], [], '', false);
+        $this->Task = $this->getMock(
+            'DbConfigTask',
+            ['in', '_stop', 'createFile', 'bake'],
+            [$out, $out, $in],
+        );
+
+        $inReturns = [
+            'default', // name
+            $answer, // db type
+            'n', // persistent
+            'localhost', // server
+            'n', // port
+            'postgres', // user
+            'password', // password
+            'cake_test', // db
+            'n', // prefix
+            'n', // encoding
+            'app', // schema
+            'y', // looks good
+            'n', // another
+        ];
+        $prompts = [];
+        $inCallIndex = 0;
+        $this->Task->expects($this->any())
+            ->method('in')
+            ->willReturnCallback(function ($prompt) use ($inReturns, &$inCallIndex, &$prompts) {
+                $prompts[] = $prompt;
+                $return = $inReturns[$inCallIndex] ?? 'n';
+                $inCallIndex++;
+
+                return $return;
+            });
+
+        $this->Task->expects($this->once())
+            ->method('bake')
+            ->with([
+                [
+                    'name' => 'default',
+                    'datasource' => $answer,
+                    'persistent' => 'false',
+                    'host' => 'localhost',
+                    'login' => 'postgres',
+                    'password' => 'password',
+                    'database' => 'cake_test',
+                    'prefix' => null,
+                    'encoding' => null,
+                    'port' => null,
+                    'schema' => 'app',
+                ],
+            ]);
+
+        $this->Task->execute();
+        $this->assertContains('Table schema?', $prompts);
+    }
+
+    /**
      * test that answering an upper case N stops asking for more configurations
      *
      * @return void

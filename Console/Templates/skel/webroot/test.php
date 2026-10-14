@@ -7,6 +7,8 @@
  * @since         CakePHP(tm) v 1.2.0.4433
  */
 
+use Composer\InstalledVersions;
+
 set_time_limit(0);
 ini_set('display_errors', 1);
 
@@ -38,10 +40,11 @@ if (!defined('APP_DIR')) {
 }
 
 /**
- * Path to the vendors directory.
+ * Path to the Composer vendor directory, which holds "autoload.php".
+ * Change this if "vendor-dir" is configured in composer.json.
  */
 if (!defined('VENDORS')) {
-    define('VENDORS', ROOT . DS . 'vendors' . DS);
+    define('VENDORS', ROOT . DS . 'vendor' . DS);
 }
 
 /**
@@ -55,36 +58,18 @@ if (!defined('WWW_ROOT')) {
     define('WWW_ROOT', __DIR__ . DS);
 }
 
-if (!is_dir(VENDORS)) {
-    trigger_error(
-        'Composer vendors directory not found at "' . VENDORS . '". ' .
-        'Please run "composer install" in the project root directory to install dependencies.',
-        E_USER_ERROR,
-    );
-}
-
 if (!is_file(VENDORS . 'autoload.php')) {
-    trigger_error(
+    throw new RuntimeException(
         'Composer autoload file not found at "' . VENDORS . 'autoload.php". ' .
-        'Please run "composer install" to generate the autoload file.',
-        E_USER_ERROR,
+        'Please run "composer install" in the project root directory to install dependencies.',
     );
 }
-
 require_once VENDORS . 'autoload.php';
 
-if (!require_once 'Cake' . DS . 'bootstrap.php') {
-    trigger_error(
-        'CakePHP core could not be found. ' .
-        'Please run "composer require pieceofcake2/cakephp" to install CakePHP core.',
-        E_USER_ERROR,
-    );
-}
+require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
 
 if (Configure::read('debug') < 1) {
     throw new NotFoundException(__d('cake_dev', 'Debug setting does not allow access to this URL.'));
 }
-
-require_once CAKE . 'TestSuite' . DS . 'CakeTestSuiteDispatcher.php';
 
 CakeTestSuiteDispatcher::run();

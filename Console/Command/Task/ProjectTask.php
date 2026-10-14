@@ -99,33 +99,6 @@ class ProjectTask extends AppShell
                 $success = false;
             }
 
-            if ($this->consolePath($path) === true) {
-                $this->out(__d('cake_console', ' * app/Console/cake path set.'));
-            } else {
-                $this->err(__d('cake_console', 'Unable to set console path for app/Console.'));
-                $success = false;
-            }
-
-            $hardCode = false;
-            if ($this->cakeOnIncludePath()) {
-                $this->out(__d('cake_console', '<info>CakePHP is on your `include_path`. CAKE_CORE_INCLUDE_PATH will be set, but commented out.</info>'));
-            } else {
-                $this->out(__d('cake_console', '<warning>CakePHP is not on your `include_path`, CAKE_CORE_INCLUDE_PATH will be hard coded.</warning>'));
-                $this->out(__d('cake_console', 'You can fix this by adding CakePHP to your `include_path`.'));
-                $hardCode = true;
-            }
-            $success = $this->corePath($path, $hardCode) === true;
-            if ($success) {
-                $this->out(__d('cake_console', ' * CAKE_CORE_INCLUDE_PATH set to %s in %s', CAKE_CORE_INCLUDE_PATH, 'webroot/index.php'));
-                $this->out(__d('cake_console', ' * CAKE_CORE_INCLUDE_PATH set to %s in %s', CAKE_CORE_INCLUDE_PATH, 'webroot/test.php'));
-            } else {
-                $this->err(__d('cake_console', 'Unable to set CAKE_CORE_INCLUDE_PATH, you should change it in %s', $path . 'webroot' . DS . 'index.php'));
-                $success = false;
-            }
-            if ($success && $hardCode) {
-                $this->out(__d('cake_console', '   * <warning>Remember to check these values after moving to production server</warning>'));
-            }
-
             $Folder = new Folder($path);
             if (!$Folder->chmod($path . 'tmp', 0777)) {
                 $this->err(__d('cake_console', 'Could not set permissions on %s', $path . DS . 'tmp'));
@@ -146,6 +119,7 @@ class ProjectTask extends AppShell
      * Checks PHP's include_path for CakePHP.
      *
      * @return bool Indicates whether or not CakePHP exists on include_path
+     * @deprecated 1.0.5 The skeleton dispatchers load CakePHP with Composer, so there is nothing to replace.
      */
     public function cakeOnIncludePath()
     {
@@ -241,6 +215,7 @@ class ProjectTask extends AppShell
      *
      * @param string $path Project path.
      * @return bool success
+     * @deprecated 1.0.5 The skeleton dispatchers load CakePHP with Composer, so there is nothing to replace.
      */
     public function consolePath($path)
     {
@@ -333,6 +308,7 @@ class ProjectTask extends AppShell
      * @param string $path Project path
      * @param bool $hardCode Whether or not define calls should be hardcoded.
      * @return bool Success
+     * @deprecated 1.0.5 The skeleton dispatchers load CakePHP with Composer, so there is nothing to replace.
      */
     public function corePath($path, $hardCode = true)
     {

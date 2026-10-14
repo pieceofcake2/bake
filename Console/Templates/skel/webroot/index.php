@@ -16,6 +16,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Composer\InstalledVersions;
+
 /**
  * Use the DS to separate the directories in other defines
  */
@@ -44,10 +46,11 @@ if (!defined('APP_DIR')) {
 }
 
 /**
- * Path to the vendors directory.
+ * Path to the Composer vendor directory, which holds "autoload.php".
+ * Change this if "vendor-dir" is configured in composer.json.
  */
 if (!defined('VENDORS')) {
-    define('VENDORS', ROOT . DS . 'vendors' . DS);
+    define('VENDORS', ROOT . DS . 'vendor' . DS);
 }
 
 /**
@@ -68,35 +71,16 @@ if (PHP_SAPI === 'cli-server') {
     }
     $_SERVER['PHP_SELF'] = '/' . basename(__FILE__);
 }
-$_SERVER['PHP_SELF'] = '/' . basename(__FILE__);
-
-if (!is_dir(VENDORS)) {
-    trigger_error(
-        'Composer vendors directory not found at "' . VENDORS . '". ' .
-        'Please run "composer install" in the project root directory to install dependencies.',
-        E_USER_ERROR,
-    );
-}
 
 if (!is_file(VENDORS . 'autoload.php')) {
-    trigger_error(
+    throw new RuntimeException(
         'Composer autoload file not found at "' . VENDORS . 'autoload.php". ' .
-        'Please run "composer install" to generate the autoload file.',
-        E_USER_ERROR,
+        'Please run "composer install" in the project root directory to install dependencies.',
     );
 }
-
 require_once VENDORS . 'autoload.php';
 
-if (!require_once 'Cake' . DS . 'bootstrap.php') {
-    trigger_error(
-        'CakePHP core could not be found. ' .
-        'Please run "composer require pieceofcake2/cakephp" to install CakePHP core.',
-        E_USER_ERROR,
-    );
-}
-
-App::uses('Dispatcher', 'Routing');
+require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
 
 $Dispatcher = new Dispatcher();
 $Dispatcher->dispatch(

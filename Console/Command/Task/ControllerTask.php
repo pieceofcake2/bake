@@ -36,7 +36,7 @@ class ControllerTask extends BakeTask
      *
      * @var array
      */
-    public $tasks = ['Model', 'Test', 'Template', 'DbConfig', 'Project'];
+    public $tasks = ['Bake.Model', 'Bake.Test', 'Bake.Template', 'Bake.DbConfig', 'Bake.Project'];
 
     /**
      * path to Controller directory

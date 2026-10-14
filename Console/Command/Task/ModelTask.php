@@ -44,7 +44,7 @@ class ModelTask extends BakeTask
      *
      * @var array
      */
-    public $tasks = ['DbConfig', 'Fixture', 'Test', 'Template'];
+    public $tasks = ['Bake.DbConfig', 'Bake.Fixture', 'Bake.Test', 'Bake.Template'];
 
     /**
      * Tables to skip when running all()
