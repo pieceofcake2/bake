@@ -380,7 +380,7 @@ class ProjectTask extends AppShell
     }
 
     /**
-     * Enables Configure::read('Routing.prefixes') in /app/Config/core.php
+     * Enables Configure::read('Routing.prefixes') in core.php of the application's config directory
      *
      * @param string $name Name to use as admin routing
      * @return bool Success
@@ -390,8 +390,8 @@ class ProjectTask extends AppShell
         $path = empty($this->configPath) ? CONFIG : $this->configPath;
         $File = new File($path . 'core.php');
         $contents = $File->read();
-        if (preg_match('%(\s*[/]*Configure::write\(\'Routing.prefixes\',[\s\'a-z,\)\(]*\);)%', $contents, $match)) {
-            $result = str_replace($match[0], "\n" . 'Configure::write(\'Routing.prefixes\', array(\'' . $name . '\'));', $contents);
+        if (preg_match('%(\s*[/]*Configure::write\(\'Routing.prefixes\',[\s\'a-z,\)\(\[\]]*\);)%', $contents, $match)) {
+            $result = str_replace($match[0], "\n" . 'Configure::write(\'Routing.prefixes\', [\'' . $name . '\']);', $contents);
             if ($File->write($result)) {
                 Configure::write('Routing.prefixes', [$name]);
 
@@ -435,8 +435,8 @@ class ProjectTask extends AppShell
             $this->out(__d(
                 'cake_console',
                 'You need to enable %s in %s to use prefix routing.',
-                'Configure::write(\'Routing.prefixes\', array(\'admin\'))',
-                '/app/Config/core.php',
+                'Configure::write(\'Routing.prefixes\', [\'admin\'])',
+                (empty($this->configPath) ? CONFIG : $this->configPath) . 'core.php',
             ));
             $this->out(__d('cake_console', 'What would you like the prefix route to be?'));
             $this->out(__d('cake_console', 'Example: %s', 'www.example.com/admin/controller'));
@@ -444,12 +444,12 @@ class ProjectTask extends AppShell
                 $admin = $this->in(__d('cake_console', 'Enter a routing prefix:'), null, 'admin');
             }
             if ($this->cakeAdmin($admin) !== true) {
-                $this->out(__d('cake_console', '<error>Unable to write to</error> %s.', '/app/Config/core.php'));
+                $this->out(__d('cake_console', '<error>Unable to write to</error> %s.', (empty($this->configPath) ? CONFIG : $this->configPath) . 'core.php'));
                 $this->out(__d(
                     'cake_console',
                     'You need to enable %s in %s to use prefix routing.',
-                    'Configure::write(\'Routing.prefixes\', array(\'admin\'))',
-                    '/app/Config/core.php',
+                    'Configure::write(\'Routing.prefixes\', [\'admin\'])',
+                    (empty($this->configPath) ? CONFIG : $this->configPath) . 'core.php',
                 ));
 
                 return $this->_stop();

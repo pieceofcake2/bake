@@ -348,7 +348,32 @@ class ProjectTaskTest extends CakeTestCase
         $this->assertTrue($result);
 
         $this->assertEquals(Configure::read('Routing.prefixes'), ['my_prefix']);
+        $this->assertStringContainsString("Configure::write('Routing.prefixes', ['my_prefix']);", $File->read());
         $File->delete();
+    }
+
+    /**
+     * test cakeAdmin() with core.php files using the long and the short array syntax
+     *
+     * @return void
+     */
+    public function testCakeAdminArraySyntax(): void
+    {
+        $this->Task->configPath = TMP . 'tests' . DS;
+        $path = TMP . 'tests' . DS . 'core.php';
+
+        foreach (["array('admin')", "['admin']"] as $value) {
+            file_put_contents($path, "<?php\n//Configure::write('Routing.prefixes', {$value});\n");
+            Configure::write('Routing.prefixes', null);
+
+            $this->assertTrue($this->Task->cakeAdmin('my_prefix'), $value);
+            $this->assertSame(
+                "<?php\nConfigure::write('Routing.prefixes', ['my_prefix']);\n",
+                file_get_contents($path),
+                $value,
+            );
+        }
+        unlink($path);
     }
 
     /**
