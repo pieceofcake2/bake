@@ -383,9 +383,14 @@ class FixtureTaskTest extends CakeTestCase
         $this->Task->connection = 'test';
         $this->Task->path = '/my/path/';
         $this->Task->args = ['all'];
-        $this->Task->Model->expects($this->any())
+        $listAllArgs = [];
+        $this->Task->Model->expects($this->once())
             ->method('listAll')
-            ->will($this->returnValue(['articles', 'comments']));
+            ->willReturnCallback(function () use (&$listAllArgs) {
+                $listAllArgs = func_get_args();
+
+                return ['articles', 'comments'];
+            });
 
         $createFileCalls = [];
         $this->Task->expects($this->exactly(2))
@@ -395,6 +400,9 @@ class FixtureTaskTest extends CakeTestCase
             });
 
         $this->Task->execute();
+
+        $this->assertSame(['test'], $listAllArgs, 'ModelTask::listAll() only takes the connection name');
+        $this->assertFalse($this->Task->Model->interactive);
 
         $this->assertEquals('/my/path/ArticleFixture.php', $createFileCalls[0]['filename']);
         $this->assertStringContainsString('class ArticleFixture', $createFileCalls[0]['content']);
