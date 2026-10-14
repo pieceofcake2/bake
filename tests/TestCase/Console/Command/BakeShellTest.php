@@ -24,6 +24,9 @@ App::uses('BakeShell', 'Bake.Console/Command');
 App::uses('ModelTask', 'Bake.Console/Command/Task');
 App::uses('ControllerTask', 'Bake.Console/Command/Task');
 App::uses('DbConfigTask', 'Bake.Console/Command/Task');
+App::uses('FixtureTask', 'Bake.Console/Command/Task');
+App::uses('TestTask', 'Bake.Console/Command/Task');
+App::uses('ViewTask', 'Bake.Console/Command/Task');
 App::uses('Controller', 'Controller');
 
 if (!class_exists('UsersController')) {
@@ -171,5 +174,28 @@ class BakeShellTest extends CakeTestCase
 
         $this->assertNull($result);
         $this->assertSame([], $this->Shell->args);
+    }
+
+    /**
+     * Tasks used by the Bake shell and its tasks must be loaded from the Bake plugin.
+     *
+     * @return void
+     */
+    public function testTasksAreLoadedFromThePlugin(): void
+    {
+        $classes = ['BakeShell', 'ControllerTask', 'FixtureTask', 'ModelTask', 'TestTask', 'ViewTask'];
+        foreach ($classes as $class) {
+            $tasks = (new ReflectionClass($class))->getDefaultProperties()['tasks'];
+            foreach ($tasks as $task) {
+                [$plugin, $name] = pluginSplit($task);
+                $this->assertSame('Bake', $plugin, "{$class} task {$task}");
+
+                $found = false;
+                foreach (App::path('Console/Command/Task', $plugin) as $path) {
+                    $found = $found || is_file($path . $name . 'Task.php');
+                }
+                $this->assertTrue($found, "{$class} task {$task} could not be found");
+            }
+        }
     }
 }

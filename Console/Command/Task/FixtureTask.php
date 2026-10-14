@@ -34,7 +34,7 @@ class FixtureTask extends BakeTask
      *
      * @var array
      */
-    public $tasks = ['DbConfig', 'Model', 'Template'];
+    public $tasks = ['Bake.DbConfig', 'Bake.Model', 'Bake.Template'];
 
     /**
      * path to fixtures directory

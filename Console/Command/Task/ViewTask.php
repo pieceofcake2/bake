@@ -35,7 +35,7 @@ class ViewTask extends BakeTask
      *
      * @var array
      */
-    public $tasks = ['Project', 'Controller', 'DbConfig', 'Template'];
+    public $tasks = ['Bake.Project', 'Bake.Controller', 'Bake.DbConfig', 'Bake.Template'];
 
     /**
      * path to View directory
