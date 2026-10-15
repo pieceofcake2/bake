@@ -167,6 +167,9 @@ class TestTask extends BakeTask
         $mock = $this->hasMockClass($type);
         [$preConstruct, $construction, $postConstruct] = $this->generateConstructor($type, $fullClassName, $plugin);
         $uses = $this->generateUses($type, $realType, $fullClassName);
+        if (!$this->_needsAppUses()) {
+            $uses = $this->_classmapUses($type, $fullClassName, $uses);
+        }
 
         $this->out("\n" . __d('cake_console', 'Baking test case for %s %s ...', $className, $type), 1, Shell::QUIET);
 
@@ -572,6 +575,31 @@ class TestTask extends BakeTask
         $uses[] = [$className, $realType];
 
         return $uses;
+    }
+
+    /**
+     * Filters the uses() calls for applications autoloaded by the Composer classmap.
+     *
+     * The CakePHP classes and the existing application classes are autoloaded, and
+     * models and controllers are loaded by ClassRegistry::init() and
+     * ControllerTestCase::generate(). Only the class under test of other types is
+     * kept, because a class baked just now is not in the classmap until
+     * `composer dump-autoload` runs.
+     *
+     * @param string $type The type of object the test is generated for, e.g. Component.
+     * @param string $fullClassName The class name of the class under test.
+     * @param array $uses The uses() calls from generateUses().
+     * @return array
+     */
+    protected function _classmapUses($type, $fullClassName, array $uses)
+    {
+        if (in_array(strtolower($type), ['model', 'controller'], true)) {
+            return [];
+        }
+
+        return array_values(array_filter($uses, function ($use) use ($fullClassName) {
+            return $use[0] === $fullClassName;
+        }));
     }
 
     /**

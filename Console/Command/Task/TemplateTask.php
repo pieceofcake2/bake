@@ -42,6 +42,14 @@ class TemplateTask extends AppShell
     public $templatePaths = [];
 
     /**
+     * Name of the bundled theme that bakes views for the cake.generic.css styles
+     * of the original CakePHP 2 application skeleton.
+     *
+     * @var string
+     */
+    public const LEGACY_THEME = 'legacy';
+
+    /**
      * Initialize callback. Setup paths for the template task.
      *
      * @return void
@@ -164,21 +172,34 @@ class TemplateTask extends AppShell
 
     /**
      * Find the theme name for the current operation.
-     * If there is only one theme in $templatePaths it will be used.
      * If there is a -theme param in the cli args, it will be used.
-     * If there is more than one installed theme user interaction will happen
+     * If there is only one selectable theme in $templatePaths it will be used.
+     * If there is more than one selectable theme user interaction will happen.
+     *
+     * The `legacy` theme bundled with bake is only used when it is requested with
+     * `--theme legacy`; it is never selected automatically nor offered in the prompt.
      *
      * @return string returns the path to the selected theme.
      */
     public function getThemePath()
     {
-        if (count($this->templatePaths) === 1) {
-            $paths = array_values($this->templatePaths);
-
-            return $paths[0];
-        }
         if (!empty($this->params['theme']) && isset($this->templatePaths[$this->params['theme']])) {
             return $this->templatePaths[$this->params['theme']];
+        }
+
+        $themes = $this->templatePaths;
+        if (
+            count($themes) > 1 &&
+            isset($themes[static::LEGACY_THEME]) &&
+            realpath($themes[static::LEGACY_THEME]) === realpath($this->_bundledThemePath(static::LEGACY_THEME))
+        ) {
+            unset($themes[static::LEGACY_THEME]);
+        }
+
+        if (count($themes) === 1) {
+            $paths = array_values($themes);
+
+            return $paths[0];
         }
 
         $this->hr();
@@ -188,16 +209,27 @@ class TemplateTask extends AppShell
 
         $i = 1;
         $indexedPaths = [];
-        foreach ($this->templatePaths as $key => $path) {
+        foreach ($themes as $key => $path) {
             $this->out($i . '. ' . $key);
             $indexedPaths[$i] = $path;
             $i++;
         }
         $index = $this->in(__d('cake_console', 'Which bake theme would you like to use?'), range(1, $i - 1), '1');
-        $themeNames = array_keys($this->templatePaths);
+        $themeNames = array_keys($themes);
         $this->params['theme'] = $themeNames[$index - 1];
 
         return $indexedPaths[$index];
+    }
+
+    /**
+     * Get the path of a theme bundled with bake.
+     *
+     * @param string $theme The theme name
+     * @return string
+     */
+    protected function _bundledThemePath($theme)
+    {
+        return dirname(__DIR__, 2) . DS . 'Templates' . DS . $theme . DS;
     }
 
     /**

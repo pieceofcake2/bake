@@ -13,124 +13,174 @@
  * @since         CakePHP(tm) v 1.2.0.5234
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
+
+$pk = "\${$singularVar}['{$modelClass}']['{$primaryKey}']";
 ?>
-<div class="<?php echo $pluralVar; ?> view">
-<h2><?php echo "<?php echo __('{$singularHumanName}'); ?>"; ?></h2>
-	<dl>
+<div class="row">
+    <aside class="column">
+        <div class="side-nav">
+            <h4 class="heading"><?php echo "<?php echo __('Actions'); ?>"; ?></h4>
 <?php
-foreach ($fields as $field) {
-	$isKey = false;
-	if (!empty($associations['belongsTo'])) {
-		foreach ($associations['belongsTo'] as $alias => $details) {
-			if ($field === $details['foreignKey']) {
-				$isKey = true;
-				echo "\t\t<dt><?php echo __('" . Inflector::humanize(Inflector::underscore($alias)) . "'); ?></dt>\n";
-				echo "\t\t<dd>\n\t\t\t<?php echo \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])); ?>\n\t\t\t&nbsp;\n\t\t</dd>\n";
-				break;
-			}
-		}
-	}
-	if ($isKey !== true) {
-		echo "\t\t<dt><?php echo __('" . Inflector::humanize($field) . "'); ?></dt>\n";
-		echo "\t\t<dd>\n\t\t\t<?php echo h(\${$singularVar}['{$modelClass}']['{$field}']); ?>\n\t\t\t&nbsp;\n\t\t</dd>\n";
-	}
+echo "            <?php echo \$this->Html->link(__('Edit {$singularHumanName}'), array('action' => 'edit', {$pk}), array('class' => 'side-nav-item')); ?>\n";
+echo "            <?php echo \$this->Form->postLink(__('Delete {$singularHumanName}'), array('action' => 'delete', {$pk}), array('class' => 'side-nav-item', 'confirm' => __('Are you sure you want to delete # %s?', {$pk}))); ?>\n";
+echo "            <?php echo \$this->Html->link(__('List {$pluralHumanName}'), array('action' => 'index'), array('class' => 'side-nav-item')); ?>\n";
+echo "            <?php echo \$this->Html->link(__('New {$singularHumanName}'), array('action' => 'add'), array('class' => 'side-nav-item')); ?>\n";
+
+$done = array();
+foreach ($associations as $type => $data) {
+    foreach ($data as $alias => $details) {
+        if ($details['controller'] != $this->name && !in_array($details['controller'], $done)) {
+            echo "            <?php echo \$this->Html->link(__('List " . Inflector::humanize($details['controller']) . "'), array('controller' => '{$details['controller']}', 'action' => 'index'), array('class' => 'side-nav-item')); ?>\n";
+            echo "            <?php echo \$this->Html->link(__('New " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'add'), array('class' => 'side-nav-item')); ?>\n";
+            $done[] = $details['controller'];
+        }
+    }
 }
 ?>
-	</dl>
-</div>
-<div class="actions">
-	<h3><?php echo "<?php echo __('Actions'); ?>"; ?></h3>
-	<ul>
+        </div>
+    </aside>
+    <div class="column column-80">
+        <div class="<?php echo $pluralVar; ?> view content">
+            <h3><?php echo "<?php echo h(\${$singularVar}['{$modelClass}']['{$displayField}']); ?>"; ?></h3>
 <?php
-	echo "\t\t<li><?php echo \$this->Html->link(__('Edit " . $singularHumanName ."'), array('action' => 'edit', \${$singularVar}['{$modelClass}']['{$primaryKey}'])); ?> </li>\n";
-	echo "\t\t<li><?php echo \$this->Form->postLink(__('Delete " . $singularHumanName . "'), array('action' => 'delete', \${$singularVar}['{$modelClass}']['{$primaryKey}']), array('confirm' => __('Are you sure you want to delete # %s?', \${$singularVar}['{$modelClass}']['{$primaryKey}']))); ?> </li>\n";
-	echo "\t\t<li><?php echo \$this->Html->link(__('List " . $pluralHumanName . "'), array('action' => 'index')); ?> </li>\n";
-	echo "\t\t<li><?php echo \$this->Html->link(__('New " . $singularHumanName . "'), array('action' => 'add')); ?> </li>\n";
-
-	$done = array();
-	foreach ($associations as $type => $data) {
-		foreach ($data as $alias => $details) {
-			if ($details['controller'] != $this->name && !in_array($details['controller'], $done)) {
-				echo "\t\t<li><?php echo \$this->Html->link(__('List " . Inflector::humanize($details['controller']) . "'), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
-				echo "\t\t<li><?php echo \$this->Html->link(__('New " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'add')); ?> </li>\n";
-				$done[] = $details['controller'];
-			}
-		}
-	}
+// Group the fields like cakephp/bake: strings and belongsTo keys first, then hasOne
+// associations, numbers, dates and booleans in the table, and text columns below it.
+$groupedFields = array('string' => array(), 'number' => array(), 'date' => array(), 'boolean' => array(), 'text' => array());
+$associationFields = array();
+foreach ($fields as $field) {
+    if (!empty($associations['belongsTo'])) {
+        foreach ($associations['belongsTo'] as $alias => $details) {
+            if ($field === $details['foreignKey']) {
+                $associationFields[$field] = array('alias' => $alias) + $details;
+                break;
+            }
+        }
+    }
+    $type = isset($schema[$field]['type']) ? $schema[$field]['type'] : null;
+    if ($type === 'binary') {
+        continue;
+    }
+    if (isset($associationFields[$field])) {
+        $group = 'string';
+    } elseif (in_array($type, array('integer', 'biginteger', 'smallinteger', 'tinyinteger', 'float', 'decimal'), true)) {
+        $group = 'number';
+    } elseif (in_array($type, array('date', 'time', 'datetime', 'timestamp'), true)) {
+        $group = 'date';
+    } elseif (in_array($type, array('boolean', 'text'), true)) {
+        $group = $type;
+    } else {
+        $group = 'string';
+    }
+    $groupedFields[$group][] = $field;
+}
 ?>
-	</ul>
-</div>
+            <table>
 <?php
-if (!empty($associations['hasOne'])) :
-	foreach ($associations['hasOne'] as $alias => $details): ?>
-	<div class="related">
-		<h3><?php echo "<?php echo __('Related " . Inflector::humanize($details['controller']) . "'); ?>"; ?></h3>
-	<?php echo "<?php if (!empty(\${$singularVar}['{$alias}'])): ?>\n"; ?>
-		<dl>
-	<?php
-			foreach ($details['fields'] as $field) {
-				echo "\t\t<dt><?php echo __('" . Inflector::humanize($field) . "'); ?></dt>\n";
-				echo "\t\t<dd>\n\t<?php echo \${$singularVar}['{$alias}']['{$field}']; ?>\n&nbsp;</dd>\n";
-			}
-	?>
-		</dl>
-	<?php echo "<?php endif; ?>\n"; ?>
-		<div class="actions">
-			<ul>
-				<li><?php echo "<?php echo \$this->Html->link(__('Edit " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'edit', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])); ?></li>\n"; ?>
-			</ul>
-		</div>
-	</div>
-	<?php
-	endforeach;
-endif;
+foreach ($groupedFields['string'] as $field) {
+    if (isset($associationFields[$field])) {
+        $details = $associationFields[$field];
+        $alias = $details['alias'];
+        echo "                <tr>\n";
+        echo "                    <th><?php echo __('" . Inflector::humanize(Inflector::underscore($alias)) . "'); ?></th>\n";
+        echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])) : ''; ?></td>\n";
+        echo "                </tr>\n";
+    } else {
+        echo "                <tr>\n";
+        echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+        echo "                    <td><?php echo h(\${$singularVar}['{$modelClass}']['{$field}']); ?></td>\n";
+        echo "                </tr>\n";
+    }
+}
+if (!empty($associations['hasOne'])) {
+    foreach ($associations['hasOne'] as $alias => $details) {
+        echo "                <tr>\n";
+        echo "                    <th><?php echo __('" . Inflector::humanize(Inflector::underscore($alias)) . "'); ?></th>\n";
+        echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])) : ''; ?></td>\n";
+        echo "                </tr>\n";
+    }
+}
+foreach ($groupedFields['number'] as $field) {
+    $value = "\${$singularVar}['{$modelClass}']['{$field}']";
+    if (in_array($schema[$field]['type'], array('float', 'decimal'), true)) {
+        // CakeNumber::format() rounds to whole numbers by default, so print fractions as they are
+        $out = "h({$value})";
+    } elseif (!empty($schema[$field]['null'])) {
+        $out = "{$value} === null ? '' : \$this->Number->format({$value})";
+    } else {
+        $out = "\$this->Number->format({$value})";
+    }
+    echo "                <tr>\n";
+    echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    echo "                    <td><?php echo {$out}; ?></td>\n";
+    echo "                </tr>\n";
+}
+foreach ($groupedFields['date'] as $field) {
+    echo "                <tr>\n";
+    echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    echo "                    <td><?php echo h(\${$singularVar}['{$modelClass}']['{$field}']); ?></td>\n";
+    echo "                </tr>\n";
+}
+foreach ($groupedFields['boolean'] as $field) {
+    echo "                <tr>\n";
+    echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    echo "                    <td><?php echo \${$singularVar}['{$modelClass}']['{$field}'] ? __('Yes') : __('No'); ?></td>\n";
+    echo "                </tr>\n";
+}
+?>
+            </table>
+<?php foreach ($groupedFields['text'] as $field): ?>
+            <div class="text">
+                <strong><?php echo "<?php echo __('" . Inflector::humanize($field) . "'); ?>"; ?></strong>
+                <blockquote>
+                    <?php echo "<?php echo \$this->Text->autoParagraph(h(\${$singularVar}['{$modelClass}']['{$field}'])); ?>\n"; ?>
+                </blockquote>
+            </div>
+<?php
+endforeach;
 if (empty($associations['hasMany'])) {
-	$associations['hasMany'] = array();
+    $associations['hasMany'] = array();
 }
 if (empty($associations['hasAndBelongsToMany'])) {
-	$associations['hasAndBelongsToMany'] = array();
+    $associations['hasAndBelongsToMany'] = array();
 }
 $relations = array_merge($associations['hasMany'], $associations['hasAndBelongsToMany']);
 foreach ($relations as $alias => $details):
-	$otherSingularVar = Inflector::variable($alias);
-	$otherPluralHumanName = Inflector::humanize($details['controller']);
-	?>
-<div class="related">
-	<h3><?php echo "<?php echo __('Related " . $otherPluralHumanName . "'); ?>"; ?></h3>
-	<?php echo "<?php if (!empty(\${$singularVar}['{$alias}'])): ?>\n"; ?>
-	<table cellpadding = "0" cellspacing = "0">
-	<tr>
+    $otherSingularVar = Inflector::variable($alias);
+    $otherPluralHumanName = Inflector::humanize($details['controller']);
+    $otherPk = "\${$otherSingularVar}['{$details['primaryKey']}']";
+    ?>
+            <div class="related">
+                <h4><?php echo "<?php echo __('Related " . $otherPluralHumanName . "'); ?>"; ?></h4>
+                <?php echo "<?php if (!empty(\${$singularVar}['{$alias}'])): ?>\n"; ?>
+                <div class="table-responsive">
+                    <table>
+                        <tr>
 <?php
-			foreach ($details['fields'] as $field) {
-				echo "\t\t<th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
-			}
+    foreach ($details['fields'] as $field) {
+        echo "                            <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    }
 ?>
-		<th class="actions"><?php echo "<?php echo __('Actions'); ?>"; ?></th>
-	</tr>
+                            <th class="actions"><?php echo "<?php echo __('Actions'); ?>"; ?></th>
+                        </tr>
+                        <?php echo "<?php foreach (\${$singularVar}['{$alias}'] as \${$otherSingularVar}): ?>\n"; ?>
+                        <tr>
 <?php
-echo "\t<?php foreach (\${$singularVar}['{$alias}'] as \${$otherSingularVar}): ?>\n";
-		echo "\t\t<tr>\n";
-			foreach ($details['fields'] as $field) {
-				echo "\t\t\t<td><?php echo \${$otherSingularVar}['{$field}']; ?></td>\n";
-			}
-
-			echo "\t\t\t<td class=\"actions\">\n";
-			echo "\t\t\t\t<?php echo \$this->Html->link(__('View'), array('controller' => '{$details['controller']}', 'action' => 'view', \${$otherSingularVar}['{$details['primaryKey']}'])); ?>\n";
-			echo "\t\t\t\t<?php echo \$this->Html->link(__('Edit'), array('controller' => '{$details['controller']}', 'action' => 'edit', \${$otherSingularVar}['{$details['primaryKey']}'])); ?>\n";
-			echo "\t\t\t\t<?php echo \$this->Form->postLink(__('Delete'), array('controller' => '{$details['controller']}', 'action' => 'delete', \${$otherSingularVar}['{$details['primaryKey']}']), array('confirm' => __('Are you sure you want to delete # %s?', \${$otherSingularVar}['{$details['primaryKey']}']))); ?>\n";
-			echo "\t\t\t</td>\n";
-		echo "\t\t</tr>\n";
-
-echo "\t<?php endforeach; ?>\n";
+    foreach ($details['fields'] as $field) {
+        echo "                            <td><?php echo h(\${$otherSingularVar}['{$field}']); ?></td>\n";
+    }
 ?>
-	</table>
-<?php echo "<?php endif; ?>\n\n"; ?>
-	<div class="actions">
-		<ul>
-			<li><?php echo "<?php echo \$this->Html->link(__('New " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'add')); ?>"; ?> </li>
-		</ul>
-	</div>
+                            <td class="actions">
+                                <?php echo "<?php echo \$this->Html->link(__('View'), array('controller' => '{$details['controller']}', 'action' => 'view', {$otherPk})); ?>\n"; ?>
+                                <?php echo "<?php echo \$this->Html->link(__('Edit'), array('controller' => '{$details['controller']}', 'action' => 'edit', {$otherPk})); ?>\n"; ?>
+                                <?php echo "<?php echo \$this->Form->postLink(__('Delete'), array('controller' => '{$details['controller']}', 'action' => 'delete', {$otherPk}), array('confirm' => __('Are you sure you want to delete # %s?', {$otherPk}))); ?>\n"; ?>
+                            </td>
+                        </tr>
+                        <?php echo "<?php endforeach; ?>\n"; ?>
+                    </table>
+                </div>
+                <?php echo "<?php endif; ?>\n"; ?>
+            </div>
+<?php endforeach; ?>
+        </div>
+    </div>
 </div>
-<?php
-endforeach;
-?>

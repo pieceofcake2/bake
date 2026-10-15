@@ -923,6 +923,8 @@ class ModelTaskTest extends CakeTestCase
         ];
         $result = $this->Task->bake('BakeArticle', compact('validate'));
         $this->assertMatchesRegularExpression('/class BakeArticle extends AppModel \{/', $result);
+        // AppModel is autoloaded by the Composer classmap in the modern layout of the test app
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertMatchesRegularExpression('/\$validate \= array\(/', $result);
         $expected = <<< STRINGEND
 array(

@@ -351,6 +351,26 @@ class ViewTaskTest extends CakeTestCase
     }
 
     /**
+     * test that the view groups the fields like cakephp/bake: strings and
+     * belongsTo keys, numbers, dates and booleans in the table, text below it.
+     *
+     * @return void
+     */
+    public function testBakeViewGroupsFields(): void
+    {
+        $this->Task->controllerName = 'ViewTaskComments';
+
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'view.ctp');
+        $this->Task->expects($this->once())->method('createFile')
+            ->with(
+                TMP . 'ViewTaskComments' . DS . 'view.ctp',
+                $expected,
+            );
+
+        $this->Task->bake('view', true);
+    }
+
+    /**
      * test baking an edit file
      *
      * @return void
@@ -383,6 +403,48 @@ class ViewTaskTest extends CakeTestCase
                 $expected,
             );
         $this->Task->bake('index', true);
+    }
+
+    /**
+     * test baking an index with the legacy theme, which keeps the markup for cake.generic.css
+     *
+     * @return void
+     */
+    public function testBakeIndexLegacyTheme(): void
+    {
+        $this->Task->controllerName = 'ViewTaskComments';
+        $this->Task->Template->templatePaths['legacy'] = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS . 'legacy' . DS;
+        $this->Task->Template->params['theme'] = 'legacy';
+
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'legacy_index.ctp');
+        $this->Task->expects($this->once())->method('createFile')
+            ->with(
+                TMP . 'ViewTaskComments' . DS . 'index.ctp',
+                $expected,
+            );
+        $this->Task->bake('index', true);
+    }
+
+    /**
+     * test that the legacy theme falls back to the default theme for the templates it does not have
+     *
+     * @return void
+     */
+    public function testBakeEditLegacyTheme(): void
+    {
+        $this->Task->controllerName = 'ViewTaskComments';
+        $this->Task->Template->templatePaths['legacy'] = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS . 'legacy' . DS;
+        $this->Task->Template->params['theme'] = 'legacy';
+
+        $this->Task->expects($this->once())->method('createFile')
+            ->with(
+                TMP . 'ViewTaskComments' . DS . 'edit.ctp',
+                $this->logicalAnd(
+                    $this->stringContains('<div class="actions">'),
+                    $this->stringContains("echo \$this->Form->end(__('Submit'));"),
+                ),
+            );
+        $this->Task->bake('edit', true);
     }
 
     /**

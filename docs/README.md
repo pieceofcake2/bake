@@ -11,6 +11,7 @@ in the CakePHP 2 book.
 - [Commands](#commands)
 - [Options](#options)
 - [Bake Themes](#bake-themes)
+- [Baked Views and the Legacy Theme](#baked-views-and-the-legacy-theme)
 
 ## Installation
 
@@ -76,6 +77,12 @@ exist yet, Bake first offers to create it.
 The files are written to the directories of your application, so a modern application gets
 `src/Model/`, `src/Controller/` and `templates/`, and a legacy application gets
 `app/Model/`, `app/Controller/` and `app/View/`.
+
+A modern application autoloads `src/` and the CakePHP classes with the Composer classmap,
+so the baked classes and tests have no `App::uses()` calls, except for the class under test
+of a component, helper or behavior test (a class baked just now is not in the classmap
+until `composer dump-autoload` runs). Classes baked for a legacy application or into a
+plugin keep their `App::uses()` calls.
 
 Use `--help` to see the arguments and options of each command:
 
@@ -169,6 +176,50 @@ bin/cake bake controller Users --theme myTheme
 ```
 
 When more than one theme is installed and no theme is given, Bake asks which one to use.
+
+## Baked Views and the Legacy Theme
+
+The views baked by the `default` theme follow the templates of CakePHP 5's bake and use
+the styles of the [pieceofcake2/app](https://pieceofcake2.github.io/app/) skeleton
+(`normalize.min.css`, `milligram.min.css`, `fonts.css` and `cake.css`, the stylesheets of
+the CakePHP 5 application skeleton):
+
+- `index.ctp`: a content box with a "New" button, a responsive table with sortable columns
+  and View / Edit / Delete links, and a paginator.
+- `view.ctp` and `form.ctp` (add and edit): an "Actions" side navigation next to the
+  content box. The view shows the record in a table and the related records of `hasOne`,
+  `hasMany` and `hasAndBelongsToMany` associations below it.
+
+The generated code still uses the CakePHP 2 helpers (`$this->Form->input()`,
+`$this->Paginator->numbers()`, `$this->Form->postLink()` and so on).
+
+![A baked index view](img/baked-index.png)
+
+![A baked view](img/baked-view.png)
+
+![A baked edit form](img/baked-edit.png)
+
+### Applications that use cake.generic.css
+
+Applications created from an older skeleton load `cake.generic.css` in their layout. The
+new markup does not match that stylesheet (the action links are not laid out as a side
+column, and the buttons and the paginator are not styled), so such applications should
+bake their views with the bundled `legacy` theme, which keeps the templates of the
+earlier Bake releases:
+
+```bash
+bin/cake bake view Articles --theme legacy
+bin/cake bake all Article --theme legacy
+```
+
+The `legacy` theme only contains view templates; models, controllers, fixtures and tests
+come from the `default` theme. It is never selected automatically: without `--theme`,
+Bake uses the `default` theme, and the `legacy` theme is not offered when Bake asks which
+of several installed themes to use.
+
+To use the new templates in an older application instead, copy the stylesheets from
+`webroot/css/` (and the fonts from `webroot/font/`) of
+[pieceofcake2/app](https://github.com/pieceofcake2/app) and load them in your layout.
 
 ## Origin
 

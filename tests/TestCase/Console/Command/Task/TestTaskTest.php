@@ -429,7 +429,8 @@ class TestTaskTest extends CakeTestCase
 
         $result = $this->Task->bake('Model', 'TestTaskArticle');
 
-        $this->assertStringContainsString("App::uses('TestTaskArticle', 'Model')", $result);
+        // The test app uses the modern layout: ClassRegistry::init() loads the model
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertStringContainsString('class TestTaskArticleTest extends CakeTestCase', $result);
 
         $this->assertStringContainsString('function setUp()', $result);
@@ -461,7 +462,8 @@ class TestTaskTest extends CakeTestCase
 
         $result = $this->Task->bake('Controller', 'TestTaskComments');
 
-        $this->assertStringContainsString("App::uses('TestTaskCommentsController', 'Controller')", $result);
+        // The test app uses the modern layout: ControllerTestCase::generate() loads the controller
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertStringContainsString('class TestTaskCommentsControllerTest extends ControllerTestCase', $result);
 
         $this->assertStringNotContainsString('function setUp()', $result);
@@ -488,8 +490,9 @@ class TestTaskTest extends CakeTestCase
 
         $result = $this->Task->bake('Component', 'Example');
 
-        $this->assertStringContainsString("App::uses('Component', 'Controller')", $result);
-        $this->assertStringContainsString("App::uses('ComponentCollection', 'Controller')", $result);
+        // The CakePHP classes are autoloaded by the Composer classmap in the modern layout
+        $this->assertStringNotContainsString("App::uses('Component', 'Controller')", $result);
+        $this->assertStringNotContainsString("App::uses('ComponentCollection', 'Controller')", $result);
         $this->assertStringContainsString("App::uses('ExampleComponent', 'Controller/Component')", $result);
         $this->assertStringContainsString('class ExampleComponentTest extends CakeTestCase', $result);
 
@@ -499,6 +502,32 @@ class TestTaskTest extends CakeTestCase
 
         $this->assertStringContainsString('function tearDown()', $result);
         $this->assertStringContainsString('unset($this->Example)', $result);
+    }
+
+    /**
+     * test that tests baked for the legacy layout or a plugin keep all App::uses() calls.
+     *
+     * @return void
+     */
+    public function testBakeComponentTestWithAppUses(): void
+    {
+        $out = $this->getMock('ConsoleOutput', [], [], '', false);
+        $in = $this->getMock('ConsoleInput', [], [], '', false);
+        $Task = $this->getMock(
+            'TestTask',
+            ['in', 'err', 'createFile', '_stop', 'isLoadableClass', '_needsAppUses'],
+            [$out, $out, $in],
+        );
+        $Task->name = 'Test';
+        $Task->Template = new TemplateTask($out, $out, $in);
+        $Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
+        $Task->expects($this->any())->method('_needsAppUses')->will($this->returnValue(true));
+
+        $result = $Task->bake('Component', 'Example');
+
+        $this->assertStringContainsString("App::uses('Component', 'Controller')", $result);
+        $this->assertStringContainsString("App::uses('ComponentCollection', 'Controller')", $result);
+        $this->assertStringContainsString("App::uses('ExampleComponent', 'Controller/Component')", $result);
     }
 
     /**
