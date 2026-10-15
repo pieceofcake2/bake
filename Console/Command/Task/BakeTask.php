@@ -82,6 +82,24 @@ class BakeTask extends AppShell
     }
 
     /**
+     * Checks whether baked application classes need `App::uses()` to load the classes they use.
+     *
+     * Applications with the modern layout (`src/`) autoload their own classes and the
+     * CakePHP classes with the Composer classmap, so `App::uses()` is only needed in
+     * the legacy `app/` layout and for the classes of a plugin.
+     *
+     * @return bool
+     */
+    protected function _needsAppUses()
+    {
+        if (!empty($this->plugin)) {
+            return true;
+        }
+
+        return basename(rtrim(APP, DS)) !== 'src';
+    }
+
+    /**
      * Gets the tests directory of a plugin.
      *
      * Plugins using the modern layout keep their tests in `tests/`,

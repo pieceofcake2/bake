@@ -900,6 +900,7 @@ class ModelTask extends BakeTask
         $this->Template->set([
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
+            'appUses' => $this->_needsAppUses(),
         ]);
         $out = $this->Template->generate('classes', 'model');
 

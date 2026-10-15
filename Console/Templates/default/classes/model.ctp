@@ -19,7 +19,10 @@
  */
 
 echo "<?php\n";
-echo "App::uses('{$plugin}AppModel', '{$pluginPath}Model');\n";
+// Applications with the modern layout autoload AppModel with the Composer classmap.
+if (!isset($appUses) || $appUses) {
+	echo "App::uses('{$plugin}AppModel', '{$pluginPath}Model');\n";
+}
 ?>
 /**
  * <?php echo $name ?> Model

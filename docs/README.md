@@ -78,6 +78,12 @@ The files are written to the directories of your application, so a modern applic
 `src/Model/`, `src/Controller/` and `templates/`, and a legacy application gets
 `app/Model/`, `app/Controller/` and `app/View/`.
 
+A modern application autoloads `src/` and the CakePHP classes with the Composer classmap,
+so the baked classes and tests have no `App::uses()` calls, except for the class under test
+of a component, helper or behavior test (a class baked just now is not in the classmap
+until `composer dump-autoload` runs). Classes baked for a legacy application or into a
+plugin keep their `App::uses()` calls.
+
 Use `--help` to see the arguments and options of each command:
 
 ```bash
