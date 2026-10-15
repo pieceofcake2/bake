@@ -42,53 +42,101 @@ foreach ($associations as $type => $data) {
     <div class="column column-80">
         <div class="<?php echo $pluralVar; ?> view content">
             <h3><?php echo "<?php echo h(\${$singularVar}['{$modelClass}']['{$displayField}']); ?>"; ?></h3>
-            <table>
 <?php
+// Group the fields like cakephp/bake: strings and belongsTo keys first, then hasOne
+// associations, numbers, dates and booleans in the table, and text columns below it.
+$groupedFields = array('string' => array(), 'number' => array(), 'date' => array(), 'boolean' => array(), 'text' => array());
+$associationFields = array();
 foreach ($fields as $field) {
-    $isKey = false;
     if (!empty($associations['belongsTo'])) {
         foreach ($associations['belongsTo'] as $alias => $details) {
             if ($field === $details['foreignKey']) {
-                $isKey = true;
-                echo "                <tr>\n";
-                echo "                    <th><?php echo __('" . Inflector::humanize(Inflector::underscore($alias)) . "'); ?></th>\n";
-                echo "                    <td><?php echo \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])); ?></td>\n";
-                echo "                </tr>\n";
+                $associationFields[$field] = array('alias' => $alias) + $details;
                 break;
             }
         }
     }
-    if ($isKey !== true) {
+    $type = isset($schema[$field]['type']) ? $schema[$field]['type'] : null;
+    if ($type === 'binary') {
+        continue;
+    }
+    if (isset($associationFields[$field])) {
+        $group = 'string';
+    } elseif (in_array($type, array('integer', 'biginteger', 'smallinteger', 'tinyinteger', 'float', 'decimal'), true)) {
+        $group = 'number';
+    } elseif (in_array($type, array('date', 'time', 'datetime', 'timestamp'), true)) {
+        $group = 'date';
+    } elseif (in_array($type, array('boolean', 'text'), true)) {
+        $group = $type;
+    } else {
+        $group = 'string';
+    }
+    $groupedFields[$group][] = $field;
+}
+?>
+            <table>
+<?php
+foreach ($groupedFields['string'] as $field) {
+    if (isset($associationFields[$field])) {
+        $details = $associationFields[$field];
+        $alias = $details['alias'];
+        echo "                <tr>\n";
+        echo "                    <th><?php echo __('" . Inflector::humanize(Inflector::underscore($alias)) . "'); ?></th>\n";
+        echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])) : ''; ?></td>\n";
+        echo "                </tr>\n";
+    } else {
         echo "                <tr>\n";
         echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
         echo "                    <td><?php echo h(\${$singularVar}['{$modelClass}']['{$field}']); ?></td>\n";
         echo "                </tr>\n";
     }
 }
+if (!empty($associations['hasOne'])) {
+    foreach ($associations['hasOne'] as $alias => $details) {
+        echo "                <tr>\n";
+        echo "                    <th><?php echo __('" . Inflector::humanize(Inflector::underscore($alias)) . "'); ?></th>\n";
+        echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])) : ''; ?></td>\n";
+        echo "                </tr>\n";
+    }
+}
+foreach ($groupedFields['number'] as $field) {
+    $value = "\${$singularVar}['{$modelClass}']['{$field}']";
+    if (in_array($schema[$field]['type'], array('float', 'decimal'), true)) {
+        // CakeNumber::format() rounds to whole numbers by default, so print fractions as they are
+        $out = "h({$value})";
+    } elseif (!empty($schema[$field]['null'])) {
+        $out = "{$value} === null ? '' : \$this->Number->format({$value})";
+    } else {
+        $out = "\$this->Number->format({$value})";
+    }
+    echo "                <tr>\n";
+    echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    echo "                    <td><?php echo {$out}; ?></td>\n";
+    echo "                </tr>\n";
+}
+foreach ($groupedFields['date'] as $field) {
+    echo "                <tr>\n";
+    echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    echo "                    <td><?php echo h(\${$singularVar}['{$modelClass}']['{$field}']); ?></td>\n";
+    echo "                </tr>\n";
+}
+foreach ($groupedFields['boolean'] as $field) {
+    echo "                <tr>\n";
+    echo "                    <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
+    echo "                    <td><?php echo \${$singularVar}['{$modelClass}']['{$field}'] ? __('Yes') : __('No'); ?></td>\n";
+    echo "                </tr>\n";
+}
 ?>
             </table>
-<?php
-if (!empty($associations['hasOne'])) :
-    foreach ($associations['hasOne'] as $alias => $details): ?>
-            <div class="related">
-                <?php echo "<?php echo \$this->Html->link(__('Edit " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'edit', \${$singularVar}['{$alias}']['{$details['primaryKey']}']), array('class' => 'button float-right')); ?>\n"; ?>
-                <h4><?php echo "<?php echo __('Related " . Inflector::humanize($details['controller']) . "'); ?>"; ?></h4>
-                <?php echo "<?php if (!empty(\${$singularVar}['{$alias}'])): ?>\n"; ?>
-                <table>
-<?php
-        foreach ($details['fields'] as $field) {
-            echo "                    <tr>\n";
-            echo "                        <th><?php echo __('" . Inflector::humanize($field) . "'); ?></th>\n";
-            echo "                        <td><?php echo h(\${$singularVar}['{$alias}']['{$field}']); ?></td>\n";
-            echo "                    </tr>\n";
-        }
-?>
-                </table>
-                <?php echo "<?php endif; ?>\n"; ?>
+<?php foreach ($groupedFields['text'] as $field): ?>
+            <div class="text">
+                <strong><?php echo "<?php echo __('" . Inflector::humanize($field) . "'); ?>"; ?></strong>
+                <blockquote>
+                    <?php echo "<?php echo \$this->Text->autoParagraph(h(\${$singularVar}['{$modelClass}']['{$field}'])); ?>\n"; ?>
+                </blockquote>
             </div>
 <?php
-    endforeach;
-endif;
+endforeach;
 if (empty($associations['hasMany'])) {
     $associations['hasMany'] = array();
 }
@@ -102,7 +150,6 @@ foreach ($relations as $alias => $details):
     $otherPk = "\${$otherSingularVar}['{$details['primaryKey']}']";
     ?>
             <div class="related">
-                <?php echo "<?php echo \$this->Html->link(__('New " . Inflector::humanize(Inflector::underscore($alias)) . "'), array('controller' => '{$details['controller']}', 'action' => 'add'), array('class' => 'button float-right')); ?>\n"; ?>
                 <h4><?php echo "<?php echo __('Related " . $otherPluralHumanName . "'); ?>"; ?></h4>
                 <?php echo "<?php if (!empty(\${$singularVar}['{$alias}'])): ?>\n"; ?>
                 <div class="table-responsive">

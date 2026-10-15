@@ -15,6 +15,11 @@
  */
 
 $pk = "\${$singularVar}['{$modelClass}']['{$primaryKey}']";
+
+// Like cakephp/bake, text and binary columns are not listed in the index table.
+$fields = array_values(array_filter($fields, function ($field) use ($schema) {
+    return !isset($schema[$field]['type']) || !in_array($schema[$field]['type'], array('text', 'binary'), true);
+}));
 ?>
 <div class="<?php echo $pluralVar; ?> index content">
     <?php echo "<?php echo \$this->Html->link(__('New {$singularHumanName}'), array('action' => 'add'), array('class' => 'button float-right')); ?>\n"; ?>
@@ -39,13 +44,25 @@ foreach ($fields as $field) {
         foreach ($associations['belongsTo'] as $alias => $details) {
             if ($field === $details['foreignKey']) {
                 $isKey = true;
-                echo "                    <td><?php echo \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])); ?></td>\n";
+                echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])) : ''; ?></td>\n";
                 break;
             }
         }
     }
     if ($isKey !== true) {
-        echo "                    <td><?php echo h(\${$singularVar}['{$modelClass}']['{$field}']); ?></td>\n";
+        $value = "\${$singularVar}['{$modelClass}']['{$field}']";
+        $type = isset($schema[$field]['type']) ? $schema[$field]['type'] : null;
+        if (in_array($type, array('integer', 'biginteger', 'smallinteger', 'tinyinteger'), true)) {
+            if (!empty($schema[$field]['null'])) {
+                echo "                    <td><?php echo {$value} === null ? '' : \$this->Number->format({$value}); ?></td>\n";
+            } else {
+                echo "                    <td><?php echo \$this->Number->format({$value}); ?></td>\n";
+            }
+        } elseif ($type === 'boolean') {
+            echo "                    <td><?php echo {$value} ? '1' : ''; ?></td>\n";
+        } else {
+            echo "                    <td><?php echo h({$value}); ?></td>\n";
+        }
     }
 }
 ?>

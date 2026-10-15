@@ -351,6 +351,26 @@ class ViewTaskTest extends CakeTestCase
     }
 
     /**
+     * test that the view groups the fields like cakephp/bake: strings and
+     * belongsTo keys, numbers, dates and booleans in the table, text below it.
+     *
+     * @return void
+     */
+    public function testBakeViewGroupsFields(): void
+    {
+        $this->Task->controllerName = 'ViewTaskComments';
+
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'view.ctp');
+        $this->Task->expects($this->once())->method('createFile')
+            ->with(
+                TMP . 'ViewTaskComments' . DS . 'view.ctp',
+                $expected,
+            );
+
+        $this->Task->bake('view', true);
+    }
+
+    /**
      * test baking an edit file
      *
      * @return void

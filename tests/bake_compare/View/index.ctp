@@ -8,7 +8,6 @@
                     <th><?php echo $this->Paginator->sort('id'); ?></th>
                     <th><?php echo $this->Paginator->sort('article_id'); ?></th>
                     <th><?php echo $this->Paginator->sort('user_id'); ?></th>
-                    <th><?php echo $this->Paginator->sort('comment'); ?></th>
                     <th><?php echo $this->Paginator->sort('published'); ?></th>
                     <th><?php echo $this->Paginator->sort('created'); ?></th>
                     <th><?php echo $this->Paginator->sort('updated'); ?></th>
@@ -18,10 +17,9 @@
             <tbody>
                 <?php foreach ($viewTaskComments as $viewTaskComment): ?>
                 <tr>
-                    <td><?php echo h($viewTaskComment['ViewTaskComment']['id']); ?></td>
-                    <td><?php echo $this->Html->link($viewTaskComment['Article']['title'], array('controller' => 'view_task_articles', 'action' => 'view', $viewTaskComment['Article']['id'])); ?></td>
-                    <td><?php echo h($viewTaskComment['ViewTaskComment']['user_id']); ?></td>
-                    <td><?php echo h($viewTaskComment['ViewTaskComment']['comment']); ?></td>
+                    <td><?php echo $this->Number->format($viewTaskComment['ViewTaskComment']['id']); ?></td>
+                    <td><?php echo !empty($viewTaskComment['Article']['id']) ? $this->Html->link($viewTaskComment['Article']['title'], array('controller' => 'view_task_articles', 'action' => 'view', $viewTaskComment['Article']['id'])) : ''; ?></td>
+                    <td><?php echo $this->Number->format($viewTaskComment['ViewTaskComment']['user_id']); ?></td>
                     <td><?php echo h($viewTaskComment['ViewTaskComment']['published']); ?></td>
                     <td><?php echo h($viewTaskComment['ViewTaskComment']['created']); ?></td>
                     <td><?php echo h($viewTaskComment['ViewTaskComment']['updated']); ?></td>
