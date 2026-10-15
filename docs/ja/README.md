@@ -26,7 +26,7 @@ composer require --dev pieceofcake2/bake
 
 このプラグインは `cakephp-plugin` タイプなので、`composer/installers` によってプラグインのディレクトリに
 インストールされます。正しい場所にインストールされるように、アプリケーションの `composer.json` で
-`installer-paths` を設定してください:
+`installer-paths` を設定してください。
 
 | 構成 | `installer-paths` |
 | --- | --- |
@@ -42,7 +42,7 @@ CakePlugin::load('Bake');
 
 Bake は開発用の依存パッケージなので、`composer install --no-dev` でデプロイした環境にはインストールされません。
 インストールされていないプラグインを読み込むと `MissingPluginException` が投げられるので、インストールされている
-環境でだけ読み込んでください。たとえば次のようにします:
+環境でだけ読み込んでください。たとえば次のようにします。
 
 ```php
 if (Configure::read('debug')) {
@@ -54,7 +54,7 @@ if (Configure::read('debug')) {
 
 ## Bake の実行
 
-プロジェクトルートで `bin/cake` (レガシー構成では `app/Console/cake`) を使って Bake を実行します:
+プロジェクトルートで `bin/cake` (レガシー構成では `app/Console/cake`) を使って Bake を実行します。
 
 ```bash
 # Bake a model
@@ -158,7 +158,7 @@ Console/Templates/default/
 
 生成されるコードをカスタマイズするには、bake テーマを作成します。bake テーマは、アプリケーションの
 `src/Console/Templates/` (レガシー構成では `app/Console/Templates/`) か、プラグインの `Console/Templates/` に置く
-ディレクトリで、変更したいテンプレートを入れます。テンプレートはデフォルトのテーマからコピーして編集します:
+ディレクトリで、変更したいテンプレートを入れます。テンプレートはデフォルトのテーマからコピーして編集します。
 
 ```
 src/Console/Templates/myTheme/
@@ -175,7 +175,7 @@ src/Console/Templates/myTheme/
 テーマのディレクトリには、`actions/`、`classes/`、`views/` のディレクトリのうち少なくとも 1 つが必要です。
 テーマにないテンプレートは、インストールされている他のテーマから、最後にはデフォルトのテーマから取得されます。
 
-テーマは `--theme` で選択します:
+テーマは `--theme` で選択します。
 
 ```bash
 bin/cake bake controller Users --theme myTheme
@@ -236,4 +236,4 @@ bin/cake bake all Article --theme legacy
 最後のアップストリームのバージョンは 2.10.24) の `bake` コンソールシェルを元にしており、元々は CakePHP コミュニティ
 (Cake Software Foundation, Inc.) によるものです。これを別のパッケージとして切り出し、モダンな PHP で動く CakePHP 2 のために
 [pieceofcake2](https://github.com/pieceofcake2) が保守しています。元のコードからの変更点は
-[コミット履歴](https://github.com/pieceofcake2/bake/commits/1.x) を参照してください。
+[コミット履歴](https://github.com/pieceofcake2/bake/commits/1.x) をご覧ください。
