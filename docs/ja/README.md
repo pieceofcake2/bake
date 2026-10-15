@@ -34,7 +34,7 @@ composer require --dev pieceofcake2/bake
 | レガシー (`app/Config/`、`app/Plugin/`) | `"app/Plugin/{$name}/": ["type:cakephp-plugin"]` |
 
 プラグインは `config/bootstrap.php` (レガシー構成では `app/Config/bootstrap.php`) で読み込みます。
-すでに `CakePlugin::loadAll()` を使っている場合は必要ありません:
+すでに `CakePlugin::loadAll()` を使っている場合は必要ありません。
 
 ```php
 CakePlugin::load('Bake');
@@ -86,7 +86,7 @@ bake したクラスとテストには `App::uses()` の呼び出しがありま
 含まれないためです)。レガシー構成のアプリケーション向けや、プラグインの中に bake したクラスでは、`App::uses()` の
 呼び出しが残ります。
 
-各コマンドの引数とオプションは `--help` で確認できます:
+各コマンドの引数とオプションは `--help` で確認できます。
 
 ```bash
 bin/cake bake controller --help
@@ -139,7 +139,7 @@ bin/cake bake controller --help
 ## Bake テーマ
 
 Bake はテンプレートからコードを生成します。デフォルトのテンプレートは、プラグインの `Console/Templates/default/`
-ディレクトリにあります:
+ディレクトリにあります。
 
 ```
 Console/Templates/default/
@@ -213,7 +213,7 @@ bin/cake bake controller Users --theme myTheme
 古いスケルトンから作成したアプリケーションは、レイアウトで `cake.generic.css` を読み込んでいます。新しいマークアップは
 このスタイルシートに合わない (アクションのリンクがサイドの列として配置されず、ボタンとページネーターにスタイルが
 付かない) ので、そうしたアプリケーションでは、同梱の `legacy` テーマでビューを bake してください。このテーマは
-以前の Bake のリリースのテンプレートを維持しています:
+以前の Bake のリリースのテンプレートを維持しています。
 
 ```bash
 bin/cake bake view Articles --theme legacy
@@ -232,8 +232,10 @@ bin/cake bake all Article --theme legacy
 
 ## 由来
 
-このパッケージは、[cakephp/cakephp](https://github.com/cakephp/cakephp) (Packagist では `cakephp/cakephp`、
-最後のアップストリームのバージョンは 2.10.24) の `bake` コンソールシェルを元にしており、元々は CakePHP コミュニティ
-(Cake Software Foundation, Inc.) によるものです。これを別のパッケージとして切り出し、モダンな PHP で動く CakePHP 2 のために
-[pieceofcake2](https://github.com/pieceofcake2) がメンテナンスしています。元のコードからの変更点は
-[コミット履歴](https://github.com/pieceofcake2/bake/commits/1.x) をご覧ください。
+このパッケージは [cakephp/cakephp](https://github.com/cakephp/cakephp) (Packagist では
+`cakephp/cakephp`、アップストリームの最終バージョンは 2.10.24) の `bake` コンソールシェルをもとに別のパッケージとして切り出したもので、
+元の作者は CakePHP コミュニティ (Cake Software Foundation, Inc.) です。
+[pieceofcake2](https://github.com/pieceofcake2) が、モダンな PHP で動く CakePHP 2 向けに
+メンテナンスしています。オリジナルからの変更点は
+[コミット履歴](https://github.com/pieceofcake2/bake/commits/1.x)
+で確認できます。
