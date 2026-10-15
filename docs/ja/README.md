@@ -2,7 +2,7 @@
 
 Bake プラグインは `bake` コンソールシェルを提供します。このシェルは、
 [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) で動作する CakePHP 2 アプリケーションのモデル、
-コントローラー、ビュー、フィクスチャ、テスト、プラグイン、プロジェクトを生成します。CakePHP 2 の本の
+コントローラー、ビュー、フィクスチャ、テスト、プラグイン、プロジェクトを生成します。CakePHP 2 のクックブックの
 [Bake でコード生成](https://pieceofcake2.github.io/docs/ja/console-and-shells/code-generation-with-bake.html)
 も参照してください。
 
@@ -200,11 +200,11 @@ bin/cake bake controller Users --theme myTheme
 生成されるコードは、引き続き CakePHP 2 のヘルパー (`$this->Form->input()`、`$this->Paginator->numbers()`、
 `$this->Form->postLink()` など) を使います。
 
-![A baked index view](../img/baked-index.png)
+![bake した index ビュー](../img/baked-index.png)
 
-![A baked view](../img/baked-view.png)
+![bake したビュー](../img/baked-view.png)
 
-![A baked edit form](../img/baked-edit.png)
+![bake した edit フォーム](../img/baked-edit.png)
 
 <a id="applications-that-use-cakegenericcss"></a>
 
