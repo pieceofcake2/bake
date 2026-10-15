@@ -4,7 +4,7 @@ Bake プラグインは `bake` コンソールシェルを提供します。こ�
 [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) で動作する CakePHP 2 アプリケーションのモデル、
 コントローラー、ビュー、フィクスチャ、テスト、プラグイン、プロジェクトを生成します。CakePHP 2 のクックブックの
 [Bake でコード生成](https://pieceofcake2.github.io/docs/ja/console-and-shells/code-generation-with-bake.html)
-もご覧ください。
+も参照してください。
 
 - [インストール](#installation)
 - [Bake の実行](#running-bake)
