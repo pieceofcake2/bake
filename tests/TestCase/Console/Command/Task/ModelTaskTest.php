@@ -445,9 +445,11 @@ class ModelTaskTest extends CakeTestCase
      */
     public function testInteractiveDoValidationWithSkipping(): void
     {
+        // The number of the 'none' choice depends on the methods of the Validation class
+        $none = (string)array_search('none', $this->Task->initValidations(), true);
         $this->Task->expects($this->any())
             ->method('in')
-            ->will($this->onConsecutiveCalls('37', '26', 'n', '10', 's'));
+            ->will($this->onConsecutiveCalls($none, '26', 'n', '10', 's'));
         $this->Task->interactive = true;
         $Model = $this->getMock('Model');
         $Model->primaryKey = 'id';
