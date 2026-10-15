@@ -12,6 +12,13 @@ The Bake plugin provides the `bake` console shell, which generates models, contr
 views, fixtures, tests, plugins and projects for CakePHP 2 applications running on
 [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp).
 
+## Documentation
+
+- Website: https://pieceofcake2.github.io/bake/
+- Markdown: [docs/README.md](docs/README.md) (for AI tools and offline reading)
+
+The Markdown documentation is also included in the Composer package, in the plugin's directory: `plugins/Bake/docs/README.md` (the location depends on your `installer-paths`). Install the package with `--dev` if you only need it for development.
+
 ## Requirements
 
 - PHP 8.0+
@@ -25,10 +32,6 @@ composer require --dev pieceofcake2/bake
 
 Then load the plugin with `CakePlugin::load('Bake')` and run `bin/cake bake`
 (legacy layout: `app/Console/cake bake`).
-
-## Documentation
-
-Documentation: https://pieceofcake2.github.io/bake/
 
 ## Contributing
 
