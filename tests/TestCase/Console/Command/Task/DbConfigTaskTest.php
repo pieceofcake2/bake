@@ -74,12 +74,16 @@ class DbConfigTaskTest extends CakeTestCase
      */
     public function testGetConfig(): void
     {
+        // getConfig() asks only when there is more than one connection.
+        ConnectionManager::enumConnectionObjects();
+        ConnectionManager::$config->db_config_task_test = ['datasource' => 'Database/Sqlite'];
         $this->Task->expects($this->any())
             ->method('in')
-            ->will($this->returnValue('test'));
+            ->will($this->returnValue('db_config_task_test'));
 
         $result = $this->Task->getConfig();
-        $this->assertEquals('test', $result);
+        unset(ConnectionManager::$config->db_config_task_test);
+        $this->assertEquals('db_config_task_test', $result);
     }
 
     /**
