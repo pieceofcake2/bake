@@ -204,6 +204,7 @@
      */
     Configure::write('Session', [
         'defaults' => 'php',
+        'cacheLimiter' => 'nocache',
     ]);
 
     /**
