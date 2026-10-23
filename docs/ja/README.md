@@ -313,7 +313,7 @@ bin/cake bake controller Users --theme myTheme
 ## bake したビューと legacy テーマ
 
 `default` テーマで bake したビューは CakePHP 5 の bake のテンプレートに倣っており、
-[pieceofcake2/app](https://pieceofcake2.github.io/app/ja/) スケルトンのスタイル (CakePHP 5 のアプリケーション
+[pieceofcake2/app](https://pieceofcake2.github.io/docs/ja/installation/application-skeleton.html) スケルトンのスタイル (CakePHP 5 のアプリケーション
 スケルトンのスタイルシートである `normalize.min.css`、`milligram.min.css`、`fonts.css` と `cake.css`) を使います:
 
 - `index.php`: 「New」ボタンのあるコンテンツボックス、並べ替えのできる列と View / Edit / Delete リンクを持つ

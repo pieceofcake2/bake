@@ -311,7 +311,7 @@ the namespaces.
 ## Baked Views and the Legacy Theme
 
 The views baked by the `default` theme follow the templates of CakePHP 5's bake and use
-the styles of the [pieceofcake2/app](https://pieceofcake2.github.io/app/) skeleton
+the styles of the [pieceofcake2/app](https://pieceofcake2.github.io/docs/installation/application-skeleton.html) skeleton
 (`normalize.min.css`, `milligram.min.css`, `fonts.css` and `cake.css`, the stylesheets of
 the CakePHP 5 application skeleton):
 
