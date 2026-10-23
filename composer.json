@@ -16,6 +16,11 @@
         "pieceofcake2/phpcs-cakephp2": "^1.1",
         "pieceofcake2/phpstan-cakephp2": "^1.0"
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Cake\\Test\\Fixture\\": "vendor/pieceofcake2/cakephp/tests/Fixture/"
+        }
+    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {

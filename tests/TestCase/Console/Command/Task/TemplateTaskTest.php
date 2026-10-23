@@ -183,7 +183,7 @@ class TemplateTaskTest extends CakeTestCase
     {
         App::build([
             'Console' => [
-                CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS,
+                CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS,
             ],
         ]);
         $this->Task->initialize();
@@ -204,7 +204,7 @@ class TemplateTaskTest extends CakeTestCase
     {
         App::build([
             'Console' => [
-                CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS,
+                CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS,
                 CAKE_CORE_INCLUDE_PATH . DS . 'console' . DS,
             ],
         ]);

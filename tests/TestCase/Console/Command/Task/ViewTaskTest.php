@@ -201,6 +201,8 @@ class ViewTaskTest extends CakeTestCase
         CakePlugin::load('Bake', [
             'path' => dirname(__DIR__, 5) . DS,
         ]);
+        // ViewTaskComment belongs to TestTest.ViewTaskArticle; CakePHP 2.13 looks the plugin up
+        CakePlugin::load('TestTest', ['path' => APP . 'Plugin' . DS . 'TestTest' . DS]);
 
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -809,7 +811,7 @@ class ViewTaskTest extends CakeTestCase
         $this->assertEquals('form', $result);
 
         $this->Task->Template->templatePaths = [
-            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
+            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
         ];
         $this->Task->Template->params['theme'] = 'test';
 
