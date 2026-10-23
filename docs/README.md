@@ -8,6 +8,7 @@ in the CakePHP 2 book.
 
 - [Installation](#installation)
 - [Running Bake](#running-bake)
+- [Namespaced Applications and Plugins](#namespaced-applications-and-plugins)
 - [Commands](#commands)
 - [Options](#options)
 - [Bake Themes](#bake-themes)
@@ -82,13 +83,103 @@ A modern application autoloads `src/` and the CakePHP classes with the Composer 
 so the baked classes and tests have no `App::uses()` calls, except for the class under test
 of a component, helper or behavior test (a class baked just now is not in the classmap
 until `composer dump-autoload` runs). Classes baked for a legacy application or into a
-plugin keep their `App::uses()` calls.
+plugin keep their `App::uses()` calls. A namespaced application imports the classes with
+`use` statements instead, see [Namespaced Applications and Plugins](#namespaced-applications-and-plugins).
 
 Use `--help` to see the arguments and options of each command:
 
 ```bash
 bin/cake bake controller --help
 ```
+
+## Namespaced Applications and Plugins
+
+pieceofcake2/cakephp 2.13 lets an application keep its classes in a namespace: the namespace
+is set in `App.namespace` of `config/core.php`, and Composer loads the classes with PSR-4
+(`App\` from `src/`, `App\Test\` from `tests/`), as in the
+[pieceofcake2/app](https://github.com/pieceofcake2/app) skeleton. When `App.namespace` is set,
+Bake writes namespaced classes:
+
+| Baked | Namespace | File |
+| --- | --- | --- |
+| Model | `App\Model` | `src/Model/Post.php` |
+| Controller | `App\Controller` | `src/Controller/PostsController.php` |
+| Views | | `templates/Posts/index.php`, `view.php`, `add.php`, `edit.php` |
+| Fixture | `App\Test\Fixture` | `tests/Fixture/PostFixture.php` |
+| Test case | `App\Test\TestCase\Model` | `tests/TestCase/Model/PostTest.php` |
+
+The test cases of the other classes are in the namespace of their directory, e.g.
+`App\Test\TestCase\Controller\Component` for `tests/TestCase/Controller/Component/`. A baked
+controller starts like this:
+
+```php
+<?php
+
+namespace App\Controller;
+
+use App\Model\Post;
+use Cake\Controller\Component\PaginatorComponent;
+use Cake\Error\NotFoundException;
+
+/**
+ * Posts Controller
+ *
+ * @property Post $Post
+ * @property PaginatorComponent $Paginator
+ */
+class PostsController extends AppController {
+
+/**
+ * Components
+ *
+ * @var array
+ */
+	public $components = array(PaginatorComponent::class);
+```
+
+- The classes are imported with `use` statements, sorted alphabetically, and the docblocks
+  name them by their short names, as the `CakePHP2Namespace` standard of
+  [pieceofcake2/phpcs-cakephp2](https://github.com/pieceofcake2/phpcs-cakephp2) expects. There
+  are no `App::uses()` calls.
+- The class names of the settings (`$components`, `$helpers`, `$actsAs` and the `className` of
+  the associations) are written as `::class` when the class exists when Bake runs, as
+  `bin/cake upgrade namespace` of [pieceofcake2/upgrade](https://github.com/pieceofcake2/upgrade)
+  writes them. A class that does not exist yet, such as the model of an associated table
+  that is not baked yet, keeps its name in a string (`'className' => 'Comment'`), which
+  CakePHP resolves when the application runs.
+- The test cases name their fixtures as before (`'app.post'`); CakePHP finds
+  `App\Test\Fixture\PostFixture` for them. `setUp()` and `tearDown()` declare the `void`
+  return type that PHPUnit 9 needs.
+- The views are `.php` files in `templates/`.
+- The baked code keeps the format of the earlier Bake releases (tabs and `array()`); run
+  `vendor/bin/phpcbf` to format it for your coding standard.
+
+A plugin with the CakePHP 5 layout, a plugin with a `src/` directory, has its classes in the
+namespace of the plugin name. Bake writes the classes of such a plugin into `src/` (for
+example `src/Model/Contact.php` in the `ContactManager\Model` namespace), the views into
+`templates/` and the fixtures and test cases into `tests/` (`ContactManager\Test\...`).
+The models and controllers extend `ContactManagerAppModel` and `ContactManagerAppController`
+of the plugin's namespace, as in other plugins; `bake plugin` creates a plugin with the
+CakePHP 2 layout, which has global classes. Add the plugin to the PSR-4 autoloading of your
+`composer.json`:
+
+```json
+"autoload": {
+    "psr-4": {
+        "App\\": "src/",
+        "ContactManager\\": "plugins/ContactManager/src/"
+    }
+},
+"autoload-dev": {
+    "psr-4": {
+        "App\\Test\\": "tests/",
+        "ContactManager\\Test\\": "plugins/ContactManager/tests/"
+    }
+}
+```
+
+Applications without `App.namespace` and plugins without `src/` get the same global classes
+as before.
 
 ## Commands
 
@@ -176,6 +267,12 @@ bin/cake bake controller Users --theme myTheme
 ```
 
 When more than one theme is installed and no theme is given, Bake asks which one to use.
+
+For a [namespaced application or plugin](#namespaced-applications-and-plugins), the class
+templates get the namespace of the file in `$namespace` and the classes of the `use`
+statements in `$imports`; `$namespace` is `null` for global classes. A theme that copied
+`classes/` from an earlier release writes global classes; copy the templates again to get
+the namespaces.
 
 ## Baked Views and the Legacy Theme
 

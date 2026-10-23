@@ -8,6 +8,7 @@ Bake プラグインは `bake` コンソールシェルを提供します。こ�
 
 - [インストール](#installation)
 - [Bake の実行](#running-bake)
+- [名前空間を使うアプリケーションとプラグイン](#namespaced-applications-and-plugins)
 - [コマンド](#commands)
 - [オプション](#options)
 - [Bake テーマ](#bake-themes)
@@ -84,13 +85,101 @@ bin/cake bake plugin MyPlugin
 bake したクラスとテストには `App::uses()` の呼び出しがありません。例外は、コンポーネント、ヘルパー、ビヘイビアの
 テストでのテスト対象のクラスです (bake したばかりのクラスは、`composer dump-autoload` を実行するまでクラスマップに
 含まれないためです)。レガシー構成のアプリケーション向けや、プラグインの中に bake したクラスでは、`App::uses()` の
-呼び出しが残ります。
+呼び出しが残ります。名前空間を使うアプリケーションでは、代わりに `use` 文でクラスをインポートします。
+[名前空間を使うアプリケーションとプラグイン](#namespaced-applications-and-plugins) を参照してください。
 
 各コマンドの引数とオプションは `--help` で確認できます。
 
 ```bash
 bin/cake bake controller --help
 ```
+
+<a id="namespaced-applications-and-plugins"></a>
+
+## 名前空間を使うアプリケーションとプラグイン
+
+pieceofcake2/cakephp 2.13 では、アプリケーションのクラスを名前空間に置けます。名前空間は `config/core.php` の
+`App.namespace` で設定し、クラスは Composer が PSR-4 で読み込みます (`App\` を `src/` から、`App\Test\` を
+`tests/` から)。[pieceofcake2/app](https://github.com/pieceofcake2/app) スケルトンはこの形です。`App.namespace` が
+設定されていると、Bake は名前空間付きのクラスを書き込みます。
+
+| bake するもの | 名前空間 | ファイル |
+| --- | --- | --- |
+| モデル | `App\Model` | `src/Model/Post.php` |
+| コントローラー | `App\Controller` | `src/Controller/PostsController.php` |
+| ビュー | | `templates/Posts/index.php`、`view.php`、`add.php`、`edit.php` |
+| フィクスチャ | `App\Test\Fixture` | `tests/Fixture/PostFixture.php` |
+| テストケース | `App\Test\TestCase\Model` | `tests/TestCase/Model/PostTest.php` |
+
+ほかのクラスのテストケースは、ディレクトリに対応する名前空間に入ります。たとえば
+`tests/TestCase/Controller/Component/` なら `App\Test\TestCase\Controller\Component` です。bake したコントローラーは
+次のように始まります。
+
+```php
+<?php
+
+namespace App\Controller;
+
+use App\Model\Post;
+use Cake\Controller\Component\PaginatorComponent;
+use Cake\Error\NotFoundException;
+
+/**
+ * Posts Controller
+ *
+ * @property Post $Post
+ * @property PaginatorComponent $Paginator
+ */
+class PostsController extends AppController {
+
+/**
+ * Components
+ *
+ * @var array
+ */
+	public $components = array(PaginatorComponent::class);
+```
+
+- クラスは `use` 文でインポートされ、アルファベット順に並びます。docblock では短い名前で書かれます。
+  [pieceofcake2/phpcs-cakephp2](https://github.com/pieceofcake2/phpcs-cakephp2) の `CakePHP2Namespace` 規約が求める
+  形です。`App::uses()` の呼び出しはありません。
+- 設定に書くクラス名 (`$components`、`$helpers`、`$actsAs` とアソシエーションの `className`) は、Bake の実行時に
+  クラスがあれば `::class` で書かれます。[pieceofcake2/upgrade](https://github.com/pieceofcake2/upgrade) の
+  `bin/cake upgrade namespace` が書くのと同じ形です。まだ bake していない関連テーブルのモデルのように、クラスがまだ
+  ないときは、名前を文字列のまま書きます (`'className' => 'Comment'`)。この名前は、アプリケーションの実行時に
+  CakePHP が解決します。
+- テストケースは、これまでどおりの名前でフィクスチャを指定します (`'app.post'`)。CakePHP はこの名前から
+  `App\Test\Fixture\PostFixture` を見つけます。`setUp()` と `tearDown()` は、PHPUnit 9 が必要とする戻り値の型
+  `void` を宣言します。
+- ビューは `templates/` の `.php` ファイルです。
+- bake したコードの書式は、これまでの Bake と同じです (タブと `array()`)。コーディング規約に合わせるには
+  `vendor/bin/phpcbf` を実行してください。
+
+CakePHP 5 の構成のプラグイン、つまり `src/` ディレクトリがあるプラグインは、プラグイン名の名前空間にクラスを
+置きます。Bake は、そのようなプラグインのクラスを `src/` に (たとえば `ContactManager\Model` 名前空間の
+`src/Model/Contact.php`)、ビューを `templates/` に、フィクスチャとテストケースを `tests/`
+(`ContactManager\Test\...`) に書き込みます。モデルとコントローラーは、ほかのプラグインと同じように、プラグインの
+名前空間の `ContactManagerAppModel` と `ContactManagerAppController` を継承します。`bake plugin` が作るのは
+CakePHP 2 の構成のプラグインで、そのクラスはグローバルです。プラグインは、`composer.json` の PSR-4 の
+オートロードに追加してください。
+
+```json
+"autoload": {
+    "psr-4": {
+        "App\\": "src/",
+        "ContactManager\\": "plugins/ContactManager/src/"
+    }
+},
+"autoload-dev": {
+    "psr-4": {
+        "App\\Test\\": "tests/",
+        "ContactManager\\Test\\": "plugins/ContactManager/tests/"
+    }
+}
+```
+
+`App.namespace` のないアプリケーションと、`src/` のないプラグインには、これまでと同じグローバルなクラスが
+書き込まれます。
 
 <a id="commands"></a>
 
@@ -182,6 +271,11 @@ bin/cake bake controller Users --theme myTheme
 ```
 
 複数のテーマがインストールされていて、テーマが指定されていない場合、Bake はどれを使うか尋ねます。
+
+[名前空間を使うアプリケーションやプラグイン](#namespaced-applications-and-plugins) では、クラスのテンプレートは
+ファイルの名前空間を `$namespace` で、`use` 文のクラスを `$imports` で受け取ります。グローバルなクラスでは
+`$namespace` は `null` です。以前のリリースから `classes/` をコピーしたテーマはグローバルなクラスを書き込むので、
+名前空間を使うには、テンプレートをコピーし直してください。
 
 <a id="baked-views-and-the-legacy-theme"></a>
 
