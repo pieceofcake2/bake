@@ -216,6 +216,41 @@ class BakeTask extends AppShell
     }
 
     /**
+     * Gets the names to write for the classes of a setting, e.g. `$components`, and adds the
+     * classes to the `use` statements of a baked file.
+     *
+     * A name is looked up as CakePHP looks it up when the application runs (App::className()):
+     * the class of the application, of the plugin of a `Plugin.Name`, or of CakePHP. The models
+     * of CakePHP (Aco, Permission) are left out, as a model of the application with the same
+     * name is not baked yet. Names whose class does not exist are left out too, so that they
+     * stay strings.
+     *
+     * @param array $names The names of the setting, e.g. `['Paginator', 'DebugKit.Toolbar']`.
+     * @param string $package The package of the classes, e.g. `Controller/Component`.
+     * @param string $suffix The suffix of the class names, e.g. `Component`.
+     * @param string $namespace The namespace of the baked file.
+     * @param array<string, string> $imports The imported classes, by short name.
+     * @return array<string, string> The names to write in the code (`PaginatorComponent` for
+     *   `PaginatorComponent::class`), by the names of the setting.
+     */
+    protected function _settingClasses(array $names, $package, $suffix, $namespace, array &$imports)
+    {
+        $classNames = [];
+        foreach ($names as $name) {
+            if (!is_string($name) || isset($classNames[$name])) {
+                continue;
+            }
+            $className = $this->_namespacedClass($name, $package, $suffix);
+            if ($className === null || ($package === 'Model' && str_starts_with($className, 'Cake\\'))) {
+                continue;
+            }
+            $classNames[$name] = $this->_importClass($className, $namespace, $imports);
+        }
+
+        return $classNames;
+    }
+
+    /**
      * Adds a class to the `use` statements of a baked file and returns the name to write in the code.
      *
      * A class of the namespace of the file is not imported. A class whose short name another

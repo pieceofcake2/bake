@@ -448,31 +448,28 @@ class ControllerTask extends BakeTask
             // A scaffold controller names no other class
             return ['namespace' => $controllerNamespace, 'imports' => [], 'classNames' => []];
         }
-        $pluginPath = $this->plugin ? $this->plugin . '.' : '';
-        $imports = $classNames = [];
-
+        $imports = [];
         $model = Inflector::singularize($controllerName);
         $this->_importClass($namespace . '\\Model\\' . $model, $controllerNamespace, $imports);
-        $types = [
-            'component' => [$components, 'Controller/Component', 'Component'],
-            'helper' => [$helpers, 'View/Helper', 'Helper'],
+        $camelize = function ($name) {
+            return Inflector::camelize($name);
+        };
+        $classNames = [
+            'component' => $this->_settingClasses(
+                array_map($camelize, (array)$components),
+                'Controller/Component',
+                'Component',
+                $controllerNamespace,
+                $imports,
+            ),
+            'helper' => $this->_settingClasses(
+                array_map($camelize, (array)$helpers),
+                'View/Helper',
+                'Helper',
+                $controllerNamespace,
+                $imports,
+            ),
         ];
-        foreach ($types as $type => [$names, $package, $suffix]) {
-            foreach ((array)$names as $name) {
-                $name = Inflector::camelize($name);
-                if (isset($classNames[$type][$name])) {
-                    continue;
-                }
-                $fullName = str_contains($name, '.') ? $name : $pluginPath . $name;
-                $className = $this->_namespacedClass($fullName, $package, $suffix);
-                if ($className === null && $pluginPath && !str_contains($name, '.')) {
-                    $className = $this->_namespacedClass($name, $package, $suffix);
-                }
-                if ($className !== null) {
-                    $classNames[$type][$name] = $this->_importClass($className, $controllerNamespace, $imports);
-                }
-            }
-        }
         if (preg_match('/\bNotFoundException\b/', (string)$actions)) {
             $this->_importClass('Cake\\Error\\NotFoundException', $controllerNamespace, $imports);
         }

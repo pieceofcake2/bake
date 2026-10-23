@@ -932,33 +932,18 @@ class ModelTask extends BakeTask
         if ($namespace === null) {
             return ['namespace' => null, 'imports' => [], 'classNames' => []];
         }
-        $pluginPath = $this->plugin ? $this->plugin . '.' : '';
         $modelNamespace = $namespace . '\\Model';
-        $imports = $classNames = [];
+        $models = [];
         foreach ((array)$data['associations'] as $associations) {
             foreach ((array)$associations as $relation) {
-                $name = $relation['className'];
-                if (isset($classNames['model'][$name])) {
-                    continue;
-                }
-                $fullName = str_contains($name, '.') ? $name : $pluginPath . $name;
-                [$plugin, ] = pluginSplit($fullName);
-                $className = $this->_namespacedClass($fullName, 'Model');
-                // Only the models of the application or of the plugin, not the models of CakePHP (Aco, Permission)
-                if ($className !== null && str_starts_with($className, ($plugin ?: $namespace) . '\\Model\\')) {
-                    $classNames['model'][$name] = $this->_importClass($className, $modelNamespace, $imports);
-                }
+                $models[] = $relation['className'];
             }
         }
-        foreach ((array)$data['actsAs'] as $behavior) {
-            if (!is_string($behavior) || isset($classNames['behavior'][$behavior])) {
-                continue;
-            }
-            $className = $this->_namespacedClass($behavior, 'Model/Behavior', 'Behavior');
-            if ($className !== null) {
-                $classNames['behavior'][$behavior] = $this->_importClass($className, $modelNamespace, $imports);
-            }
-        }
+        $imports = [];
+        $classNames = [
+            'model' => $this->_settingClasses($models, 'Model', '', $modelNamespace, $imports),
+            'behavior' => $this->_settingClasses((array)$data['actsAs'], 'Model/Behavior', 'Behavior', $modelNamespace, $imports),
+        ];
 
         return [
             'namespace' => $modelNamespace,
