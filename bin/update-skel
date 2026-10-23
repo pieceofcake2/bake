@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# Copies the skeleton of pieceofcake2/app into Console/Templates/skel, the skeleton of `bake project`.
+#
+#   bin/update-skel <app-checkout> [<ref>]
+#
+# <app-checkout> is a clone of https://github.com/pieceofcake2/app, <ref> a commit, branch or tag of it
+# (default: HEAD). Only the files that git tracks at <ref> are copied, with their modes; uncommitted
+# changes, vendor/ and the installed plugins are not. The files that only the skeleton repository needs
+# are left out (see EXCLUDE below), and so are the contents of tmp/ and logs/ except their "empty"
+# placeholders. Review the changes with `git status` and `git diff` before you commit them.
+
+set -eu
+
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+    echo "Usage: $0 <app-checkout> [<ref>]" >&2
+    exit 1
+fi
+
+app=$1
+ref=${2:-HEAD}
+skel=$(cd "$(dirname "$0")/.." && pwd)/Console/Templates/skel
+
+# The files of the skeleton repository that do not belong in a new project
+EXCLUDE='README.md LICENSE composer.lock docs .github .qlty vendor'
+
+if ! git -C "$app" rev-parse --verify --quiet "$ref^{commit}" >/dev/null; then
+    echo "$app is not a git checkout with $ref" >&2
+    exit 1
+fi
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+# Check out <ref> into a temporary directory with a separate index, so that the checkout of the
+# application is left as it is. Unlike git archive, this keeps the files marked export-ignore.
+GIT_INDEX_FILE="$work/index" git -C "$app" read-tree "$ref"
+mkdir "$work/skel"
+GIT_INDEX_FILE="$work/index" git -C "$app" checkout-index --all --prefix="$work/skel/"
+
+for path in $EXCLUDE; do
+    rm -rf "$work/skel/$path"
+done
+# Installed plugins, and the contents of tmp/ and logs/ other than their placeholders
+for directory in plugins tmp logs; do
+    if [ -d "$work/skel/$directory" ]; then
+        find "$work/skel/$directory" -type f ! -name empty -exec rm -f {} +
+    fi
+done
+
+rm -rf "$skel"
+mv "$work/skel" "$skel"
+
+echo "Copied $(git -C "$app" rev-parse --short "$ref") of $app into $skel"

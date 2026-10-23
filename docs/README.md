@@ -352,6 +352,24 @@ To use the new templates in an older application instead, copy the stylesheets f
 `webroot/css/` (and the fonts from `webroot/font/`) of
 [pieceofcake2/app](https://github.com/pieceofcake2/app) and load them in your layout.
 
+## Maintaining the Project Skeleton
+
+For the maintainers of this plugin: `Console/Templates/skel` is a copy of the skeleton of
+[pieceofcake2/app](https://github.com/pieceofcake2/app). Update it with `bin/update-skel` from a
+clone of pieceofcake2/app, at a commit, branch or tag (default: `HEAD`):
+
+```bash
+bin/update-skel ../app v3.0.0
+git status
+git diff
+```
+
+The script copies the files that git tracks at that commit, with their modes, and leaves out
+what only the skeleton repository needs (`README.md`, `LICENSE`, `composer.lock`, `docs/`,
+`.github/`, `.qlty/`, `vendor/`, installed plugins) and the contents of `tmp/` and `logs/`,
+keeping the `empty` placeholders. On a case-insensitive file system, check with `git ls-files`
+that a renamed directory (for example `Config/` → `config/`) does not stay in git twice.
+
 ## Origin
 
 This package is based on the `bake` console shell of

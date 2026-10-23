@@ -353,6 +353,26 @@ bin/cake bake all Article --theme legacy
 [pieceofcake2/app](https://github.com/pieceofcake2/app) の `webroot/css/` からスタイルシートを
 (そして `webroot/font/` からフォントを) コピーし、レイアウトで読み込んでください。
 
+<a id="maintaining-the-project-skeleton"></a>
+
+## プロジェクトのスケルトンの更新
+
+このプラグインのメンテナー向けです。`Console/Templates/skel` は
+[pieceofcake2/app](https://github.com/pieceofcake2/app) のスケルトンのコピーです。pieceofcake2/app のクローンから、
+コミット、ブランチ、タグのどれか (既定は `HEAD`) を指定して、`bin/update-skel` で更新します。
+
+```bash
+bin/update-skel ../app v3.0.0
+git status
+git diff
+```
+
+スクリプトは、そのコミットで git が管理しているファイルを、パーミッションを保ったままコピーします。スケルトンの
+リポジトリだけで使うもの (`README.md`、`LICENSE`、`composer.lock`、`docs/`、`.github/`、`.qlty/`、`vendor/`、
+インストールされたプラグイン) と、`tmp/` と `logs/` の中身は除きます。ただし `empty` のプレースホルダーは残します。
+大文字と小文字を区別しないファイルシステムでは、名前の変わったディレクトリ (たとえば `Config/` から `config/`) が
+git に二重に残っていないか、`git ls-files` で確かめてください。
+
 <a id="origin"></a>
 
 ## 由来
