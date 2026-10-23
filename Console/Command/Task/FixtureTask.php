@@ -303,6 +303,11 @@ class FixtureTask extends BakeTask
 
         $this->Template->set('model', $model);
         $this->Template->set($vars);
+        $namespace = $this->_namespace();
+        $this->Template->set([
+            'namespace' => $namespace === null ? null : $namespace . '\\Test\\Fixture',
+            'imports' => $namespace === null ? [] : ['Cake\\TestSuite\\Fixture\\CakeTestFixture'],
+        ]);
         $content = $this->Template->generate('classes', 'fixture');
 
         $this->out("\n" . __d('cake_console', 'Baking test fixture for %s...', $model), 1, Shell::QUIET);

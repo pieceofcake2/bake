@@ -17,6 +17,18 @@
  */
 
 echo "<?php\n";
+if (!empty($namespace)) {
+	// Namespaced classes: Composer loads the classes, which the use statements import.
+	echo "\nnamespace {$namespace};\n";
+	if (!empty($imports)) {
+		echo "\n";
+		foreach ($imports as $importedClass) {
+			echo "use {$importedClass};\n";
+		}
+	}
+}
+// PHPUnit 9 declares the return types of setUp() and tearDown()
+$void = empty($namespace) ? '' : ': void';
 ?>
 <?php foreach ($uses as $dependency): ?>
 App::uses('<?php echo $dependency[0]; ?>', '<?php echo $dependency[1]; ?>');
@@ -48,7 +60,7 @@ class <?php echo $fullClassName; ?>Test extends CakeTestCase {
  *
  * @return void
  */
-	public function setUp() {
+	public function setUp()<?php echo $void; ?> {
 		parent::setUp();
 <?php echo $preConstruct ? "\t\t" . $preConstruct : ''; ?>
 		$this-><?php echo $className . ' = ' . $construction; ?>
@@ -60,7 +72,7 @@ class <?php echo $fullClassName; ?>Test extends CakeTestCase {
  *
  * @return void
  */
-	public function tearDown() {
+	public function tearDown()<?php echo $void; ?> {
 		unset($this-><?php echo $className; ?>);
 
 		parent::tearDown();

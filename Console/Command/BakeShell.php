@@ -175,10 +175,17 @@ class BakeShell extends AppShell
         $modelExists = false;
         $model = $this->_modelName($name);
 
-        App::uses('AppModel', 'Model');
-        App::uses($model, 'Model');
-        if (class_exists($model)) {
-            $object = new $model();
+        // The classes of a namespaced application are in App.namespace, which App::className() looks in
+        $namespaced = (bool)Configure::read('App.namespace');
+        if ($namespaced) {
+            $modelClass = App::className($model, 'Model');
+        } else {
+            App::uses('AppModel', 'Model');
+            App::uses($model, 'Model');
+            $modelClass = class_exists($model) ? $model : null;
+        }
+        if ($modelClass !== null) {
+            $object = new $modelClass();
             $modelExists = true;
         } else {
             $object = new Model(['name' => $name, 'ds' => $this->connection]);
@@ -201,8 +208,13 @@ class BakeShell extends AppShell
                     $this->Controller->bakeTest($controller);
                 }
             }
-            App::uses($controller . 'Controller', 'Controller');
-            if (class_exists($controller . 'Controller')) {
+            if ($namespaced) {
+                $controllerExists = App::className($controller, 'Controller', 'Controller') !== null;
+            } else {
+                App::uses($controller . 'Controller', 'Controller');
+                $controllerExists = class_exists($controller . 'Controller');
+            }
+            if ($controllerExists) {
                 $this->View->args = [$name];
                 $this->View->execute();
             }

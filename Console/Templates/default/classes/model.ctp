@@ -19,10 +19,24 @@
  */
 
 echo "<?php\n";
-// Applications with the modern layout autoload AppModel with the Composer classmap.
-if (!isset($appUses) || $appUses) {
+if (!empty($namespace)) {
+	// Namespaced classes: Composer loads the classes, which the use statements import.
+	echo "\nnamespace {$namespace};\n\n";
+	if (!empty($imports)) {
+		foreach ($imports as $importedClass) {
+			echo "use {$importedClass};\n";
+		}
+		echo "\n";
+	}
+} elseif (!isset($appUses) || $appUses) {
+	// Applications with the modern layout autoload AppModel with the Composer classmap.
 	echo "App::uses('{$plugin}AppModel', '{$pluginPath}Model');\n";
 }
+// The class names of the settings: Name::class for the classes that exist, else the name in a string.
+$classNames = isset($classNames) ? $classNames : array();
+$modelClass = function ($name) use ($classNames) {
+	return isset($classNames['model'][$name]) ? $classNames['model'][$name] . '::class' : "'{$name}'";
+};
 ?>
 /**
  * <?php echo $name ?> Model
@@ -31,7 +45,8 @@ if (!isset($appUses) || $appUses) {
 foreach (array('hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany') as $assocType) {
 	if (!empty($associations[$assocType])) {
 		foreach ($associations[$assocType] as $relation) {
-			echo " * @property {$relation['className']} \${$relation['alias']}\n";
+			$propertyType = isset($classNames['model'][$relation['className']]) ? $classNames['model'][$relation['className']] : $relation['className'];
+			echo " * @property {$propertyType} \${$relation['alias']}\n";
 		}
 	}
 }
@@ -81,7 +96,7 @@ if (!empty($actsAs)): ?>
  *
  * @var array
  */
-	public $actsAs = array(<?php echo "\n\t"; foreach ($actsAs as $behavior): echo "\t"; var_export($behavior); echo ",\n\t"; endforeach; ?>);
+	public $actsAs = array(<?php echo "\n\t"; foreach ($actsAs as $behavior): echo "\t"; if (is_string($behavior) && isset($classNames['behavior'][$behavior])): echo $classNames['behavior'][$behavior] . '::class'; else: var_export($behavior); endif; echo ",\n\t"; endforeach; ?>);
 
 <?php endif;
 
@@ -122,7 +137,7 @@ foreach (array('hasOne', 'belongsTo') as $assocType):
 		echo "\n\tpublic \$$assocType = array(";
 		foreach ($associations[$assocType] as $i => $relation):
 			$out = "\n\t\t'{$relation['alias']}' => array(\n";
-			$out .= "\t\t\t'className' => '{$relation['className']}',\n";
+			$out .= "\t\t\t'className' => " . $modelClass($relation['className']) . ",\n";
 			$out .= "\t\t\t'foreignKey' => '{$relation['foreignKey']}',\n";
 			$out .= "\t\t\t'conditions' => '',\n";
 			$out .= "\t\t\t'fields' => '',\n";
@@ -143,7 +158,7 @@ if (!empty($associations['hasMany'])):
 	echo "\n\tpublic \$hasMany = array(";
 	foreach ($associations['hasMany'] as $i => $relation):
 		$out = "\n\t\t'{$relation['alias']}' => array(\n";
-		$out .= "\t\t\t'className' => '{$relation['className']}',\n";
+		$out .= "\t\t\t'className' => " . $modelClass($relation['className']) . ",\n";
 		$out .= "\t\t\t'foreignKey' => '{$relation['foreignKey']}',\n";
 		$out .= "\t\t\t'dependent' => false,\n";
 		$out .= "\t\t\t'conditions' => '',\n";
@@ -169,7 +184,7 @@ if (!empty($associations['hasAndBelongsToMany'])):
 	echo "\n\tpublic \$hasAndBelongsToMany = array(";
 	foreach ($associations['hasAndBelongsToMany'] as $i => $relation):
 		$out = "\n\t\t'{$relation['alias']}' => array(\n";
-		$out .= "\t\t\t'className' => '{$relation['className']}',\n";
+		$out .= "\t\t\t'className' => " . $modelClass($relation['className']) . ",\n";
 		$out .= "\t\t\t'joinTable' => '{$relation['joinTable']}',\n";
 		$out .= "\t\t\t'foreignKey' => '{$relation['foreignKey']}',\n";
 		$out .= "\t\t\t'associationForeignKey' => '{$relation['associationForeignKey']}',\n";

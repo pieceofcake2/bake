@@ -18,6 +18,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "App\\": "tests/test_app/src/",
             "Cake\\Test\\Fixture\\": "vendor/pieceofcake2/cakephp/tests/Fixture/"
         }
     },

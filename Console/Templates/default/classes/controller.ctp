@@ -19,10 +19,24 @@
  */
 
 echo "<?php\n";
-// Applications with the modern layout autoload AppController with the Composer classmap.
-if (!isset($appUses) || $appUses) {
+if (!empty($namespace)) {
+	// Namespaced classes: Composer loads the classes, which the use statements import.
+	echo "\nnamespace {$namespace};\n\n";
+	if (!empty($imports)) {
+		foreach ($imports as $importedClass) {
+			echo "use {$importedClass};\n";
+		}
+		echo "\n";
+	}
+} elseif (!isset($appUses) || $appUses) {
+	// Applications with the modern layout autoload AppController with the Composer classmap.
 	echo "App::uses('{$plugin}AppController', '{$pluginPath}Controller');\n";
 }
+// The class names of the settings: Name::class for the classes that exist, else the name in a string.
+$classNames = isset($classNames) ? $classNames : array();
+$classValue = function ($type, $name) use ($classNames) {
+	return isset($classNames[$type][$name]) ? $classNames[$type][$name] . '::class' : "'{$name}'";
+};
 ?>
 /**
  * <?php echo $controllerName; ?> Controller
@@ -33,7 +47,8 @@ if (!$isScaffold) {
 	echo " * @property {$defaultModel} \${$defaultModel}\n";
 	if (!empty($components)) {
 		foreach ($components as $component) {
-			echo " * @property {$component}Component \${$component}\n";
+			$componentType = isset($classNames['component'][Inflector::camelize($component)]) ? $classNames['component'][Inflector::camelize($component)] : "{$component}Component";
+			echo " * @property {$componentType} \${$component}\n";
 		}
 	}
 }
@@ -56,9 +71,9 @@ class <?php echo $controllerName; ?>Controller extends <?php echo $plugin; ?>App
 		echo "\tpublic \$helpers = array(";
 		for ($i = 0, $len = count($helpers); $i < $len; $i++):
 			if ($i != $len - 1):
-				echo "'" . Inflector::camelize($helpers[$i]) . "', ";
+				echo $classValue('helper', Inflector::camelize($helpers[$i])) . ", ";
 			else:
-				echo "'" . Inflector::camelize($helpers[$i]) . "'";
+				echo $classValue('helper', Inflector::camelize($helpers[$i]));
 			endif;
 		endfor;
 		echo ");\n\n";
@@ -69,9 +84,9 @@ class <?php echo $controllerName; ?>Controller extends <?php echo $plugin; ?>App
 		echo "\tpublic \$components = array(";
 		for ($i = 0, $len = count($components); $i < $len; $i++):
 			if ($i != $len - 1):
-				echo "'" . Inflector::camelize($components[$i]) . "', ";
+				echo $classValue('component', Inflector::camelize($components[$i])) . ", ";
 			else:
-				echo "'" . Inflector::camelize($components[$i]) . "'";
+				echo $classValue('component', Inflector::camelize($components[$i]));
 			endif;
 		endfor;
 		echo ");\n\n";

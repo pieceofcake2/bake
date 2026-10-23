@@ -19,6 +19,16 @@
  */
 
 echo "<?php\n";
+if (!empty($namespace)) {
+	// Namespaced classes: Composer loads the classes, which the use statements import.
+	echo "\nnamespace {$namespace};\n\n";
+	if (!empty($imports)) {
+		foreach ($imports as $importedClass) {
+			echo "use {$importedClass};\n";
+		}
+		echo "\n";
+	}
+}
 ?>
 /**
  * <?php echo $model; ?> Fixture

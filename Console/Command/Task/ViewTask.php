@@ -148,9 +148,15 @@ class ViewTask extends BakeTask
      */
     protected function _methodsToBake()
     {
+        $controllerClassName = $this->controllerName . 'Controller';
+        $appControllerClassName = 'AppController';
+        if ($this->_namespace() !== null) {
+            $controllerClassName = $this->_appClass($this->controllerName, 'Controller', 'Controller', true) ?? $controllerClassName;
+            $appControllerClassName = App::className('AppController', 'Controller') ?? $appControllerClassName;
+        }
         $methods = array_diff(
-            array_map('strtolower', get_class_methods($this->controllerName . 'Controller')),
-            array_map('strtolower', get_class_methods('AppController')),
+            array_map('strtolower', get_class_methods($controllerClassName)),
+            array_map('strtolower', get_class_methods($appControllerClassName)),
         );
         $scaffoldActions = false;
         if (empty($methods)) {
@@ -193,8 +199,7 @@ class ViewTask extends BakeTask
         foreach ($tables as $table) {
             $model = $this->_modelName($table);
             $this->controllerName = $this->_controllerName($model);
-            App::uses($model, 'Model');
-            if (class_exists($model)) {
+            if ($this->_appClass($model, 'Model') !== null) {
                 $vars = $this->_loadController();
                 if (!$actions) {
                     $actions = $this->_methodsToBake();
@@ -281,9 +286,13 @@ class ViewTask extends BakeTask
         }
 
         $controllerClassName = $this->controllerName . 'Controller';
-        App::uses($controllerClassName, $plugin . 'Controller');
+        if ($this->_namespace() !== null) {
+            $controllerClassName = $this->_appClass($this->controllerName, 'Controller', 'Controller', true) ?? $controllerClassName;
+        } else {
+            App::uses($controllerClassName, $plugin . 'Controller');
+        }
         if (!class_exists($controllerClassName)) {
-            $file = $controllerClassName . '.php';
+            $file = $this->controllerName . 'Controller.php';
             $this->err(__d('cake_console', "The file '%s' could not be found.\nIn order to bake a view, you'll need to first create the controller.", $file));
             $this->_stop();
 
@@ -361,7 +370,7 @@ class ViewTask extends BakeTask
         $this->hr();
         $this->out(__d('cake_console', 'Controller Name: %s', $this->controllerName));
         $this->out(__d('cake_console', 'Action Name:     %s', $action));
-        $this->out(__d('cake_console', 'Path:            %s', $this->getPath() . $this->controllerName . DS . Inflector::underscore($action) . '.ctp'));
+        $this->out(__d('cake_console', 'Path:            %s', $this->getPath() . $this->controllerName . DS . Inflector::underscore($action) . $this->_viewExtension()));
         $this->hr();
         $looksGood = $this->in(__d('cake_console', 'Look okay?'), ['y', 'n'], 'y');
         if (strtolower($looksGood) === 'y') {
@@ -390,9 +399,39 @@ class ViewTask extends BakeTask
         }
         $this->out("\n" . __d('cake_console', 'Baking `%s` view file...', $action), 1, Shell::QUIET);
         $path = $this->getPath();
-        $filename = $path . $this->controllerName . DS . Inflector::underscore($action) . '.ctp';
+        $filename = $path . $this->controllerName . DS . Inflector::underscore($action) . $this->_viewExtension();
 
         return $this->createFile($filename, $content);
+    }
+
+    /**
+     * Gets the path for the view files. Namespaced plugins keep them in `templates/`,
+     * as in CakePHP 5.
+     *
+     * @return string Path to output.
+     */
+    public function getPath()
+    {
+        if (!empty($this->plugin) && $this->_namespace() !== null) {
+            return $this->_pluginPath($this->plugin) . 'templates' . DS;
+        }
+
+        return parent::getPath();
+    }
+
+    /**
+     * Gets the extension of the baked view files: `.php` for the namespaced applications and
+     * plugins, whose views are in `templates/`, as in CakePHP 5, and `.ctp` otherwise.
+     *
+     * @return string
+     */
+    protected function _viewExtension()
+    {
+        if ($this->_namespace() !== null && basename(rtrim($this->getPath(), DS)) === 'templates') {
+            return '.php';
+        }
+
+        return '.ctp';
     }
 
     /**
