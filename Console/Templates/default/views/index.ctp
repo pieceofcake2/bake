@@ -18,24 +18,24 @@ $pk = "\${$singularVar}['{$modelClass}']['{$primaryKey}']";
 
 // Like cakephp/bake, text and binary columns are not listed in the index table.
 $fields = array_values(array_filter($fields, function ($field) use ($schema) {
-    return !isset($schema[$field]['type']) || !in_array($schema[$field]['type'], array('text', 'binary'), true);
+    return !isset($schema[$field]['type']) || !in_array($schema[$field]['type'], ['text', 'binary'], true);
 }));
 ?>
 <div class="<?php echo $pluralVar; ?> index content">
-    <?php echo "<?php echo \$this->Html->link(__('New {$singularHumanName}'), array('action' => 'add'), array('class' => 'button float-right')); ?>\n"; ?>
+    <?php echo "<?php echo \$this->Html->link(__('New {$singularHumanName}'), ['action' => 'add'], ['class' => 'button float-right']); ?>\n"; ?>
     <h3><?php echo "<?php echo __('{$pluralHumanName}'); ?>"; ?></h3>
     <div class="table-responsive">
         <table>
             <thead>
                 <tr>
-<?php foreach ($fields as $field): ?>
+<?php foreach ($fields as $field) : ?>
                     <th><?php echo "<?php echo \$this->Paginator->sort('{$field}'); ?>"; ?></th>
 <?php endforeach; ?>
                     <th class="actions"><?php echo "<?php echo __('Actions'); ?>"; ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php echo "<?php foreach (\${$pluralVar} as \${$singularVar}): ?>\n"; ?>
+                <?php echo "<?php foreach (\${$pluralVar} as \${$singularVar}) : ?>\n"; ?>
                 <tr>
 <?php
 foreach ($fields as $field) {
@@ -44,7 +44,7 @@ foreach ($fields as $field) {
         foreach ($associations['belongsTo'] as $alias => $details) {
             if ($field === $details['foreignKey']) {
                 $isKey = true;
-                echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])) : ''; ?></td>\n";
+                echo "                    <td><?php echo !empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}']) ? \$this->Html->link(\${$singularVar}['{$alias}']['{$details['displayField']}'], ['controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}']]) : ''; ?></td>\n";
                 break;
             }
         }
@@ -52,7 +52,7 @@ foreach ($fields as $field) {
     if ($isKey !== true) {
         $value = "\${$singularVar}['{$modelClass}']['{$field}']";
         $type = isset($schema[$field]['type']) ? $schema[$field]['type'] : null;
-        if (in_array($type, array('integer', 'biginteger', 'smallinteger', 'tinyinteger'), true)) {
+        if (in_array($type, ['integer', 'biginteger', 'smallinteger', 'tinyinteger'], true)) {
             if (!empty($schema[$field]['null'])) {
                 echo "                    <td><?php echo {$value} === null ? '' : \$this->Number->format({$value}); ?></td>\n";
             } else {
@@ -67,9 +67,9 @@ foreach ($fields as $field) {
 }
 ?>
                     <td class="actions">
-                        <?php echo "<?php echo \$this->Html->link(__('View'), array('action' => 'view', {$pk})); ?>\n"; ?>
-                        <?php echo "<?php echo \$this->Html->link(__('Edit'), array('action' => 'edit', {$pk})); ?>\n"; ?>
-                        <?php echo "<?php echo \$this->Form->postLink(__('Delete'), array('action' => 'delete', {$pk}), array('confirm' => __('Are you sure you want to delete # %s?', {$pk}))); ?>\n"; ?>
+                        <?php echo "<?php echo \$this->Html->link(__('View'), ['action' => 'view', {$pk}]); ?>\n"; ?>
+                        <?php echo "<?php echo \$this->Html->link(__('Edit'), ['action' => 'edit', {$pk}]); ?>\n"; ?>
+                        <?php echo "<?php echo \$this->Form->postLink(__('Delete'), ['action' => 'delete', {$pk}], ['confirm' => __('Are you sure you want to delete # %s?', {$pk})]); ?>\n"; ?>
                     </td>
                 </tr>
                 <?php echo "<?php endforeach; ?>\n"; ?>
@@ -79,13 +79,13 @@ foreach ($fields as $field) {
     <div class="paginator">
         <ul class="pagination">
             <?php echo "<?php\n"; ?>
-            echo $this->Paginator->first('<< ' . __('first'), array('tag' => 'li'));
-            echo $this->Paginator->prev('< ' . __('previous'), array('tag' => 'li'), null, array('tag' => 'li', 'class' => 'prev disabled', 'disabledTag' => 'a'));
-            echo $this->Paginator->numbers(array('tag' => 'li', 'separator' => '', 'currentTag' => 'a', 'currentClass' => 'active'));
-            echo $this->Paginator->next(__('next') . ' >', array('tag' => 'li'), null, array('tag' => 'li', 'class' => 'next disabled', 'disabledTag' => 'a'));
-            echo $this->Paginator->last(__('last') . ' >>', array('tag' => 'li'));
+            echo $this->Paginator->first('<< ' . __('first'), ['tag' => 'li']);
+            echo $this->Paginator->prev('< ' . __('previous'), ['tag' => 'li'], null, ['tag' => 'li', 'class' => 'prev disabled', 'disabledTag' => 'a']);
+            echo $this->Paginator->numbers(['tag' => 'li', 'separator' => '', 'currentTag' => 'a', 'currentClass' => 'active']);
+            echo $this->Paginator->next(__('next') . ' >', ['tag' => 'li'], null, ['tag' => 'li', 'class' => 'next disabled', 'disabledTag' => 'a']);
+            echo $this->Paginator->last(__('last') . ' >>', ['tag' => 'li']);
             ?>
         </ul>
-        <p><?php echo "<?php echo \$this->Paginator->counter(array('format' => __('Page {:page} of {:pages}, showing {:current} record(s) out of {:count} total'))); ?>"; ?></p>
+        <p><?php echo "<?php echo \$this->Paginator->counter(['format' => __('Page {:page} of {:pages}, showing {:current} record(s) out of {:count} total')]); ?>"; ?></p>
     </div>
 </div>

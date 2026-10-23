@@ -18,76 +18,53 @@
 
 echo "<?php\n";
 if (!empty($namespace)) {
-	// Namespaced classes: Composer loads the classes, which the use statements import.
-	echo "\nnamespace {$namespace};\n";
-	if (!empty($imports)) {
-		echo "\n";
-		foreach ($imports as $importedClass) {
-			echo "use {$importedClass};\n";
-		}
-	}
+    // Namespaced classes: Composer loads the classes, which the use statements import.
+    echo "\nnamespace {$namespace};\n\n";
+    if (!empty($imports)) {
+        foreach ($imports as $importedClass) {
+            echo "use {$importedClass};\n";
+        }
+        echo "\n";
+    }
+} elseif (!empty($uses)) {
+    foreach ($uses as $dependency) {
+        echo "App::uses('{$dependency[0]}', '{$dependency[1]}');\n";
+    }
+    echo "\n";
 }
-// PHPUnit 9 declares the return types of setUp() and tearDown()
-$void = empty($namespace) ? '' : ': void';
-?>
-<?php foreach ($uses as $dependency): ?>
-App::uses('<?php echo $dependency[0]; ?>', '<?php echo $dependency[1]; ?>');
-<?php endforeach; ?>
+// A method of the test case, indented by 4 spaces. The tests declare their return types, as PHPUnit 9 does.
+$method = function ($name, $body) {
+    return "    /**\n     * {$name} method\n     *\n     * @return void\n     */\n" .
+        "    public function {$name}(): void\n    {\n{$body}    }\n";
+};
 
-/**
- * <?php echo $fullClassName; ?> Test Case
- */
-<?php if ($type === 'Controller'): ?>
-class <?php echo $fullClassName; ?>Test extends ControllerTestCase {
-<?php else: ?>
-class <?php echo $fullClassName; ?>Test extends CakeTestCase {
-<?php endif; ?>
-
-<?php if (!empty($fixtures)): ?>
-/**
- * Fixtures
- *
- * @var array
- */
-	public $fixtures = array(
-		'<?php echo join("',\n\t\t'", $fixtures); ?>'
-	);
-
-<?php endif; ?>
-<?php if (!empty($construction)): ?>
-/**
- * setUp method
- *
- * @return void
- */
-	public function setUp()<?php echo $void; ?> {
-		parent::setUp();
-<?php echo $preConstruct ? "\t\t" . $preConstruct : ''; ?>
-		$this-><?php echo $className . ' = ' . $construction; ?>
-<?php echo $postConstruct ? "\t\t" . $postConstruct : ''; ?>
-	}
-
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown()<?php echo $void; ?> {
-		unset($this-><?php echo $className; ?>);
-
-		parent::tearDown();
-	}
-
-<?php endif; ?>
-<?php foreach ($methods as $method): ?>
-/**
- * test<?php echo Inflector::camelize($method); ?> method
- *
- * @return void
- */
-	public function test<?php echo Inflector::camelize($method); ?>() {
-		$this->markTestIncomplete('test<?php echo Inflector::camelize($method); ?> not implemented.');
-	}
-
-<?php endforeach; ?>
+$members = [];
+if (!empty($fixtures)) {
+    $list = '';
+    foreach ($fixtures as $fixture) {
+        $list .= "        '{$fixture}',\n";
+    }
+    $members[] = "    /**\n     * Fixtures\n     *\n     * @var array\n     */\n    public \$fixtures = [\n{$list}    ];\n";
 }
+if (!empty($construction)) {
+    $setUp = "        parent::setUp();\n";
+    if ($preConstruct) {
+        $setUp .= '        ' . $preConstruct;
+    }
+    $setUp .= "        \$this->{$className} = {$construction}";
+    if ($postConstruct) {
+        $setUp .= '        ' . $postConstruct;
+    }
+    $members[] = $method('setUp', $setUp);
+    $members[] = $method('tearDown', "        unset(\$this->{$className});\n\n        parent::tearDown();\n");
+}
+foreach ($methods as $testedMethod) {
+    $testName = 'test' . Inflector::camelize($testedMethod);
+    $members[] = $method($testName, "        \$this->markTestIncomplete('{$testName} not implemented.');\n");
+}
+
+$baseClass = $type === 'Controller' ? 'ControllerTestCase' : 'CakeTestCase';
+echo "/**\n * {$fullClassName} Test Case\n */\n";
+echo "class {$fullClassName}Test extends {$baseClass}\n{\n";
+echo implode("\n", $members);
+echo "}\n";

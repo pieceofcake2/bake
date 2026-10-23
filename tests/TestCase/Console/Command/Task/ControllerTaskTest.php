@@ -406,7 +406,7 @@ class ControllerTaskTest extends CakeTestCase
         $this->assertTextEquals($expected, $result);
 
         $result = $this->Task->bakeActions('BakeArticles', 'admin_', true);
-        $this->assertStringContainsString('function admin_index() {', $result);
+        $this->assertStringContainsString("function admin_index()\n    {", $result);
         $this->assertStringContainsString('function admin_add()', $result);
         $this->assertStringContainsString('function admin_view($id = null)', $result);
         $this->assertStringContainsString('function admin_edit($id = null)', $result);
@@ -727,7 +727,7 @@ class ControllerTaskTest extends CakeTestCase
 
         $this->Task->expects($this->once())->method('createFile')->with(
             '/my/path/BakeArticlesController.php',
-            $this->stringContains("public \$components = array('Paginator', 'Session', 'Flash');"),
+            $this->stringContains("public \$components = ['Paginator', 'Session', 'Flash'];"),
         )->will($this->returnValue(true));
 
         $this->Task->execute();

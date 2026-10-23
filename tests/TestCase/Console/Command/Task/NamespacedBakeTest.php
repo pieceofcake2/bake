@@ -223,7 +223,7 @@ class NamespacedBakeTest extends CakeTestCase
 
         $this->assertSame([$path . 'src' . DS . 'Model' . DS . 'BakeArticle.php'], array_keys($files));
         $this->assertStringStartsWith("<?php\n\nnamespace BakeNsPlugin\\Model;\n\n/**\n", $result);
-        $this->assertStringContainsString('class BakeArticle extends BakeNsPluginAppModel {', $result);
+        $this->assertStringContainsString("class BakeArticle extends BakeNsPluginAppModel\n{", $result);
         $this->assertStringNotContainsString('App::uses(', $result);
     }
 
@@ -262,7 +262,7 @@ class NamespacedBakeTest extends CakeTestCase
 
         $result = $Task->bake('BakeArticles', '', [], ['BakeNotLoaded.Toolbar']);
 
-        $this->assertStringContainsString("public \$components = array('BakeNotLoaded.Toolbar', PaginatorComponent::class);", $result);
+        $this->assertStringContainsString("public \$components = ['BakeNotLoaded.Toolbar', PaginatorComponent::class];", $result);
     }
 
     /**
@@ -302,7 +302,7 @@ class NamespacedBakeTest extends CakeTestCase
             "use BakeNsPlugin\\Model\\BakeArticle;\n" .
             "use Cake\\Controller\\Component\\PaginatorComponent;\n\n";
         $this->assertStringStartsWith($expected, $result);
-        $this->assertStringContainsString('class BakeArticlesController extends BakeNsPluginAppController {', $result);
+        $this->assertStringContainsString("class BakeArticlesController extends BakeNsPluginAppController\n{", $result);
     }
 
     /**

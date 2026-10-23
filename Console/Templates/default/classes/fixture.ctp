@@ -20,55 +20,35 @@
 
 echo "<?php\n";
 if (!empty($namespace)) {
-	// Namespaced classes: Composer loads the classes, which the use statements import.
-	echo "\nnamespace {$namespace};\n\n";
-	if (!empty($imports)) {
-		foreach ($imports as $importedClass) {
-			echo "use {$importedClass};\n";
-		}
-		echo "\n";
-	}
+    // Namespaced classes: Composer loads the classes, which the use statements import.
+    echo "\nnamespace {$namespace};\n\n";
+    if (!empty($imports)) {
+        foreach ($imports as $importedClass) {
+            echo "use {$importedClass};\n";
+        }
+        echo "\n";
+    }
 }
-?>
-/**
- * <?php echo $model; ?> Fixture
- */
-class <?php echo $model; ?>Fixture extends CakeTestFixture {
+// A property of the class with its docblock, indented by 4 spaces
+$property = function ($comment, $type, $name, $value) {
+    return "    /**\n     * {$comment}\n     *\n     * @var {$type}\n     */\n    public \${$name} = {$value};\n";
+};
 
-<?php if ($table): ?>
-/**
- * Table name
- *
- * @var string
- */
-	public $table = '<?php echo $table; ?>';
-
-<?php endif; ?>
-<?php if ($import): ?>
-/**
- * Import
- *
- * @var array
- */
-	public $import = <?php echo $import; ?>;
-
-<?php endif; ?>
-<?php if ($schema): ?>
-/**
- * Fields
- *
- * @var array
- */
-	public $fields = <?php echo $schema; ?>;
-
-<?php endif; ?>
-<?php if ($records): ?>
-/**
- * Records
- *
- * @var array
- */
-	public $records = <?php echo $records; ?>;
-
-<?php endif; ?>
+$properties = [];
+if ($table) {
+    $properties[] = $property('Table name', 'string', 'table', "'{$table}'");
 }
+if ($import) {
+    $properties[] = $property('Import', 'array', 'import', $import);
+}
+if ($schema) {
+    $properties[] = $property('Fields', 'array', 'fields', $schema);
+}
+if ($records) {
+    $properties[] = $property('Records', 'array', 'records', $records);
+}
+
+echo "/**\n * {$model} Fixture\n */\n";
+echo "class {$model}Fixture extends CakeTestFixture\n{\n";
+echo implode("\n", $properties);
+echo "}\n";

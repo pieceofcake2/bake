@@ -88,6 +88,12 @@ bake したクラスとテストには `App::uses()` の呼び出しがありま
 呼び出しが残ります。名前空間を使うアプリケーションでは、代わりに `use` 文でクラスをインポートします。
 [名前空間を使うアプリケーションとプラグイン](#namespaced-applications-and-plugins) を参照してください。
 
+bake したコードは、[pieceofcake2/app](https://github.com/pieceofcake2/app) スケルトンと同じコードスタイルです。
+インデントは 4 つのスペースで、配列は短い構文 (`[]`) で書き、クラスとメソッドの開き波かっこは次の行に置きます。
+テストケースは、PHPUnit 9 が必要とする戻り値の型を宣言します (`setUp(): void`)。クラス、フィクスチャ、
+テストケースは、[pieceofcake2/phpcs-cakephp2](https://github.com/pieceofcake2/phpcs-cakephp2) の `CakePHP2`
+規約に、名前空間を使うアプリケーションでは `CakePHP2Namespace` 規約に合格します。
+
 各コマンドの引数とオプションは `--help` で確認できます。
 
 ```bash
@@ -130,14 +136,14 @@ use Cake\Error\NotFoundException;
  * @property Post $Post
  * @property PaginatorComponent $Paginator
  */
-class PostsController extends AppController {
-
-/**
- * Components
- *
- * @var array
- */
-	public $components = array(PaginatorComponent::class);
+class PostsController extends AppController
+{
+    /**
+     * Components
+     *
+     * @var array
+     */
+    public $components = [PaginatorComponent::class];
 ```
 
 - クラスは `use` 文でインポートされ、アルファベット順に並びます。docblock では短い名前で書かれます。
@@ -149,11 +155,8 @@ class PostsController extends AppController {
   ないときは、名前を文字列のまま書きます (`'className' => 'Comment'`)。この名前は、アプリケーションの実行時に
   CakePHP が解決します。
 - テストケースは、これまでどおりの名前でフィクスチャを指定します (`'app.post'`)。CakePHP はこの名前から
-  `App\Test\Fixture\PostFixture` を見つけます。`setUp()` と `tearDown()` は、PHPUnit 9 が必要とする戻り値の型
-  `void` を宣言します。
+  `App\Test\Fixture\PostFixture` を見つけます。
 - ビューは `templates/` の `.php` ファイルです。
-- bake したコードの書式は、これまでの Bake と同じです (タブと `array()`)。コーディング規約に合わせるには
-  `vendor/bin/phpcbf` を実行してください。
 
 CakePHP 5 の構成のプラグイン、つまり `src/` ディレクトリがあるプラグインは、プラグイン名の名前空間にクラスを
 置きます。Bake は、そのようなプラグインのクラスを `src/` に (たとえば `ContactManager\Model` 名前空間の

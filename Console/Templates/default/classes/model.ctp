@@ -20,188 +20,155 @@
 
 echo "<?php\n";
 if (!empty($namespace)) {
-	// Namespaced classes: Composer loads the classes, which the use statements import.
-	echo "\nnamespace {$namespace};\n\n";
-	if (!empty($imports)) {
-		foreach ($imports as $importedClass) {
-			echo "use {$importedClass};\n";
-		}
-		echo "\n";
-	}
+    // Namespaced classes: Composer loads the classes, which the use statements import.
+    echo "\nnamespace {$namespace};\n\n";
+    if (!empty($imports)) {
+        foreach ($imports as $importedClass) {
+            echo "use {$importedClass};\n";
+        }
+        echo "\n";
+    }
 } elseif (!isset($appUses) || $appUses) {
-	// Applications with the modern layout autoload AppModel with the Composer classmap.
-	echo "App::uses('{$plugin}AppModel', '{$pluginPath}Model');\n";
+    // Applications with the modern layout autoload AppModel with the Composer classmap.
+    echo "App::uses('{$plugin}AppModel', '{$pluginPath}Model');\n\n";
 }
 // The class names of the settings: Name::class for the classes that exist, else the name in a string.
-$classNames = isset($classNames) ? $classNames : array();
+$classNames = isset($classNames) ? $classNames : [];
 $modelClass = function ($name) use ($classNames) {
-	return isset($classNames['model'][$name]) ? $classNames['model'][$name] . '::class' : "'{$name}'";
+    return isset($classNames['model'][$name]) ? $classNames['model'][$name] . '::class' : "'{$name}'";
 };
-?>
-/**
- * <?php echo $name ?> Model
- *
-<?php
-foreach (array('hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany') as $assocType) {
-	if (!empty($associations[$assocType])) {
-		foreach ($associations[$assocType] as $relation) {
-			$propertyType = isset($classNames['model'][$relation['className']]) ? $classNames['model'][$relation['className']] : $relation['className'];
-			echo " * @property {$propertyType} \${$relation['alias']}\n";
-		}
-	}
+// A property of the class with its docblock, indented by 4 spaces
+$property = function ($comment, $type, $name, $value) {
+    return "    /**\n     * {$comment}\n     *\n     * @var {$type}\n     */\n    public \${$name} = {$value};\n";
+};
+// The keys of an association, as an array of 12 spaces of indentation
+$association = function ($alias, $keys) {
+    $out = "        '{$alias}' => [\n";
+    foreach ($keys as $key => $value) {
+        $out .= "            '{$key}' => {$value},\n";
+    }
+
+    return $out . "        ],\n";
+};
+
+$properties = [];
+if ($useDbConfig !== 'default') {
+    $properties[] = $property('Use database config', 'string', 'useDbConfig', "'{$useDbConfig}'");
 }
-?>
- */
-class <?php echo $name ?> extends <?php echo $plugin; ?>AppModel {
-
-<?php if ($useDbConfig !== 'default'): ?>
-/**
- * Use database config
- *
- * @var string
- */
-	public $useDbConfig = '<?php echo $useDbConfig; ?>';
-
-<?php endif;
-
-if ($useTable && $useTable !== Inflector::tableize($name)):
-	$table = "'$useTable'";
-	echo "/**\n * Use table\n *\n * @var mixed False or table name\n */\n";
-	echo "\tpublic \$useTable = $table;\n\n";
-endif;
-
-if ($primaryKey !== 'id'): ?>
-/**
- * Primary key field
- *
- * @var string
- */
-	public $primaryKey = '<?php echo $primaryKey; ?>';
-
-<?php endif;
-
-if ($displayField): ?>
-/**
- * Display field
- *
- * @var string
- */
-	public $displayField = '<?php echo $displayField; ?>';
-
-<?php endif;
-
-if (!empty($actsAs)): ?>
-/**
- * Behaviors
- *
- * @var array
- */
-	public $actsAs = array(<?php echo "\n\t"; foreach ($actsAs as $behavior): echo "\t"; if (is_string($behavior) && isset($classNames['behavior'][$behavior])): echo $classNames['behavior'][$behavior] . '::class'; else: var_export($behavior); endif; echo ",\n\t"; endforeach; ?>);
-
-<?php endif;
-
-if (!empty($validate)):
-	echo "/**\n * Validation rules\n *\n * @var array\n */\n";
-	echo "\tpublic \$validate = array(\n";
-	foreach ($validate as $field => $validations):
-		echo "\t\t'$field' => array(\n";
-		foreach ($validations as $key => $validator):
-			echo "\t\t\t'$key' => array(\n";
-			echo "\t\t\t\t'rule' => array('$validator'),\n";
-			echo "\t\t\t\t//'message' => 'Your custom message here',\n";
-			echo "\t\t\t\t//'allowEmpty' => false,\n";
-			echo "\t\t\t\t//'required' => false,\n";
-			echo "\t\t\t\t//'last' => false, // Stop validation after this rule\n";
-			echo "\t\t\t\t//'on' => 'create', // Limit validation to 'create' or 'update' operations\n";
-			echo "\t\t\t),\n";
-		endforeach;
-		echo "\t\t),\n";
-	endforeach;
-	echo "\t);\n";
-endif;
-
-foreach ($associations as $assoc):
-	if (!empty($assoc)):
-?>
-
-	// The Associations below have been created with all possible keys, those that are not needed can be removed
-<?php
-		break;
-	endif;
-endforeach;
-
-foreach (array('hasOne', 'belongsTo') as $assocType):
-	if (!empty($associations[$assocType])):
-		$typeCount = count($associations[$assocType]);
-		echo "\n/**\n * $assocType associations\n *\n * @var array\n */";
-		echo "\n\tpublic \$$assocType = array(";
-		foreach ($associations[$assocType] as $i => $relation):
-			$out = "\n\t\t'{$relation['alias']}' => array(\n";
-			$out .= "\t\t\t'className' => " . $modelClass($relation['className']) . ",\n";
-			$out .= "\t\t\t'foreignKey' => '{$relation['foreignKey']}',\n";
-			$out .= "\t\t\t'conditions' => '',\n";
-			$out .= "\t\t\t'fields' => '',\n";
-			$out .= "\t\t\t'order' => ''\n";
-			$out .= "\t\t)";
-			if ($i + 1 < $typeCount) {
-				$out .= ",";
-			}
-			echo $out;
-		endforeach;
-		echo "\n\t);\n";
-	endif;
-endforeach;
-
-if (!empty($associations['hasMany'])):
-	$belongsToCount = count($associations['hasMany']);
-	echo "\n/**\n * hasMany associations\n *\n * @var array\n */";
-	echo "\n\tpublic \$hasMany = array(";
-	foreach ($associations['hasMany'] as $i => $relation):
-		$out = "\n\t\t'{$relation['alias']}' => array(\n";
-		$out .= "\t\t\t'className' => " . $modelClass($relation['className']) . ",\n";
-		$out .= "\t\t\t'foreignKey' => '{$relation['foreignKey']}',\n";
-		$out .= "\t\t\t'dependent' => false,\n";
-		$out .= "\t\t\t'conditions' => '',\n";
-		$out .= "\t\t\t'fields' => '',\n";
-		$out .= "\t\t\t'order' => '',\n";
-		$out .= "\t\t\t'limit' => '',\n";
-		$out .= "\t\t\t'offset' => '',\n";
-		$out .= "\t\t\t'exclusive' => '',\n";
-		$out .= "\t\t\t'finderQuery' => '',\n";
-		$out .= "\t\t\t'counterQuery' => ''\n";
-		$out .= "\t\t)";
-		if ($i + 1 < $belongsToCount) {
-			$out .= ",";
-		}
-		echo $out;
-	endforeach;
-	echo "\n\t);\n\n";
-endif;
-
-if (!empty($associations['hasAndBelongsToMany'])):
-	$habtmCount = count($associations['hasAndBelongsToMany']);
-	echo "\n/**\n * hasAndBelongsToMany associations\n *\n * @var array\n */";
-	echo "\n\tpublic \$hasAndBelongsToMany = array(";
-	foreach ($associations['hasAndBelongsToMany'] as $i => $relation):
-		$out = "\n\t\t'{$relation['alias']}' => array(\n";
-		$out .= "\t\t\t'className' => " . $modelClass($relation['className']) . ",\n";
-		$out .= "\t\t\t'joinTable' => '{$relation['joinTable']}',\n";
-		$out .= "\t\t\t'foreignKey' => '{$relation['foreignKey']}',\n";
-		$out .= "\t\t\t'associationForeignKey' => '{$relation['associationForeignKey']}',\n";
-		$out .= "\t\t\t'unique' => 'keepExisting',\n";
-		$out .= "\t\t\t'conditions' => '',\n";
-		$out .= "\t\t\t'fields' => '',\n";
-		$out .= "\t\t\t'order' => '',\n";
-		$out .= "\t\t\t'limit' => '',\n";
-		$out .= "\t\t\t'offset' => '',\n";
-		$out .= "\t\t\t'finderQuery' => '',\n";
-		$out .= "\t\t)";
-		if ($i + 1 < $habtmCount) {
-			$out .= ",";
-		}
-		echo $out;
-	endforeach;
-	echo "\n\t);\n\n";
-endif;
-?>
+if ($useTable && $useTable !== Inflector::tableize($name)) {
+    $properties[] = $property('Use table', 'mixed False or table name', 'useTable', "'{$useTable}'");
 }
+if ($primaryKey !== 'id') {
+    $properties[] = $property('Primary key field', 'string', 'primaryKey', "'{$primaryKey}'");
+}
+if ($displayField) {
+    $properties[] = $property('Display field', 'string', 'displayField', "'{$displayField}'");
+}
+if (!empty($actsAs)) {
+    $behaviors = "[\n";
+    foreach ($actsAs as $behavior) {
+        if (is_string($behavior) && isset($classNames['behavior'][$behavior])) {
+            $behaviors .= "        {$classNames['behavior'][$behavior]}::class,\n";
+        } else {
+            $behaviors .= '        ' . var_export($behavior, true) . ",\n";
+        }
+    }
+    $properties[] = $property('Behaviors', 'array', 'actsAs', $behaviors . '    ]');
+}
+if (!empty($validate)) {
+    $rules = "[\n";
+    foreach ($validate as $field => $validations) {
+        $rules .= "        '{$field}' => [\n";
+        foreach ($validations as $key => $validator) {
+            $rules .= "            '{$key}' => [\n";
+            $rules .= "                'rule' => ['{$validator}'],\n";
+            $rules .= "                //'message' => 'Your custom message here',\n";
+            $rules .= "                //'allowEmpty' => false,\n";
+            $rules .= "                //'required' => false,\n";
+            $rules .= "                //'last' => false, // Stop validation after this rule\n";
+            $rules .= "                //'on' => 'create', // Limit validation to 'create' or 'update' operations\n";
+            $rules .= "            ],\n";
+        }
+        $rules .= "        ],\n";
+    }
+    $properties[] = $property('Validation rules', 'array', 'validate', $rules . '    ]');
+}
+
+$associationProperties = [];
+foreach (['hasOne', 'belongsTo'] as $assocType) {
+    if (!empty($associations[$assocType])) {
+        $value = "[\n";
+        foreach ($associations[$assocType] as $relation) {
+            $value .= $association($relation['alias'], [
+                'className' => $modelClass($relation['className']),
+                'foreignKey' => "'{$relation['foreignKey']}'",
+                'conditions' => "''",
+                'fields' => "''",
+                'order' => "''",
+            ]);
+        }
+        $associationProperties[] = $property("{$assocType} associations", 'array', $assocType, $value . '    ]');
+    }
+}
+if (!empty($associations['hasMany'])) {
+    $value = "[\n";
+    foreach ($associations['hasMany'] as $relation) {
+        $value .= $association($relation['alias'], [
+            'className' => $modelClass($relation['className']),
+            'foreignKey' => "'{$relation['foreignKey']}'",
+            'dependent' => 'false',
+            'conditions' => "''",
+            'fields' => "''",
+            'order' => "''",
+            'limit' => "''",
+            'offset' => "''",
+            'exclusive' => "''",
+            'finderQuery' => "''",
+            'counterQuery' => "''",
+        ]);
+    }
+    $associationProperties[] = $property('hasMany associations', 'array', 'hasMany', $value . '    ]');
+}
+if (!empty($associations['hasAndBelongsToMany'])) {
+    $value = "[\n";
+    foreach ($associations['hasAndBelongsToMany'] as $relation) {
+        $value .= $association($relation['alias'], [
+            'className' => $modelClass($relation['className']),
+            'joinTable' => "'{$relation['joinTable']}'",
+            'foreignKey' => "'{$relation['foreignKey']}'",
+            'associationForeignKey' => "'{$relation['associationForeignKey']}'",
+            'unique' => "'keepExisting'",
+            'conditions' => "''",
+            'fields' => "''",
+            'order' => "''",
+            'limit' => "''",
+            'offset' => "''",
+            'finderQuery' => "''",
+        ]);
+    }
+    $associationProperties[] = $property('hasAndBelongsToMany associations', 'array', 'hasAndBelongsToMany', $value . '    ]');
+}
+if ($associationProperties) {
+    $associationProperties[0] = "    // The Associations below have been created with all possible keys, those that are not needed can be removed\n\n" .
+        $associationProperties[0];
+    $properties = array_merge($properties, $associationProperties);
+}
+
+$docProperties = [];
+foreach (['hasOne', 'belongsTo', 'hasMany', 'hasAndBelongsToMany'] as $assocType) {
+    if (!empty($associations[$assocType])) {
+        foreach ($associations[$assocType] as $relation) {
+            $propertyType = isset($classNames['model'][$relation['className']]) ? $classNames['model'][$relation['className']] : $relation['className'];
+            $docProperties[] = " * @property {$propertyType} \${$relation['alias']}\n";
+        }
+    }
+}
+
+echo "/**\n * {$name} Model\n";
+if ($docProperties) {
+    echo " *\n" . implode('', $docProperties);
+}
+echo " */\n";
+echo "class {$name} extends {$plugin}AppModel\n{\n";
+echo implode("\n", $properties);
+echo "}\n";

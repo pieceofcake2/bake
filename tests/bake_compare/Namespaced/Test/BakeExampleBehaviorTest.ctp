@@ -8,36 +8,38 @@ use Cake\TestSuite\CakeTestCase;
 /**
  * BakeExampleBehavior Test Case
  */
-class BakeExampleBehaviorTest extends CakeTestCase {
+class BakeExampleBehaviorTest extends CakeTestCase
+{
+    /**
+     * setUp method
+     *
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->BakeExample = new BakeExampleBehavior();
+    }
 
-/**
- * setUp method
- *
- * @return void
- */
-	public function setUp(): void {
-		parent::setUp();
-		$this->BakeExample = new BakeExampleBehavior();
-	}
+    /**
+     * tearDown method
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        unset($this->BakeExample);
 
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown(): void {
-		unset($this->BakeExample);
+        parent::tearDown();
+    }
 
-		parent::tearDown();
-	}
-
-/**
- * testSlug method
- *
- * @return void
- */
-	public function testSlug() {
-		$this->markTestIncomplete('testSlug not implemented.');
-	}
-
+    /**
+     * testSlug method
+     *
+     * @return void
+     */
+    public function testSlug(): void
+    {
+        $this->markTestIncomplete('testSlug not implemented.');
+    }
 }

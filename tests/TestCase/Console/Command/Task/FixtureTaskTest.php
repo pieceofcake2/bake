@@ -320,7 +320,7 @@ class FixtureTaskTest extends CakeTestCase
             ->method('createFile')
             ->with($filename, $this->logicalAnd(
                 $this->stringContains('class ArticleFixture'),
-                $this->stringContains("\$import = array('model' => 'Article'"),
+                $this->stringContains("\$import = ['model' => 'Article'"),
             ));
 
         $this->Task->execute();
@@ -349,7 +349,7 @@ class FixtureTaskTest extends CakeTestCase
             ->method('createFile')
             ->with($filename, $this->logicalAnd(
                 $this->stringContains('class ArticleFixture'),
-                $this->stringContains("\$import = array('model' => 'Article', 'connection' => 'test')"),
+                $this->stringContains("\$import = ['model' => 'Article', 'connection' => 'test']"),
             ));
 
         $this->Task->execute();
@@ -468,10 +468,10 @@ class FixtureTaskTest extends CakeTestCase
 
         // 検証
         $this->assertEquals('/my/path/ArticleFixture.php', $createFileCalls[0]['filename']);
-        $this->assertStringContainsString('public $import = array(\'model\' => \'Article\'', $createFileCalls[0]['content']);
+        $this->assertStringContainsString('public $import = [\'model\' => \'Article\'', $createFileCalls[0]['content']);
 
         $this->assertEquals('/my/path/CommentFixture.php', $createFileCalls[1]['filename']);
-        $this->assertStringContainsString('public $import = array(\'model\' => \'Comment\'', $createFileCalls[1]['content']);
+        $this->assertStringContainsString('public $import = [\'model\' => \'Comment\'', $createFileCalls[1]['content']);
     }
 
     /**
@@ -516,18 +516,18 @@ class FixtureTaskTest extends CakeTestCase
         $result = $this->Task->bake('Article', 'comments');
         $this->assertStringContainsString('class ArticleFixture extends CakeTestFixture', $result);
         $this->assertStringContainsString('public $table = \'comments\';', $result);
-        $this->assertStringContainsString('public $fields = array(', $result);
+        $this->assertStringContainsString('public $fields = [', $result);
 
         $result = $this->Task->bake('Article', 'comments', ['records' => true]);
-        $this->assertStringContainsString("public \$import = array('records' => true, 'connection' => 'test');", $result);
+        $this->assertStringContainsString("public \$import = ['records' => true, 'connection' => 'test'];", $result);
         $this->assertStringNotContainsString('public $records', $result);
 
         $result = $this->Task->bake('Article', 'comments', ['schema' => 'Article']);
-        $this->assertStringContainsString("public \$import = array('model' => 'Article', 'connection' => 'test');", $result);
+        $this->assertStringContainsString("public \$import = ['model' => 'Article', 'connection' => 'test'];", $result);
         $this->assertStringNotContainsString('public $fields', $result);
 
         $result = $this->Task->bake('Article', 'comments', ['schema' => 'Article', 'records' => true]);
-        $this->assertStringContainsString("public \$import = array('model' => 'Article', 'records' => true, 'connection' => 'test');", $result);
+        $this->assertStringContainsString("public \$import = ['model' => 'Article', 'records' => true, 'connection' => 'test'];", $result);
         $this->assertStringNotContainsString('public $fields', $result);
         $this->assertStringNotContainsString('public $records', $result);
     }

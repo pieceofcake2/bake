@@ -404,7 +404,7 @@ class DbConfigTaskTest extends CakeTestCase
             ->with(
                 $path . 'database.php',
                 $this->logicalAnd(
-                    $this->stringContains("public \$default = array(\n"),
+                    $this->stringContains("public \$default = [\n"),
                     $this->stringContains("'datasource' => 'Database/Mysql',"),
                     $this->stringContains("'persistent' => false,"),
                     $this->stringContains("'host' => 'localhost',"),
@@ -413,7 +413,7 @@ class DbConfigTaskTest extends CakeTestCase
                     $this->stringContains("'password' => 'password',"),
                     $this->stringContains("'database' => 'cake',"),
                     $this->stringContains("'prefix' => 'app_',"),
-                    $this->stringContains("'encoding' => 'utf8'"),
+                    $this->stringContains("'encoding' => 'utf8',"),
                 ),
             )
             ->will($this->returnValue(true));

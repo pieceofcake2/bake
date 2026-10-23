@@ -425,7 +425,7 @@ class ControllerTask extends BakeTask
      *
      * - `namespace`: the namespace of the controller, e.g. `App\Controller`, or null for a global class.
      * - `imports`: the classes of the `use` statements: the model, the components, the helpers
-     *   and the exceptions that the actions throw.
+     *   and the classes that the actions throw and return.
      * - `classNames`: the names to write for the classes of the components and helpers
      *   (`PaginatorComponent` for `PaginatorComponent::class`), by their names in the settings.
      *   A class that does not exist keeps its name in a string.
@@ -470,8 +470,12 @@ class ControllerTask extends BakeTask
                 $imports,
             ),
         ];
-        if (preg_match('/\bNotFoundException\b/', (string)$actions)) {
-            $this->_importClass('Cake\\Error\\NotFoundException', $controllerNamespace, $imports);
+        // The classes that the actions throw and return
+        $actionClasses = ['NotFoundException' => 'Cake\\Error\\NotFoundException', 'CakeResponse' => 'Cake\\Network\\CakeResponse'];
+        foreach ($actionClasses as $shortName => $className) {
+            if (preg_match('/\b' . $shortName . '\b/', (string)$actions)) {
+                $this->_importClass($className, $controllerNamespace, $imports);
+            }
         }
 
         return [

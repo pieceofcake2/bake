@@ -86,6 +86,13 @@ until `composer dump-autoload` runs). Classes baked for a legacy application or 
 plugin keep their `App::uses()` calls. A namespaced application imports the classes with
 `use` statements instead, see [Namespaced Applications and Plugins](#namespaced-applications-and-plugins).
 
+The baked code has the code style of the [pieceofcake2/app](https://github.com/pieceofcake2/app)
+skeleton: 4 spaces of indentation, short arrays (`[]`), the opening braces of classes and
+methods on their own lines, and the return types that PHPUnit 9 needs in the test cases
+(`setUp(): void`). The classes, fixtures and test cases pass the `CakePHP2` standard of
+[pieceofcake2/phpcs-cakephp2](https://github.com/pieceofcake2/phpcs-cakephp2), and the
+`CakePHP2Namespace` standard in a namespaced application.
+
 Use `--help` to see the arguments and options of each command:
 
 ```bash
@@ -127,14 +134,14 @@ use Cake\Error\NotFoundException;
  * @property Post $Post
  * @property PaginatorComponent $Paginator
  */
-class PostsController extends AppController {
-
-/**
- * Components
- *
- * @var array
- */
-	public $components = array(PaginatorComponent::class);
+class PostsController extends AppController
+{
+    /**
+     * Components
+     *
+     * @var array
+     */
+    public $components = [PaginatorComponent::class];
 ```
 
 - The classes are imported with `use` statements, sorted alphabetically, and the docblocks
@@ -148,11 +155,8 @@ class PostsController extends AppController {
   that is not baked yet, keeps its name in a string (`'className' => 'Comment'`), which
   CakePHP resolves when the application runs.
 - The test cases name their fixtures as before (`'app.post'`); CakePHP finds
-  `App\Test\Fixture\PostFixture` for them. `setUp()` and `tearDown()` declare the `void`
-  return type that PHPUnit 9 needs.
+  `App\Test\Fixture\PostFixture` for them.
 - The views are `.php` files in `templates/`.
-- The baked code keeps the format of the earlier Bake releases (tabs and `array()`); run
-  `vendor/bin/phpcbf` to format it for your coding standard.
 
 A plugin with the CakePHP 5 layout, a plugin with a `src/` directory, has its classes in the
 namespace of the plugin name. Bake writes the classes of such a plugin into `src/` (for

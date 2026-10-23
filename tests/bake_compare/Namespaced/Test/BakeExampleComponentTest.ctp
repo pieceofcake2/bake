@@ -9,37 +9,39 @@ use Cake\TestSuite\CakeTestCase;
 /**
  * BakeExampleComponent Test Case
  */
-class BakeExampleComponentTest extends CakeTestCase {
+class BakeExampleComponentTest extends CakeTestCase
+{
+    /**
+     * setUp method
+     *
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        $Collection = new ComponentCollection();
+        $this->BakeExample = new BakeExampleComponent($Collection);
+    }
 
-/**
- * setUp method
- *
- * @return void
- */
-	public function setUp(): void {
-		parent::setUp();
-		$Collection = new ComponentCollection();
-		$this->BakeExample = new BakeExampleComponent($Collection);
-	}
+    /**
+     * tearDown method
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        unset($this->BakeExample);
 
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown(): void {
-		unset($this->BakeExample);
+        parent::tearDown();
+    }
 
-		parent::tearDown();
-	}
-
-/**
- * testGreet method
- *
- * @return void
- */
-	public function testGreet() {
-		$this->markTestIncomplete('testGreet not implemented.');
-	}
-
+    /**
+     * testGreet method
+     *
+     * @return void
+     */
+    public function testGreet(): void
+    {
+        $this->markTestIncomplete('testGreet not implemented.');
+    }
 }

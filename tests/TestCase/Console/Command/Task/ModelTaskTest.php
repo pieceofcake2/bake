@@ -924,20 +924,20 @@ class ModelTaskTest extends CakeTestCase
             ],
         ];
         $result = $this->Task->bake('BakeArticle', compact('validate'));
-        $this->assertMatchesRegularExpression('/class BakeArticle extends AppModel \{/', $result);
+        $this->assertStringContainsString("class BakeArticle extends AppModel\n{\n", $result);
         // AppModel is autoloaded by the Composer classmap in the modern layout of the test app
         $this->assertStringNotContainsString('App::uses(', $result);
-        $this->assertMatchesRegularExpression('/\$validate \= array\(/', $result);
+        $this->assertMatchesRegularExpression('/\$validate \= \[/', $result);
         $expected = <<< STRINGEND
-array(
-			'notBlank' => array(
-				'rule' => array('notBlank'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			),
+[
+            'notBlank' => [
+                'rule' => ['notBlank'],
+                //'message' => 'Your custom message here',
+                //'allowEmpty' => false,
+                //'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ],
 STRINGEND;
         $this->assertMatchesRegularExpression('/' . preg_quote(str_replace("\r\n", "\n", $expected), '/') . '/', $result);
     }
@@ -991,10 +991,10 @@ STRINGEND;
         $this->assertStringContainsString(' * @property OtherModel $OtherModel', $result);
         $this->assertStringContainsString(' * @property BakeComment $BakeComment', $result);
         $this->assertStringContainsString(' * @property BakeTag $BakeTag', $result);
-        $this->assertMatchesRegularExpression('/\$hasAndBelongsToMany \= array\(/', $result);
-        $this->assertMatchesRegularExpression('/\$hasMany \= array\(/', $result);
-        $this->assertMatchesRegularExpression('/\$belongsTo \= array\(/', $result);
-        $this->assertMatchesRegularExpression('/\$hasOne \= array\(/', $result);
+        $this->assertMatchesRegularExpression('/\$hasAndBelongsToMany \= \[/', $result);
+        $this->assertMatchesRegularExpression('/\$hasMany \= \[/', $result);
+        $this->assertMatchesRegularExpression('/\$belongsTo \= \[/', $result);
+        $this->assertMatchesRegularExpression('/\$hasOne \= \[/', $result);
         $this->assertMatchesRegularExpression('/BakeTag/', $result);
         $this->assertMatchesRegularExpression('/OtherModel/', $result);
         $this->assertMatchesRegularExpression('/SomethingElse/', $result);
@@ -1032,15 +1032,15 @@ STRINGEND;
     {
         $result = $this->Task->bake('NumberTree', ['actsAs' => ['Tree', 'PluginName.Sluggable']]);
         $expected = <<<TEXT
-/**
- * Behaviors
- *
- * @var array
- */
-	public \$actsAs = array(
-		'Tree',
-		'PluginName.Sluggable',
-	);
+    /**
+     * Behaviors
+     *
+     * @var array
+     */
+    public \$actsAs = [
+        'Tree',
+        'PluginName.Sluggable',
+    ];
 TEXT;
         $this->assertTextContains($expected, $result);
     }
@@ -1114,7 +1114,7 @@ TEXT;
 
         $this->Task->expects($this->once())->method('_checkUnitTest')->will($this->returnValue(1));
         $this->Task->expects($this->once())->method('createFile')
-            ->with($filename, $this->stringContains("'BakeComment' => array("));
+            ->with($filename, $this->stringContains("'BakeComment' => ["));
 
         $this->Task->execute();
     }
