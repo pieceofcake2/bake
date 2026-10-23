@@ -342,6 +342,30 @@ class BakedCodeStyleTest extends CakeTestCase
     }
 
     /**
+     * Runs phpcs on code.
+     *
+     * @param string $root The root directory of the plugin.
+     * @param string $phpcs The phpcs command.
+     * @param string $standard The standard.
+     * @param string $path The path of the code.
+     * @param string $contents The code.
+     * @return string The output of phpcs.
+     */
+    protected function _phpcs(string $root, string $phpcs, string $standard, string $path, string $contents): string
+    {
+        $command = [PHP_BINARY, $phpcs, '-q', '--report=emacs', '--standard=' . $standard, '--stdin-path=' . $path, '-'];
+        $process = proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $root);
+        fwrite($pipes[0], $contents);
+        fclose($pipes[0]);
+        $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+
+        return $output;
+    }
+
+    /**
      * Asserts that all baked files pass phpcs with a standard.
      *
      * @param string $standard The standard, CakePHP2 or CakePHP2Namespace.
@@ -355,6 +379,11 @@ class BakedCodeStyleTest extends CakeTestCase
         $this->assertGreaterThan(15, count($this->_baked));
 
         $messages = [];
+        // The coding standards need the dependencies that Composer installs for a recent PHP
+        $check = $this->_phpcs($root, $phpcs, $standard, '/baked-app/src/Check.php', "<?php\n");
+        if (str_contains($check, 'ERROR:')) {
+            $this->markTestSkipped('phpcs cannot load the standard on PHP ' . PHP_VERSION . ': ' . trim($check));
+        }
         // phpcs checks the files in parallel, one process for each file
         $processes = [];
         foreach ($this->_baked as $file => $contents) {
