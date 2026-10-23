@@ -13,14 +13,25 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
-App::uses('ControllerTask', 'Bake.Console/Command/Task');
-App::uses('FixtureTask', 'Bake.Console/Command/Task');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-App::uses('ProjectTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('TestTask', 'Bake.Console/Command/Task');
-App::uses('ViewTask', 'Bake.Console/Command/Task');
 App::uses('Folder', 'Utility');
+foreach (['BakeTask', 'ControllerTask', 'FixtureTask', 'ModelTask', 'ProjectTask', 'TemplateTask', 'TestTask', 'ViewTask'] as $task) {
+    App::uses($task, 'Bake.Console/Command/Task');
+}
+
+/**
+ * A bake task that makes the sorting of the use statements public
+ */
+class NamespacedBakeTestTask extends BakeTask
+{
+    /**
+     * @param array<string> $imports The fully qualified class names.
+     * @return array<string>
+     */
+    public function sortImports(array $imports): array
+    {
+        return $this->_sortImports($imports);
+    }
+}
 
 /**
  * Tests baking the classes of a namespaced application (App.namespace) and of a
@@ -30,6 +41,13 @@ App::uses('Folder', 'Utility');
  */
 class NamespacedBakeTest extends CakeTestCase
 {
+    /**
+     * The output directory of the baked classes
+     *
+     * @var string
+     */
+    protected const PATH = '/my/path/';
+
     /**
      * fixtures
      *
@@ -140,7 +158,8 @@ class NamespacedBakeTest extends CakeTestCase
     protected function _loadNamespacedPlugin(string $plugin): string
     {
         $this->_pluginPath = TMP . 'tests' . DS . $plugin . DS;
-        new Folder($this->_pluginPath . 'src', true);
+        $Folder = new Folder();
+        $Folder->create($this->_pluginPath . 'src');
         CakePlugin::load($plugin, ['path' => $this->_pluginPath]);
 
         return $this->_pluginPath;
@@ -154,7 +173,7 @@ class NamespacedBakeTest extends CakeTestCase
     public function testBakeModel(): void
     {
         $Task = $this->_task('ModelTask', ['in', 'out', 'err', 'createFile', '_stop', '_checkUnitTest']);
-        $Task->path = '/my/path/';
+        $Task->path = static::PATH;
         $files = [];
         $this->_recordFiles($Task, $files);
 
@@ -183,7 +202,7 @@ class NamespacedBakeTest extends CakeTestCase
         ]);
 
         $this->_assertBaked('Model/BakeArticle.ctp', $result);
-        $this->assertSame(['/my/path/BakeArticle.php'], array_keys($files));
+        $this->assertSame([static::PATH . 'BakeArticle.php'], array_keys($files));
     }
 
     /**
@@ -218,7 +237,7 @@ class NamespacedBakeTest extends CakeTestCase
     {
         $Task = $this->_task('ControllerTask', ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest']);
         $Task->name = 'Controller';
-        $Task->path = '/my/path/';
+        $Task->path = static::PATH;
         $files = [];
         $this->_recordFiles($Task, $files);
 
@@ -227,7 +246,7 @@ class NamespacedBakeTest extends CakeTestCase
         $result = $Task->bake('BakeArticles', $actions, ['Js', 'Time'], ['Session', 'Flash', 'BakeMissing']);
 
         $this->_assertBaked('Controller/BakeArticlesController.ctp', $result);
-        $this->assertSame(['/my/path/BakeArticlesController.php'], array_keys($files));
+        $this->assertSame([static::PATH . 'BakeArticlesController.php'], array_keys($files));
     }
 
     /**
@@ -294,7 +313,7 @@ class NamespacedBakeTest extends CakeTestCase
     public function testBakeFixture(): void
     {
         $Task = $this->_task('FixtureTask', ['in', 'err', 'createFile', '_stop', 'clear']);
-        $Task->path = '/my/path/';
+        $Task->path = static::PATH;
         $files = [];
         $this->_recordFiles($Task, $files);
 
@@ -304,7 +323,7 @@ class NamespacedBakeTest extends CakeTestCase
         ]);
 
         $this->_assertBaked('Fixture/BakeArticleFixture.ctp', $result);
-        $this->assertSame(['/my/path/BakeArticleFixture.php'], array_keys($files));
+        $this->assertSame([static::PATH . 'BakeArticleFixture.php'], array_keys($files));
     }
 
     /**
@@ -464,27 +483,24 @@ class NamespacedBakeTest extends CakeTestCase
      */
     public function testSortImports(): void
     {
-        $Task = $this->_task('ModelTask', ['in', 'out', 'err', 'createFile', '_stop']);
-        $method = new ReflectionMethod($Task, '_sortImports');
-        if (PHP_VERSION_ID < 80100) {
-            $method->setAccessible(true);
-        }
+        $Task = new NamespacedBakeTestTask();
+        $post = 'App\\Model\\Post';
 
-        $result = $method->invoke($Task, [
-            'Cake\Controller\ComponentCollection',
-            'Cake\Controller\Component\PaginatorComponent',
-            'App\Model\Post',
-            'Cake\Controller\Component',
-            'cake\Error\NotFoundException',
-            'App\Model\Post',
+        $result = $Task->sortImports([
+            'Cake\\Controller\\ComponentCollection',
+            'Cake\\Controller\\Component\\PaginatorComponent',
+            $post,
+            'Cake\\Controller\\Component',
+            'cake\\Error\\NotFoundException',
+            $post,
         ]);
 
         $expected = [
-            'App\Model\Post',
-            'Cake\Controller\Component',
-            'Cake\Controller\Component\PaginatorComponent',
-            'Cake\Controller\ComponentCollection',
-            'cake\Error\NotFoundException',
+            $post,
+            'Cake\\Controller\\Component',
+            'Cake\\Controller\\Component\\PaginatorComponent',
+            'Cake\\Controller\\ComponentCollection',
+            'cake\\Error\\NotFoundException',
         ];
         $this->assertSame($expected, $result);
     }
