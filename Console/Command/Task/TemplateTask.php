@@ -236,6 +236,9 @@ class TemplateTask extends AppShell
      * Find a template inside a directory inside a path.
      * Will scan all other theme dirs if the template is not found in the first directory.
      *
+     * A template is a `.php` file, or a `.ctp` file as in the earlier releases of bake, so that the
+     * themes of applications keep working. In the same directory, `.php` wins.
+     *
      * @param string $path The initial path to look for the file on. If it is not found fallbacks will be used.
      * @param string $directory Subdirectory to look for ie. 'views', 'objects'
      * @param string $filename lower_case_underscored filename you want.
@@ -243,18 +246,48 @@ class TemplateTask extends AppShell
      */
     protected function _findTemplate($path, $directory, $filename)
     {
-        $themeFile = $path . $directory . DS . $filename . '.ctp';
-        if (file_exists($themeFile)) {
+        $themeFile = $this->_templateFile($path . $directory . DS . $filename);
+        if ($themeFile !== null) {
             return $themeFile;
         }
         foreach ($this->templatePaths as $path) {
-            $templatePath = $path . $directory . DS . $filename . '.ctp';
-            if (file_exists($templatePath)) {
+            $templatePath = $this->_templateFile($path . $directory . DS . $filename);
+            if ($templatePath !== null) {
                 return $templatePath;
             }
         }
         $this->err(__d('cake_console', 'Could not find template for %s', $filename));
 
         return false;
+    }
+
+    /**
+     * Gets the file of a template: the `.php` file, else the `.ctp` file.
+     *
+     * @param string $file The path of the template without the extension.
+     * @return string|null The file, or null when there is none.
+     */
+    protected function _templateFile($file)
+    {
+        foreach (['.php', '.ctp'] as $extension) {
+            if (file_exists($file . $extension)) {
+                return $file . $extension;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether a theme has a template, as a `.php` or a `.ctp` file.
+     *
+     * @param string $themePath The path to the theme.
+     * @param string $directory Subdirectory, e.g. 'views'.
+     * @param string $filename The template name.
+     * @return bool
+     */
+    public function hasTemplate($themePath, $directory, $filename)
+    {
+        return $this->_templateFile($themePath . $directory . DS . $filename) !== null;
     }
 }

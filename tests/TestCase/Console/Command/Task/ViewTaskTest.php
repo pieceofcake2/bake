@@ -362,7 +362,7 @@ class ViewTaskTest extends CakeTestCase
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'view.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'view.php');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'view.ctp',
@@ -398,7 +398,7 @@ class ViewTaskTest extends CakeTestCase
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'index.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'index.php');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'index.ctp',
@@ -418,7 +418,7 @@ class ViewTaskTest extends CakeTestCase
         $this->Task->Template->templatePaths['legacy'] = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS . 'legacy' . DS;
         $this->Task->Template->params['theme'] = 'legacy';
 
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'legacy_index.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'legacy_index.php');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'index.ctp',

@@ -23,6 +23,7 @@ App::uses('ConsoleOutput', 'Console');
 App::uses('ConsoleInput', 'Console');
 App::uses('Shell', 'Console');
 App::uses('TemplateTask', 'Bake.Console/Command/Task');
+App::uses('Folder', 'Utility');
 
 /**
  * TemplateTaskTest class
@@ -219,6 +220,32 @@ class TemplateTaskTest extends CakeTestCase
         ]);
         $result = $this->Task->generate('classes', 'fixture');
         $this->assertMatchesRegularExpression('/ArticleFixture extends CakeTestFixture/', $result);
+    }
+
+    /**
+     * A theme of an application may still have .ctp templates; in the same directory a .php
+     * template wins over a .ctp one.
+     *
+     * @return void
+     */
+    public function testGenerateCtpAndPhpTemplates(): void
+    {
+        $path = TMP . 'tests' . DS . 'bake_theme' . DS;
+        $Folder = new Folder($path . 'Templates' . DS . 'mine' . DS . 'classes', true);
+        file_put_contents($path . 'Templates' . DS . 'mine' . DS . 'classes' . DS . 'old.ctp', 'ctp <?php echo $test; ?>');
+        file_put_contents($path . 'Templates' . DS . 'mine' . DS . 'classes' . DS . 'both.ctp', 'ctp');
+        file_put_contents($path . 'Templates' . DS . 'mine' . DS . 'classes' . DS . 'both.php', 'php <?php echo $test; ?>');
+        App::build(['Console' => [$path]]);
+        $this->Task->initialize();
+        $this->Task->params['theme'] = 'mine';
+
+        $this->assertSame('ctp foo', $this->Task->generate('classes', 'old', ['test' => 'foo']));
+        $this->assertSame('php foo', $this->Task->generate('classes', 'both', ['test' => 'foo']));
+        $this->assertTrue($this->Task->hasTemplate($this->Task->templatePaths['mine'], 'classes', 'old'));
+        $this->assertFalse($this->Task->hasTemplate($this->Task->templatePaths['mine'], 'classes', 'missing'));
+
+        $Folder->delete($path);
+        App::build();
     }
 
     /**

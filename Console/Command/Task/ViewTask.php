@@ -473,7 +473,7 @@ class ViewTask extends BakeTask
             return $this->template;
         }
         $themePath = $this->Template->getThemePath();
-        if (file_exists($themePath . 'views' . DS . $action . '.ctp')) {
+        if ($this->Template->hasTemplate($themePath, 'views', $action)) {
             return $action;
         }
         $template = $action;

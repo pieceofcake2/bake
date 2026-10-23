@@ -231,16 +231,16 @@ Bake generates the code from templates. The default templates are in the plugin'
 ```
 Console/Templates/default/
 ├── actions/
-│   └── controller_actions.ctp
+│   └── controller_actions.php
 ├── classes/
-│   ├── controller.ctp
-│   ├── fixture.ctp
-│   ├── model.ctp
-│   └── test.ctp
+│   ├── controller.php
+│   ├── fixture.php
+│   ├── model.php
+│   └── test.php
 └── views/
-    ├── form.ctp
-    ├── index.ctp
-    └── view.ctp
+    ├── form.php
+    ├── index.php
+    └── view.php
 ```
 
 To customize the generated code, create a bake theme: a directory in
@@ -251,18 +251,21 @@ the default theme and edit them:
 ```
 src/Console/Templates/myTheme/
 ├── classes/
-│   ├── controller.ctp
-│   ├── fixture.ctp
-│   └── model.ctp
+│   ├── controller.php
+│   ├── fixture.php
+│   └── model.php
 └── views/
-    ├── form.ctp
-    ├── index.ctp
-    └── view.ctp
+    ├── form.php
+    ├── index.php
+    └── view.php
 ```
 
 A theme directory must contain at least one of the `actions/`, `classes/` and `views/`
 directories. Templates that a theme does not have are taken from the other installed themes
 and finally from the default theme.
+
+The templates are `.php` files. The `.ctp` templates of themes made for earlier releases of
+Bake still work; when a directory has both, the `.php` file is used.
 
 Select the theme with `--theme`:
 
@@ -285,9 +288,9 @@ the styles of the [pieceofcake2/app](https://pieceofcake2.github.io/app/) skelet
 (`normalize.min.css`, `milligram.min.css`, `fonts.css` and `cake.css`, the stylesheets of
 the CakePHP 5 application skeleton):
 
-- `index.ctp`: a content box with a "New" button, a responsive table with sortable columns
+- `index.php`: a content box with a "New" button, a responsive table with sortable columns
   and View / Edit / Delete links, and a paginator.
-- `view.ctp` and `form.ctp` (add and edit): an "Actions" side navigation next to the
+- `view.php` and `form.php` (add and edit): an "Actions" side navigation next to the
   content box. The view shows the record in a table and the related records of `hasOne`,
   `hasMany` and `hasAndBelongsToMany` associations below it.
 

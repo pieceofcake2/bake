@@ -236,16 +236,16 @@ Bake はテンプレートからコードを生成します。デフォルトの
 ```
 Console/Templates/default/
 ├── actions/
-│   └── controller_actions.ctp
+│   └── controller_actions.php
 ├── classes/
-│   ├── controller.ctp
-│   ├── fixture.ctp
-│   ├── model.ctp
-│   └── test.ctp
+│   ├── controller.php
+│   ├── fixture.php
+│   ├── model.php
+│   └── test.php
 └── views/
-    ├── form.ctp
-    ├── index.ctp
-    └── view.ctp
+    ├── form.php
+    ├── index.php
+    └── view.php
 ```
 
 生成されるコードをカスタマイズするには、bake テーマを作成します。bake テーマは、アプリケーションの
@@ -255,17 +255,20 @@ Console/Templates/default/
 ```
 src/Console/Templates/myTheme/
 ├── classes/
-│   ├── controller.ctp
-│   ├── fixture.ctp
-│   └── model.ctp
+│   ├── controller.php
+│   ├── fixture.php
+│   └── model.php
 └── views/
-    ├── form.ctp
-    ├── index.ctp
-    └── view.ctp
+    ├── form.php
+    ├── index.php
+    └── view.php
 ```
 
 テーマのディレクトリには、`actions/`、`classes/`、`views/` のディレクトリのうち少なくとも 1 つが必要です。
 テーマにないテンプレートは、インストールされている他のテーマから、最後にはデフォルトのテーマから取得されます。
+
+テンプレートは `.php` ファイルです。以前の Bake 向けに作ったテーマの `.ctp` テンプレートもそのまま使えます。
+同じディレクトリに両方があるときは、`.php` ファイルが使われます。
 
 テーマは `--theme` で選択します。
 
@@ -288,9 +291,9 @@ bin/cake bake controller Users --theme myTheme
 [pieceofcake2/app](https://pieceofcake2.github.io/app/ja/) スケルトンのスタイル (CakePHP 5 のアプリケーション
 スケルトンのスタイルシートである `normalize.min.css`、`milligram.min.css`、`fonts.css` と `cake.css`) を使います:
 
-- `index.ctp`: 「New」ボタンのあるコンテンツボックス、並べ替えのできる列と View / Edit / Delete リンクを持つ
+- `index.php`: 「New」ボタンのあるコンテンツボックス、並べ替えのできる列と View / Edit / Delete リンクを持つ
   レスポンシブなテーブル、そしてページネーター。
-- `view.ctp` と `form.ctp` (add と edit): コンテンツボックスの横に「Actions」のサイドナビゲーション。
+- `view.php` と `form.php` (add と edit): コンテンツボックスの横に「Actions」のサイドナビゲーション。
   view はレコードをテーブルで表示し、その下に `hasOne`、`hasMany`、`hasAndBelongsToMany` アソシエーションの
   関連レコードを表示します。
 

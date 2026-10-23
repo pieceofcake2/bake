@@ -139,7 +139,7 @@ class NamespacedBakeTest extends CakeTestCase
     /**
      * Asserts that baked code matches a file of tests/bake_compare/Namespaced/.
      *
-     * @param string $file The file, e.g. Model/BakeArticle.ctp.
+     * @param string $file The file, e.g. Model/BakeArticle.php.
      * @param string $result The baked code.
      * @return void
      */
@@ -201,7 +201,7 @@ class NamespacedBakeTest extends CakeTestCase
             'displayField' => 'title',
         ]);
 
-        $this->_assertBaked('Model/BakeArticle.ctp', $result);
+        $this->_assertBaked('Model/BakeArticle.php', $result);
         $this->assertSame([static::PATH . 'BakeArticle.php'], array_keys($files));
     }
 
@@ -245,7 +245,7 @@ class NamespacedBakeTest extends CakeTestCase
         // BakeMissing has no class: the name stays a string
         $result = $Task->bake('BakeArticles', $actions, ['Js', 'Time'], ['Session', 'Flash', 'BakeMissing']);
 
-        $this->_assertBaked('Controller/BakeArticlesController.ctp', $result);
+        $this->_assertBaked('Controller/BakeArticlesController.php', $result);
         $this->assertSame([static::PATH . 'BakeArticlesController.php'], array_keys($files));
     }
 
@@ -278,7 +278,7 @@ class NamespacedBakeTest extends CakeTestCase
 
         $result = $Task->bake('BakeArticles', 'scaffold');
 
-        $this->_assertBaked('Controller/Scaffold.ctp', $result);
+        $this->_assertBaked('Controller/Scaffold.php', $result);
     }
 
     /**
@@ -322,7 +322,7 @@ class NamespacedBakeTest extends CakeTestCase
             'table' => 'articles',
         ]);
 
-        $this->_assertBaked('Fixture/BakeArticleFixture.ctp', $result);
+        $this->_assertBaked('Fixture/BakeArticleFixture.php', $result);
         $this->assertSame([static::PATH . 'BakeArticleFixture.php'], array_keys($files));
     }
 
@@ -355,30 +355,30 @@ class NamespacedBakeTest extends CakeTestCase
     public static function bakeTestProvider(): array
     {
         return [
-            'model' => ['Model', 'BakeArticle', 'Model' . DS . 'BakeArticleTest.php', 'Test/BakeArticleTest.ctp'],
+            'model' => ['Model', 'BakeArticle', 'Model' . DS . 'BakeArticleTest.php', 'Test/BakeArticleTest.php'],
             'controller' => [
                 'Controller',
                 'BakeArticles',
                 'Controller' . DS . 'BakeArticlesControllerTest.php',
-                'Test/BakeArticlesControllerTest.ctp',
+                'Test/BakeArticlesControllerTest.php',
             ],
             'component' => [
                 'Component',
                 'BakeExample',
                 'Controller' . DS . 'Component' . DS . 'BakeExampleComponentTest.php',
-                'Test/BakeExampleComponentTest.ctp',
+                'Test/BakeExampleComponentTest.php',
             ],
             'helper' => [
                 'Helper',
                 'BakeExample',
                 'View' . DS . 'Helper' . DS . 'BakeExampleHelperTest.php',
-                'Test/BakeExampleHelperTest.ctp',
+                'Test/BakeExampleHelperTest.php',
             ],
             'behavior' => [
                 'Behavior',
                 'BakeExample',
                 'Model' . DS . 'Behavior' . DS . 'BakeExampleBehaviorTest.php',
-                'Test/BakeExampleBehaviorTest.ctp',
+                'Test/BakeExampleBehaviorTest.php',
             ],
         ];
     }
@@ -454,7 +454,7 @@ class NamespacedBakeTest extends CakeTestCase
             ['/my/templates/BakeArticles/index.php', '/my/templates/BakeArticles/add.php'],
             array_keys($files),
         );
-        $this->_assertBaked('View/index.ctp', $files['/my/templates/BakeArticles/index.php']);
+        $this->_assertBaked('View/index.php', $files['/my/templates/BakeArticles/index.php']);
     }
 
     /**
