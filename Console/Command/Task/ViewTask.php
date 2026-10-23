@@ -405,33 +405,71 @@ class ViewTask extends BakeTask
     }
 
     /**
-     * Gets the path for the view files. Namespaced plugins keep them in `templates/`,
-     * as in CakePHP 5.
+     * Gets the path for the view files. A plugin keeps them in `templates/` when it has that
+     * directory or is namespaced (the CakePHP 5 layout), and in `View/` otherwise.
      *
      * @return string Path to output.
      */
     public function getPath()
     {
-        if (!empty($this->plugin) && $this->_namespace() !== null) {
-            return $this->_pluginPath($this->plugin) . 'templates' . DS;
+        if (!empty($this->plugin)) {
+            $pluginPath = $this->_pluginPath($this->plugin);
+            if (is_dir($pluginPath . 'templates') || $this->_namespace() !== null) {
+                return $pluginPath . 'templates' . DS;
+            }
         }
 
         return parent::getPath();
     }
 
     /**
-     * Gets the extension of the baked view files: `.php` for the namespaced applications and
-     * plugins, whose views are in `templates/`, as in CakePHP 5, and `.ctp` otherwise.
+     * Gets the extension of the baked view files, from the views that the application or the
+     * plugin has.
+     *
+     * CakePHP 2.13 renders `.php` and `.ctp` files in a `templates/` directory, but only `.ctp`
+     * files in a `View/` directory. In `templates/`, the views are `.php` files, unless the views
+     * there are `.ctp` files: first the views of the controller, then all views.
      *
      * @return string
      */
     protected function _viewExtension()
     {
-        if ($this->_namespace() !== null && basename(rtrim($this->getPath(), DS)) === 'templates') {
-            return '.php';
+        $path = $this->getPath();
+        if (basename(rtrim($path, DS)) !== 'templates') {
+            return '.ctp';
+        }
+        foreach ([$path . $this->controllerName . DS, $path] as $directory) {
+            $extensions = $this->_viewExtensions($directory);
+            if ($extensions !== []) {
+                return $extensions === ['ctp'] ? '.ctp' : '.php';
+            }
         }
 
-        return '.ctp';
+        return '.php';
+    }
+
+    /**
+     * Lists the extensions of the view files in a directory and its subdirectories.
+     *
+     * @param string $directory The directory.
+     * @return array<string> The extensions, `php` and `ctp`, that the views have.
+     */
+    protected function _viewExtensions($directory)
+    {
+        if (!is_dir($directory)) {
+            return [];
+        }
+        $extensions = [];
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS));
+        foreach ($files as $file) {
+            $extension = strtolower($file->getExtension());
+            if (in_array($extension, ['php', 'ctp'], true)) {
+                $extensions[$extension] = $extension;
+            }
+        }
+        sort($extensions);
+
+        return $extensions;
     }
 
     /**

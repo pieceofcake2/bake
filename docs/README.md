@@ -75,9 +75,20 @@ Running `bin/cake bake` (or a command such as `bin/cake bake model`) without a n
 an interactive mode that guides you through the generation. If `database.php` does not
 exist yet, Bake first offers to create it.
 
-The files are written to the directories of your application, so a modern application gets
-`src/Model/`, `src/Controller/` and `templates/`, and a legacy application gets
-`app/Model/`, `app/Controller/` and `app/View/`.
+Bake looks at the application or plugin that it bakes into, and writes the files where and as
+that application or plugin keeps them:
+
+| | Detected from | Result |
+| --- | --- | --- |
+| Namespace | `App.namespace` of the application; a `src/` directory of a plugin | Namespaced classes (`App\Model\Post`, `ContactManager\Model\Contact`), else global classes; see [Namespaced Applications and Plugins](#namespaced-applications-and-plugins) |
+| Classes | The paths of the application (`App::path()`); for a plugin `src/` or the plugin directory | `src/Model/`, `src/Controller/` or `app/Model/`, `app/Controller/`; `src/Model/` or `Model/` of a plugin |
+| Views | `templates/` of the application or plugin, else `View/` | `templates/Posts/` or `View/Posts/` |
+| View extension | The views that are already there | `.ctp` in `View/`, which CakePHP 2.13 only reads as `.ctp`. In `templates/`, `.php`, unless the views there are `.ctp` files: first the views of the controller, then all views (an application of pieceofcake2/app-legacy keeps baking `.ctp`) |
+| Test cases and fixtures | `tests/TestCase/` or `Test/Case/` of the application or plugin | `tests/TestCase/` and `tests/Fixture/`, or `Test/Case/` and `Test/Fixture/` |
+
+Bake writes the views of a controller only; the layouts and elements stay as they are, with
+the directory names that the application uses (`layout/`, `element/`, `email/`, `Error/` or
+`Layouts/`, `Elements/`, `Emails/`, `Errors/`).
 
 A modern application autoloads `src/` and the CakePHP classes with the Composer classmap,
 so the baked classes and tests have no `App::uses()` calls, except for the class under test
@@ -156,7 +167,6 @@ class PostsController extends AppController
   CakePHP resolves when the application runs.
 - The test cases name their fixtures as before (`'app.post'`); CakePHP finds
   `App\Test\Fixture\PostFixture` for them.
-- The views are `.php` files in `templates/`.
 
 A plugin with the CakePHP 5 layout, a plugin with a `src/` directory, has its classes in the
 namespace of the plugin name. Bake writes the classes of such a plugin into `src/` (for

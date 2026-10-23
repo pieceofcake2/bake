@@ -77,9 +77,20 @@ bin/cake bake plugin MyPlugin
 名前を指定せずに `bin/cake bake` (または `bin/cake bake model` などのコマンド) を実行すると、対話モードが始まり、
 生成の手順を案内します。`database.php` がまだない場合、Bake はまずそれを作成するか尋ねます。
 
-ファイルはアプリケーションのディレクトリに書き込まれます。モダン構成のアプリケーションでは `src/Model/`、
-`src/Controller/` と `templates/` に、レガシー構成のアプリケーションでは `app/Model/`、`app/Controller/` と
-`app/View/` に書き込まれます。
+Bake は、bake する先のアプリケーションやプラグインの構成を見て、そのアプリケーションやプラグインがファイルを
+置いている場所と形で書き込みます。
+
+| | 判断のもと | 結果 |
+| --- | --- | --- |
+| 名前空間 | アプリケーションの `App.namespace`、プラグインの `src/` ディレクトリ | 名前空間付きのクラス (`App\Model\Post`、`ContactManager\Model\Contact`)、なければグローバルなクラス。[名前空間を使うアプリケーションとプラグイン](#namespaced-applications-and-plugins) を参照 |
+| クラス | アプリケーションのパス (`App::path()`)、プラグインでは `src/` かプラグインのディレクトリ | `src/Model/`、`src/Controller/` か `app/Model/`、`app/Controller/`。プラグインでは `src/Model/` か `Model/` |
+| ビュー | アプリケーションやプラグインの `templates/`、なければ `View/` | `templates/Posts/` か `View/Posts/` |
+| ビューの拡張子 | すでにあるビュー | `View/` では `.ctp` (CakePHP 2.13 は `View/` では `.ctp` だけを読みます)。`templates/` では `.php` ですが、そこにあるビューが `.ctp` なら `.ctp` にします。まずそのコントローラーのビューを、次にすべてのビューを見ます (pieceofcake2/app-legacy のアプリケーションでは、これまでどおり `.ctp` になります) |
+| テストケースとフィクスチャ | アプリケーションやプラグインの `tests/TestCase/` か `Test/Case/` | `tests/TestCase/` と `tests/Fixture/`、または `Test/Case/` と `Test/Fixture/` |
+
+Bake が書き込むのはコントローラーのビューだけです。レイアウトとエレメントはそのままで、アプリケーションが使っている
+ディレクトリ名 (`layout/`、`element/`、`email/`、`Error/` か `Layouts/`、`Elements/`、`Emails/`、`Errors/`) も
+変わりません。
 
 モダン構成のアプリケーションは、`src/` と CakePHP のクラスを Composer のクラスマップでオートロードするので、
 bake したクラスとテストには `App::uses()` の呼び出しがありません。例外は、コンポーネント、ヘルパー、ビヘイビアの
@@ -156,7 +167,6 @@ class PostsController extends AppController
   CakePHP が解決します。
 - テストケースは、これまでどおりの名前でフィクスチャを指定します (`'app.post'`)。CakePHP はこの名前から
   `App\Test\Fixture\PostFixture` を見つけます。
-- ビューは `templates/` の `.php` ファイルです。
 
 CakePHP 5 の構成のプラグイン、つまり `src/` ディレクトリがあるプラグインは、プラグイン名の名前空間にクラスを
 置きます。Bake は、そのようなプラグインのクラスを `src/` に (たとえば `ContactManager\Model` 名前空間の
