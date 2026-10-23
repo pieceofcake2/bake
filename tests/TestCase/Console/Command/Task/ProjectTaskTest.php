@@ -151,6 +151,38 @@ class ProjectTaskTest extends CakeTestCase
     }
 
     /**
+     * The copied files keep the modes of the skeleton: bin/cake is executable, the other files
+     * are not, and tmp/ and logs/ are writable.
+     *
+     * @return void
+     */
+    public function testBakeFileModes(): void
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Windows has no file modes.');
+        }
+        $path = $this->Task->args[0] = TMP . 'tests' . DS . 'bake_test_app';
+        $this->Task->params['skel'] = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
+        $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
+        $this->Task->execute();
+
+        clearstatcache();
+        $mode = function ($file) use ($path) {
+            return sprintf('%o', fileperms($path . DS . $file) & 0777);
+        };
+        $this->assertSame('755', $mode('bin' . DS . 'cake'));
+        $this->assertSame('644', $mode('config' . DS . 'core.php'));
+        $this->assertSame('644', $mode('composer.json'));
+        $this->assertSame('644', $mode('webroot' . DS . '.htaccess'));
+        $this->assertSame('644', $mode('templates' . DS . 'Pages' . DS . 'home.php'));
+        $this->assertSame('755', $mode('src'));
+        $this->assertSame('755', $mode('src' . DS . 'Controller'));
+        $this->assertSame('777', $mode('tmp'));
+        $this->assertSame('777', $mode('tmp' . DS . 'cache'));
+        $this->assertSame('777', $mode('logs'));
+    }
+
+    /**
      * test bake with an absolute path.
      *
      * @return void

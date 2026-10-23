@@ -183,7 +183,7 @@ class ProjectTask extends AppShell
                     $skip = [];
                 }
 
-                if ($Folder->copy(['to' => $path, 'skip' => $skip])) {
+                if ($Folder->copy(['to' => $path, 'skip' => $skip]) && $this->_copyModes($skel, $path)) {
                     $this->hr();
                     $this->out(__d('cake_console', '<success>Created:</success> %s in %s', $app, $path));
                     $this->hr();
@@ -208,6 +208,41 @@ class ProjectTask extends AppShell
 
                 return false;
         }
+    }
+
+    /**
+     * Gives the copied files the modes of the skeleton. Folder::copy() makes all files 0755, so the
+     * files become 0644, and the executable files of the skeleton (`bin/cake`) and the
+     * directories 0755. ProjectTask::execute() then makes `tmp/` and `logs/` writable.
+     *
+     * @param string $skel The skeleton.
+     * @param string $path The project path.
+     * @return bool Success
+     */
+    protected function _copyModes($skel, $path)
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            // Windows has no such modes
+            return true;
+        }
+        $skel = rtrim($skel, DS) . DS;
+        $path = rtrim($path, DS) . DS;
+        $items = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($skel, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST,
+        );
+        $success = true;
+        foreach ($items as $item) {
+            $target = $path . substr($item->getPathname(), strlen($skel));
+            if (!file_exists($target)) {
+                // A skipped file, e.g. an "empty" placeholder
+                continue;
+            }
+            $mode = $item->isDir() || $item->isExecutable() ? 0755 : 0644;
+            $success = chmod($target, $mode) && $success;
+        }
+
+        return $success;
     }
 
     /**
