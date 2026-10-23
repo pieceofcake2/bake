@@ -15,6 +15,9 @@
     <exclude-pattern>*/Console/Templates/default/*</exclude-pattern>
     <exclude-pattern>*/Console/Templates/legacy/*</exclude-pattern>
     <exclude-pattern>*/tests/bake_compare/*</exclude-pattern>
+    <!-- The project skeleton is a copy of pieceofcake2/app, which checks it with its own phpcs.xml
+         (CakePHP2Namespace for config/, src/ and tests/) -->
+    <exclude-pattern>*/Console/Templates/skel/*</exclude-pattern>
 
     <rule ref="CakePHP2"/>
 </ruleset>

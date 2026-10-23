@@ -212,10 +212,27 @@ as before.
 Names can be given as `Plugin.Name` to bake into a plugin, for example
 `bin/cake bake model ContactManager.Contact`.
 
-`bake project` copies the legacy `app/`-style skeleton bundled with the plugin
-(`Console/Templates/skel`). Use `--skel` to copy another directory. To start a new
-application with the modern layout, use `composer create-project pieceofcake2/app`
-instead (see [pieceofcake2/app](https://github.com/pieceofcake2/app)).
+`bake project` copies the skeleton bundled with the plugin (`Console/Templates/skel`), which
+is the skeleton of [pieceofcake2/app](https://github.com/pieceofcake2/app): namespaced classes
+in `src/` (`App\`), `.php` templates in `templates/` with the CakePHP 5 directory names
+(`layout/`, `element/`, `email/`, `Error/`), `config/` with the `.env` files, `tests/`,
+`webroot/`, `bin/cake`, `composer.json` and the configuration of phpcs, PHPStan and PHPUnit. It
+leaves out what belongs to the skeleton repository only (its README, LICENSE, documentation,
+CI workflows and Qlty configuration). Bake then writes a random `Security.salt` and
+`Security.cipherSeed` as the defaults in `config/core.php` (the environment variables
+`SECURITY_SALT` and `SECURITY_CIPHER_SEED` still win) and the name of the directory as the
+cache prefix. Run `composer install` in the new directory before you use it:
+
+```bash
+bin/cake bake project /path/to/myapp
+cd /path/to/myapp
+composer install
+```
+
+`--empty` keeps the `empty` files that keep the empty directories in Git. Use `--skel` to copy
+another directory. `composer create-project pieceofcake2/app` creates the same application.
+For the former form (global classes, `.ctp` templates), see
+[pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy).
 
 ## Options
 

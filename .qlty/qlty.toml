@@ -11,6 +11,8 @@ exclude_patterns = [
     "Console/Templates/default/**",
     "Console/Templates/legacy/**",
     "tests/bake_compare/**",
+    # The project skeleton is a copy of pieceofcake2/app, which is checked in that repository
+    "Console/Templates/skel/**",
 ]
 
 test_patterns = [

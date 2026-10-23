@@ -2,74 +2,68 @@
 /**
  * Web Access Frontend for TestSuite
  *
+ * CakePHP(tm) Tests <https://book.cakephp.org/2.0/en/development/testing.html>
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  * @link          https://book.cakephp.org/2.0/en/development/testing.html
  * @package       app.webroot
  * @since         CakePHP(tm) v 1.2.0.4433
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Core\Configure;
+use Cake\Error\NotFoundException;
+use Cake\TestSuite\CakeTestSuiteDispatcher;
 use Composer\InstalledVersions;
 
 set_time_limit(0);
 ini_set('display_errors', 1);
 
-/**
- * Use the DS to separate the directories in other defines
- */
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }
 
-/**
- * These defines should only be edited if you have CakePHP installed in
- * a directory layout other than the way it is distributed.
- * When using custom settings be sure to use the DS and do not add a trailing DS.
- */
-
-/**
- * The full path to the directory which holds "app", WITHOUT a trailing DS.
- */
-if (!defined('ROOT')) {
-    define('ROOT', dirname(__DIR__, 2));
+if (!is_file(dirname(__DIR__) . DS . 'config' . DS . 'define.php')) {
+    trigger_error(
+        'Configuration file "config' . DS . 'define.php" could not be loaded. ' .
+        'Please ensure this file exists and is readable.',
+        E_USER_ERROR
+    );
 }
+require_once dirname(__DIR__) . DS . 'config' . DS . 'define.php';
 
-/**
- * The actual directory name for the "app".
- */
-if (!defined('APP_DIR')) {
-    define('APP_DIR', basename(dirname(__DIR__)));
-}
-
-/**
- * Path to the Composer vendor directory, which holds "autoload.php".
- * Change this if "vendor-dir" is configured in composer.json.
- */
-if (!defined('VENDORS')) {
-    define('VENDORS', ROOT . DS . 'vendor' . DS);
-}
-
-/**
- * Editing below this line should not be necessary.
- * Change at your own risk.
- */
-if (!defined('WEBROOT_DIR')) {
-    define('WEBROOT_DIR', basename(__DIR__));
-}
-if (!defined('WWW_ROOT')) {
-    define('WWW_ROOT', __DIR__ . DS);
-}
-
-if (!is_file(VENDORS . 'autoload.php')) {
-    throw new RuntimeException(
-        'Composer autoload file not found at "' . VENDORS . 'autoload.php". ' .
+if (!is_dir(VENDORS)) {
+    trigger_error(
+        'Composer vendors directory not found at "' . VENDORS . '". ' .
         'Please run "composer install" in the project root directory to install dependencies.',
+        E_USER_ERROR,
+    );
+}
+if (!is_file(VENDORS . 'autoload.php')) {
+    trigger_error(
+        'Composer autoload file not found at "' . VENDORS . 'autoload.php". ' .
+        'Please run "composer install" to generate the autoload file.',
+        E_USER_ERROR,
     );
 }
 require_once VENDORS . 'autoload.php';
 
-require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
+// The test runner runs with APP_ENV=test by default, as vendor/bin/phpunit (tests/bootstrap.php),
+// so config/core.php loads config/.env.test, where DATABASE_URL is the test database.
+if ((string)getenv('APP_ENV') === '' && empty($_SERVER['APP_ENV'])) {
+    putenv('APP_ENV=test');
+    $_ENV['APP_ENV'] = 'test';
+    $_SERVER['APP_ENV'] = 'test';
+}
+
+require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'bootstrap.php';
 
 if (Configure::read('debug') < 1) {
     throw new NotFoundException(__d('cake_dev', 'Debug setting does not allow access to this URL.'));
 }
-
 CakeTestSuiteDispatcher::run();

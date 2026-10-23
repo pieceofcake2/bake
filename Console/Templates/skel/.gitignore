@@ -1,0 +1,51 @@
+# User specific & automatically generated files #
+#################################################
+# Keep the directory structure of tmp/ and logs/ (the "empty" placeholder files)
+# but ignore their contents.
+/tmp/cache/*
+!/tmp/cache/*/
+/tmp/cache/*/*
+!/tmp/cache/*/empty
+/tmp/sessions/*
+!/tmp/sessions/empty
+/tmp/tests/*
+!/tmp/tests/empty
+/logs/*
+!/logs/empty
+/vendor
+# Plugins installed by Composer. Plugins of your own application in plugins/ are
+# committed; add other plugins that you install with Composer here.
+/plugins/Bake/
+/plugins/DebugKit/
+.phpunit.result.cache
+/phpunit.xml
+/config/database.php
+/config/email.php
+/config/.env.local
+/config/.env.*.local
+
+# IDE and editor specific files #
+#################################
+/nbproject
+.idea
+/.project
+/.buildpath
+/.settings/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# End-to-End tests (pieceofcake2/panther) #
+###########################################
+# Screenshots of the failed tests
+/tmp/error-screenshots/
+# chromedriver downloaded by vendor/bin/bdi detect drivers
+/drivers/

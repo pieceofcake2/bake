@@ -1,0 +1,106 @@
+<?php
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @package       app.Config
+ * @since         CakePHP(tm) v 0.2.9
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
+ */
+
+/**
+ * Database configuration class.
+ *
+ * You can specify multiple configurations for production, development and testing.
+ *
+ * datasource => The name of a supported datasource; valid options are as follows:
+ *  Database/Mysql - MySQL 5.6, 5.7, 8.0+ (pdo_mysql),
+ *  Database/Sqlite - SQLite 3 (pdo_sqlite),
+ *  Database/Postgres - PostgreSQL 9.4+ (pdo_pgsql),
+ *  Database/Sqlserver - Microsoft SQL Server 2022+ (pdo_sqlsrv)
+ *
+ * You can add custom database datasources (or override existing datasources) by adding the
+ * appropriate file to src/Model/Datasource/Database. Datasources should be named 'MyDatasource.php',
+ *
+ *
+ * persistent => true / false
+ * Determines whether or not the database should use a persistent connection
+ *
+ * host =>
+ * the host you connect to the database. To add a socket or port number, use 'port' => #
+ *
+ * prefix =>
+ * Uses the given prefix for all the tables in this database. This setting can be overridden
+ * on a per-table basis with the Model::$tablePrefix property.
+ *
+ * schema =>
+ * For Postgres/Sqlserver specifies which schema you would like to use the tables in.
+ * Postgres defaults to 'public'. For Sqlserver, it defaults to empty and use
+ * the connected user's default schema (typically 'dbo').
+ *
+ * encoding =>
+ * For MySQL, Postgres specifies the character encoding to use when connecting to the
+ * database. Uses database default not specified.
+ *
+ * sslmode =>
+ * For Postgres specifies the SSL mode for the connection ('disable', 'allow', 'prefer', 'require',
+ * 'verify-ca' or 'verify-full'). If not set, sslmode is not added to the DSN and the libpq
+ * default ('prefer') is used.
+ *
+ * unix_socket =>
+ * For MySQL to connect via socket specify the `unix_socket` parameter instead of `host` and `port`
+ *
+ * settings =>
+ * Array of key/value pairs, on connection it executes SET statements for each pair
+ * For MySQL : http://dev.mysql.com/doc/refman/5.6/en/set-statement.html
+ * For Postgres : http://www.postgresql.org/docs/9.2/static/sql-set.html
+ * For Sql Server : http://msdn.microsoft.com/en-us/library/ms190356.aspx
+ *
+ * flags =>
+ * A key/value array of driver specific connection options.
+ *
+ * dsn =>
+ * A DSN that sets the connection in one string (e.g. mysql://user:password@localhost/database_name).
+ * The keys in the DSN replace the same keys of the connection.
+ */
+class DATABASE_CONFIG
+{
+    public $default = [
+        //'datasource' => 'Database/Mysql',
+        'persistent' => false,
+        //'host' => 'localhost',
+        //'login' => 'user',
+        //'password' => 'password',
+        //'database' => 'database_name',
+        'prefix' => '',
+        //'encoding' => 'utf8mb4',
+
+        // PDO MySQL/SQLite Driver had the following backward incompatible changes in PHP 8.1
+        // * https://www.php.net/manual/en/migration81.incompatible.php#migration81.incompatible.pdo.mysql
+        // * https://www.php.net/manual/en/migration81.incompatible.php#migration81.incompatible.pdo.sqlite
+        // If under PHP 8.1 and didn't use the following flags, adding them will cause integer and float columns
+        // in the result set to be strings as before.
+        //'flags' => [
+        //    PDO::ATTR_STRINGIFY_FETCHES => true,
+        //],
+    ];
+
+    public $test = [];
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->default['dsn'] = env('DATABASE_URL');
+        if (env('APP_ENV') === 'test') {
+            $this->test = $this->default;
+        }
+    }
+}

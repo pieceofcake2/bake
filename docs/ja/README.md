@@ -213,10 +213,25 @@ CakePHP 2 の構成のプラグインで、そのクラスはグローバルで�
 プラグインの中に bake するには、`bin/cake bake model ContactManager.Contact` のように、名前を `Plugin.Name` の形で
 指定します。
 
-`bake project` は、プラグインに同梱されているレガシーな `app/` 形式のスケルトン (`Console/Templates/skel`) を
-コピーします。別のディレクトリをコピーするには `--skel` を使います。モダン構成の新しいアプリケーションを始めるには、
-代わりに `composer create-project pieceofcake2/app` を使ってください
-([pieceofcake2/app](https://github.com/pieceofcake2/app) を参照)。
+`bake project` は、プラグインに同梱されているスケルトン (`Console/Templates/skel`) をコピーします。これは
+[pieceofcake2/app](https://github.com/pieceofcake2/app) のスケルトンです。`src/` の名前空間付きのクラス (`App\`)、
+CakePHP 5 のディレクトリ名 (`layout/`、`element/`、`email/`、`Error/`) の `templates/` にある `.php` テンプレート、
+`.env` ファイルを含む `config/`、`tests/`、`webroot/`、`bin/cake`、`composer.json`、phpcs・PHPStan・PHPUnit の設定が
+入っています。スケルトンのリポジトリだけのもの (README、LICENSE、ドキュメント、CI のワークフロー、Qlty の設定) は
+含みません。そのあと Bake は、`config/core.php` の `Security.salt` と `Security.cipherSeed` の既定値をランダムな値に
+して (環境変数 `SECURITY_SALT` と `SECURITY_CIPHER_SEED` があればそちらが優先されます)、ディレクトリ名をキャッシュの
+プレフィックスにします。使う前に、新しいディレクトリで `composer install` を実行してください。
+
+```bash
+bin/cake bake project /path/to/myapp
+cd /path/to/myapp
+composer install
+```
+
+`--empty` を付けると、空のディレクトリを Git に残すための `empty` ファイルもコピーします。別のディレクトリをコピー
+するには `--skel` を使います。`composer create-project pieceofcake2/app` でも同じアプリケーションができます。
+以前の形 (グローバルなクラス、`.ctp` テンプレート) については
+[pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy) を参照してください。
 
 <a id="options"></a>
 

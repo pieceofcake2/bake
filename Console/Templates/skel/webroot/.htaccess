@@ -1,10 +1,8 @@
 # Based on webroot/.htaccess of cakephp/app (https://github.com/cakephp/app),
 # MIT License, Copyright (c) Cake Software Foundation, Inc.
 #
-# Set the document root of your web server to this webroot/ directory
-# (app/webroot/), never to the project directory or to app/. A document root
-# above webroot/ exposes the configuration, logs, cache and source code of the
-# application.
+# Set the document root of your web server to this webroot/ directory, never
+# to the project directory above it.
 
 # Uncomment the following to prevent the httpoxy vulnerability
 # See: https://httpoxy.org/
