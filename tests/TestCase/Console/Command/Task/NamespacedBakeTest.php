@@ -466,6 +466,9 @@ class NamespacedBakeTest extends CakeTestCase
     {
         $Task = $this->_task('ModelTask', ['in', 'out', 'err', 'createFile', '_stop']);
         $method = new ReflectionMethod($Task, '_sortImports');
+        if (PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         $result = $method->invoke($Task, [
             'Cake\Controller\ComponentCollection',
