@@ -367,7 +367,7 @@ git diff
 The script copies the files that git tracks at that commit, with their modes, and leaves out
 what only the skeleton repository needs (`README.md`, `LICENSE`, `composer.lock`, `docs/`,
 `.github/`, `.qlty/`, `vendor/`, installed plugins) and the contents of `tmp/` and `logs/`,
-keeping the `empty` placeholders. On a case-insensitive file system, check with `git ls-files`
+keeping the `.gitkeep` placeholders. On a case-insensitive file system, check with `git ls-files`
 that a renamed directory (for example `Config/` → `config/`) does not stay in git twice.
 
 ## Origin

@@ -7,8 +7,8 @@
 # <app-checkout> is a clone of https://github.com/pieceofcake2/app, <ref> a commit, branch or tag of it
 # (default: HEAD). Only the files that git tracks at <ref> are copied, with their modes; uncommitted
 # changes, vendor/ and the installed plugins are not. The files that only the skeleton repository needs
-# are left out (see EXCLUDE below), and so are the contents of tmp/ and logs/ except their "empty"
-# placeholders. Review the changes with `git status` and `git diff` before you commit them.
+# are left out (see EXCLUDE below), and so are the contents of tmp/ and logs/ except their ".gitkeep"
+# placeholders (or "empty" ones of older releases). Review the changes with `git status` and `git diff` before you commit them.
 
 set -eu
 
@@ -44,7 +44,7 @@ done
 # Installed plugins, and the contents of tmp/ and logs/ other than their placeholders
 for directory in plugins tmp logs; do
     if [ -d "$work/skel/$directory" ]; then
-        find "$work/skel/$directory" -type f ! -name empty -exec rm -f {} +
+        find "$work/skel/$directory" -type f ! -name .gitkeep ! -name empty -exec rm -f {} +
     fi
 done
 
