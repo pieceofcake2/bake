@@ -205,7 +205,7 @@ as before.
 | `view [<controller>] [<action>] [<alias>]` | Bake the views (`index`, `view`, `add`, `edit`) of a controller, or a single view. |
 | `fixture [<name>]` | Bake a test fixture. `fixture all` bakes the fixtures of all tables. |
 | `test [<type>] [<name>]` | Bake a test case for a controller, model, helper, component or behavior. |
-| `plugin [<name>]` | Bake the directory structure, `AppController` and `AppModel` of a new plugin. |
+| `plugin [<name>]` | Bake the directory structure, `AppController` and `AppModel` of a new plugin. Each new directory gets a `.gitkeep` file, which keeps it in Git while it is empty. |
 | `db_config` | Bake the `database.php` configuration file. |
 | `project [<path>]` | Bake a new application from a skeleton. |
 

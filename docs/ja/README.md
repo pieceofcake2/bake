@@ -206,7 +206,7 @@ CakePHP 2 の構成のプラグインで、そのクラスはグローバルで�
 | `view [<controller>] [<action>] [<alias>]` | コントローラーのビュー (`index`、`view`、`add`、`edit`)、または 1 つのビューを bake します。 |
 | `fixture [<name>]` | テストのフィクスチャを bake します。`fixture all` はすべてのテーブルのフィクスチャを bake します。 |
 | `test [<type>] [<name>]` | コントローラー、モデル、ヘルパー、コンポーネント、ビヘイビアのテストケースを bake します。 |
-| `plugin [<name>]` | 新しいプラグインのディレクトリ構成、`AppController` と `AppModel` を bake します。 |
+| `plugin [<name>]` | 新しいプラグインのディレクトリ構成、`AppController` と `AppModel` を bake します。空のディレクトリを Git に残すため、作成したディレクトリにはそれぞれ `.gitkeep` ファイルを置きます。 |
 | `db_config` | `database.php` 設定ファイルを bake します。 |
 | `project [<path>]` | スケルトンから新しいアプリケーションを bake します。 |
 
