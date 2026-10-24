@@ -666,14 +666,14 @@ class TestTaskTest extends CakeTestCase
      */
     public function testInteractiveWithPlugin(): void
     {
-        $testApp = CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Plugin' . DS;
+        $testApp = CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Plugin' . DS;
         App::build([
             'Plugin' => [$testApp],
         ], App::RESET);
-        CakePlugin::load('TestPlugin');
+        CakePlugin::load('TestLegacyPlugin');
 
-        $this->Task->plugin = 'TestPlugin';
-        $path = $testApp . 'TestPlugin' . DS . 'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' . DS . 'OtherHelperTest.php';
+        $this->Task->plugin = 'TestLegacyPlugin';
+        $path = $testApp . 'TestLegacyPlugin' . DS . 'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' . DS . 'OtherHelperTest.php';
         $this->Task->expects($this->any())
             ->method('in')
             ->will($this->onConsecutiveCalls(

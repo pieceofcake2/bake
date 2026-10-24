@@ -254,7 +254,7 @@ class FixtureTask extends BakeTask
                 $importBits[] = "'connection' => '{$this->connection}'";
             }
             if (!empty($importBits)) {
-                $import = sprintf('array(%s)', implode(', ', $importBits));
+                $import = sprintf('[%s]', implode(', ', $importBits));
             }
         }
 
@@ -303,6 +303,11 @@ class FixtureTask extends BakeTask
 
         $this->Template->set('model', $model);
         $this->Template->set($vars);
+        $namespace = $this->_namespace();
+        $this->Template->set([
+            'namespace' => $namespace === null ? null : $namespace . '\\Test\\Fixture',
+            'imports' => $namespace === null ? [] : ['Cake\\TestSuite\\Fixture\\CakeTestFixture'],
+        ]);
         $content = $this->Template->generate('classes', 'fixture');
 
         $this->out("\n" . __d('cake_console', 'Baking test fixture for %s...', $model), 1, Shell::QUIET);
@@ -334,9 +339,51 @@ class FixtureTask extends BakeTask
      */
     protected function _generateSchema($tableInfo)
     {
-        $schema = trim($this->_Schema->generateTable('f', $tableInfo), "\n");
+        $out = "[\n";
+        foreach ($tableInfo as $field => $value) {
+            if ($field === 'indexes') {
+                $indexes = [];
+                foreach ((array)$value as $key => $index) {
+                    $indexes[] = "            '{$key}' => [" . implode(', ', $this->_exportValues($index)) . "],\n";
+                }
+                $out .= $indexes ? "        'indexes' => [\n" . implode('', $indexes) . "        ],\n" : "        'indexes' => [],\n";
+                continue;
+            }
+            if ($field === 'tableParameters') {
+                $out .= "        'tableParameters' => [" . implode(', ', $this->_exportValues((array)$value)) . "],\n";
+                continue;
+            }
+            if (is_string($value)) {
+                $value = ['type' => $value];
+            }
+            $out .= "        '{$field}' => [" . implode(', ', $this->_exportValues($value)) . "],\n";
+        }
 
-        return substr($schema, 13, -1);
+        return $out . '    ]';
+    }
+
+    /**
+     * Exports the keys and values of an array as PHP code, with short arrays.
+     *
+     * @param array $values The values.
+     * @return array<string> The `'key' => value` pairs, or the values of a list.
+     */
+    protected function _exportValues($values)
+    {
+        $out = [];
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $value = '[' . implode(', ', $this->_exportValues($value)) . ']';
+            } else {
+                $value = var_export($value, true);
+                if ($value === 'NULL') {
+                    $value = 'null';
+                }
+            }
+            $out[] = is_int($key) ? $value : var_export((string)$key, true) . ' => ' . $value;
+        }
+
+        return $out;
     }
 
     /**
@@ -420,21 +467,19 @@ class FixtureTask extends BakeTask
      */
     protected function _makeRecordString($records)
     {
-        $out = "array(\n";
+        $out = "[\n";
         foreach ($records as $record) {
-            $values = [];
+            $out .= "        [\n";
             foreach ($record as $field => $value) {
                 $val = var_export($value, true);
                 if ($val === 'NULL') {
                     $val = 'null';
                 }
-                $values[] = "\t\t\t'$field' => $val";
+                $out .= "            '$field' => $val,\n";
             }
-            $out .= "\t\tarray(\n";
-            $out .= implode(",\n", $values);
-            $out .= "\n\t\t),\n";
+            $out .= "        ],\n";
         }
-        $out .= "\t)";
+        $out .= '    ]';
 
         return $out;
     }

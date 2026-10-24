@@ -48,12 +48,8 @@ class ProjectTask extends AppShell
         if (isset($this->args[0])) {
             $project = $this->args[0];
         } else {
-            $appContents = array_diff(scandir(APP), ['.', '..']);
-            if (empty($appContents)) {
-                $suggestedPath = rtrim(APP, DS);
-            } else {
-                $suggestedPath = APP . 'myapp';
-            }
+            // Next to the application that runs bake
+            $suggestedPath = dirname(ROOT) . DS . 'myapp';
         }
 
         while (!$project) {
@@ -66,7 +62,7 @@ class ProjectTask extends AppShell
         }
 
         $response = false;
-        while (!$response && is_dir($project) === true && file_exists($project . 'Config' . 'core.php')) {
+        while (!$response && is_dir($project) === true && $this->_coreFile(Folder::slashTerm($project)) !== null) {
             $prompt = __d('cake_console', '<warning>A project already exists in this location:</warning> %s Overwrite?', $project);
             $response = $this->in($prompt, ['y', 'n'], 'n');
             if (strtolower($response) === 'n') {
@@ -100,13 +96,18 @@ class ProjectTask extends AppShell
             }
 
             $Folder = new Folder($path);
-            if (!$Folder->chmod($path . 'tmp', 0777)) {
-                $this->err(__d('cake_console', 'Could not set permissions on %s', $path . DS . 'tmp'));
-                $this->out('chmod -R 0777 ' . $path . DS . 'tmp');
-                $success = false;
+            foreach (['tmp', 'logs'] as $directory) {
+                if (is_dir($path . $directory) && !$Folder->chmod($path . $directory, 0777)) {
+                    $this->err(__d('cake_console', 'Could not set permissions on %s', $path . $directory));
+                    $this->out('chmod -R 0777 ' . $path . $directory);
+                    $success = false;
+                }
             }
             if ($success) {
                 $this->out(__d('cake_console', '<success>Project baked successfully!</success>'));
+                if (file_exists($path . 'composer.json')) {
+                    $this->out(__d('cake_console', 'Run `composer install` in %s to install CakePHP and the other packages.', $path));
+                }
             } else {
                 $this->out(__d('cake_console', 'Project baked but with <warning>some issues.</warning>.'));
             }
@@ -140,7 +141,9 @@ class ProjectTask extends AppShell
      *
      * @param string $path Project path
      * @param string $skel Path to copy from
-     * @param array $skip array of directories to skip when copying
+     * @param array $skip Names of the files and directories to skip when copying. The `empty`
+     *   placeholders of older skeletons are skipped unless the `empty` param is set; the `.gitkeep`
+     *   placeholders are always copied, so that the empty directories are kept in git.
      * @return mixed
      */
     public function bake($path, $skel = null, $skip = ['empty'])
@@ -219,6 +222,9 @@ class ProjectTask extends AppShell
      */
     public function consolePath($path)
     {
+        if (!is_file($path . 'Console' . DS . 'cake')) {
+            return false;
+        }
         $File = new File($path . 'Console' . DS . 'cake');
         $contents = $File->read();
         if (preg_match('/(__CAKE_PATH__)/', $contents, $match)) {
@@ -236,6 +242,50 @@ class ProjectTask extends AppShell
     }
 
     /**
+     * Gets the core.php of a project: `config/core.php` of the CakePHP 5 layout, or
+     * `Config/core.php` of a skeleton with the CakePHP 2 layout.
+     *
+     * @param string $path Project path
+     * @return string|null The file, or null when there is none.
+     */
+    protected function _coreFile($path)
+    {
+        foreach (['config', 'Config'] as $directory) {
+            if (is_file($path . $directory . DS . 'core.php')) {
+                return $path . $directory . DS . 'core.php';
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Replaces the value of a setting of core.php: the default after `env('NAME') ?:` of the
+     * skeleton, or the value of `Configure::write()` of a skeleton without environment variables.
+     *
+     * @param string $path Project path
+     * @param string $name The name of the setting, e.g. `Security.salt`.
+     * @param string $value The new value.
+     * @return bool Success
+     */
+    protected function _writeCoreValue($path, $name, $value)
+    {
+        $file = $this->_coreFile($path);
+        if ($file === null) {
+            return false;
+        }
+        $File = new File($file);
+        $contents = $File->read();
+        $pattern = '/(Configure::write\(\'' . preg_quote($name, '/') . '\',\s*(?:env\(\'[A-Z_]+\'\)\s*\?:\s*)?)\'[A-Za-z0-9]*\'(\);)/';
+        $result = preg_replace($pattern, '${1}\'' . $value . '\'${2}', $contents, 1, $count);
+        if (!$count) {
+            return false;
+        }
+
+        return $File->write($result);
+    }
+
+    /**
      * Generates and writes 'Security.salt'
      *
      * @param string $path Project path
@@ -243,43 +293,19 @@ class ProjectTask extends AppShell
      */
     public function securitySalt($path)
     {
-        $File = new File($path . 'Config' . DS . 'core.php');
-        $contents = $File->read();
-        if (preg_match('/([\s]*Configure::write\(\'Security.salt\',[\s\'A-z0-9]*\);)/', $contents, $match)) {
-            $string = Security::generateAuthKey();
-            $result = str_replace($match[0], "\t" . 'Configure::write(\'Security.salt\', \'' . $string . '\');', $contents);
-            if ($File->write($result)) {
-                return true;
-            }
-
-            return false;
-        }
-
-        return false;
+        return $this->_writeCoreValue($path, 'Security.salt', Security::generateAuthKey());
     }
 
     /**
-     * Generates and writes 'Security.cipherSeed'
+     * Generates and writes 'Security.cipherSeed': a number from 1 to 4294967295, which
+     * Security::cipher() uses as a seed.
      *
      * @param string $path Project path
      * @return bool Success
      */
     public function securityCipherSeed($path)
     {
-        $File = new File($path . 'Config' . DS . 'core.php');
-        $contents = $File->read();
-        if (preg_match('/([\s]*Configure::write\(\'Security.cipherSeed\',[\s\'A-z0-9]*\);)/', $contents, $match)) {
-            App::uses('Security', 'Utility');
-            $string = substr(bin2hex(Security::generateAuthKey()), 0, 30);
-            $result = str_replace($match[0], "\t" . 'Configure::write(\'Security.cipherSeed\', \'' . $string . '\');', $contents);
-            if ($File->write($result)) {
-                return true;
-            }
-
-            return false;
-        }
-
-        return false;
+        return $this->_writeCoreValue($path, 'Security.cipherSeed', (string)random_int(1, 4294967295));
     }
 
     /**
@@ -291,7 +317,11 @@ class ProjectTask extends AppShell
     public function cachePrefix($dir)
     {
         $app = basename($dir);
-        $File = new File($dir . 'Config' . DS . 'core.php');
+        $file = $this->_coreFile($dir);
+        if ($file === null) {
+            return false;
+        }
+        $File = new File($file);
         $contents = $File->read();
         if (preg_match('/(\$prefix = \'myapp_\';)/', $contents, $match)) {
             $result = str_replace($match[0], '$prefix = \'' . $app . '_\';', $contents);
@@ -456,14 +486,15 @@ class ProjectTask extends AppShell
             'help' => __d('cake_console', 'Application directory to make, if it starts with "/" the path is absolute.'),
         ])->addOption('empty', [
             'boolean' => true,
-            'help' => __d('cake_console', 'Create empty files in each of the directories. Good if you are using git'),
+            'help' => __d('cake_console', 'Also copy the "empty" placeholder files of a skeleton that has them. ' .
+                'The .gitkeep placeholders, which keep the empty directories in git, are always copied.'),
         ])->addOption('theme', [
             'short' => 't',
             'help' => __d('cake_console', 'Theme to use when baking code.'),
         ])->addOption('skel', [
             'default' => CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel',
             'help' => __d('cake_console', 'The directory layout to use for the new application skeleton.' .
-                ' Defaults to cake/Console/Templates/skel of CakePHP used to create the project.'),
+                ' Defaults to Console/Templates/skel of the Bake plugin, the skeleton of pieceofcake2/app.'),
         ]);
 
         return $parser;

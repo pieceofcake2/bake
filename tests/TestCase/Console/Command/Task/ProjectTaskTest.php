@@ -34,6 +34,13 @@ App::uses('File', 'Utility');
 class ProjectTaskTest extends CakeTestCase
 {
     /**
+     * The placeholder file that keeps an empty directory in git
+     *
+     * @var string
+     */
+    public const GITKEEP = '.gitkeep';
+
+    /**
      * setUp method
      *
      * @return void
@@ -94,48 +101,63 @@ class ProjectTaskTest extends CakeTestCase
         $path = $this->Task->path . 'bake_test_app';
 
         $this->assertTrue(is_dir($path), 'No project dir %s');
+        // The layout of pieceofcake2/app
         $dirs = [
-            'Config',
-            'Config' . DS . 'Schema',
-            'Console',
-            'Console' . DS . 'Command',
-            'Console' . DS . 'Templates',
-            'Console' . DS . 'Command' . DS . 'Task',
-            'Controller',
-            'Controller' . DS . 'Component',
-            'Locale',
-            'Model',
-            'Model' . DS . 'Behavior',
-            'Model' . DS . 'Datasource',
-            'Plugin',
-            'Test',
-            'Test' . DS . 'Case',
-            'Test' . DS . 'Case' . DS . 'Controller',
-            'Test' . DS . 'Case' . DS . 'Controller' . DS . 'Component',
-            'Test' . DS . 'Case' . DS . 'Model',
-            'Test' . DS . 'Case' . DS . 'Model' . DS . 'Behavior',
-            'Test' . DS . 'Fixture',
-            'Vendor',
-            'View',
-            'View' . DS . 'Helper',
-            'tmp',
-            'tmp' . DS . 'cache',
+            'bin',
+            'config',
+            'config' . DS . 'Schema',
+            'logs',
+            'resources' . DS . 'locales' . DS . 'eng' . DS . 'LC_MESSAGES',
+            'src' . DS . 'Console' . DS . 'Command' . DS . 'Task',
+            'src' . DS . 'Controller' . DS . 'Component',
+            'src' . DS . 'Model' . DS . 'Behavior',
+            'src' . DS . 'Model' . DS . 'Datasource',
+            'src' . DS . 'View' . DS . 'Helper',
+            'templates' . DS . 'Error',
+            'templates' . DS . 'Pages',
+            'templates' . DS . 'element' . DS . 'Flash',
+            'templates' . DS . 'email' . DS . 'html',
+            'templates' . DS . 'layout' . DS . 'email' . DS . 'text',
+            'tests' . DS . 'Fixture',
+            'tests' . DS . 'TestCase' . DS . 'Controller' . DS . 'Component',
+            'tests' . DS . 'TestCase' . DS . 'Model' . DS . 'Behavior',
+            'tests' . DS . 'TestCase' . DS . 'View' . DS . 'Helper',
             'tmp' . DS . 'cache' . DS . 'models',
             'tmp' . DS . 'cache' . DS . 'persistent',
             'tmp' . DS . 'cache' . DS . 'views',
-            'tmp' . DS . 'logs',
             'tmp' . DS . 'sessions',
             'tmp' . DS . 'tests',
-            'webroot',
             'webroot' . DS . 'css',
             'webroot' . DS . 'files',
             'webroot' . DS . 'img',
             'webroot' . DS . 'js',
-
         ];
         foreach ($dirs as $dir) {
             $this->assertTrue(is_dir($path . DS . $dir), 'Missing ' . $dir);
         }
+        $files = [
+            'bin' . DS . 'cake',
+            'composer.json',
+            '.gitignore',
+            'config' . DS . 'core.php',
+            'config' . DS . '.env',
+            'src' . DS . 'Controller' . DS . 'AppController.php',
+            'src' . DS . 'Controller' . DS . 'PagesController.php',
+            'src' . DS . 'Model' . DS . 'AppModel.php',
+            'templates' . DS . 'Pages' . DS . 'home.php',
+            'templates' . DS . 'layout' . DS . 'default.php',
+            'tests' . DS . 'bootstrap.php',
+            'webroot' . DS . '.htaccess',
+            'webroot' . DS . 'index.php',
+        ];
+        foreach ($files as $file) {
+            $this->assertFileExists($path . DS . $file);
+        }
+        $this->assertStringContainsString('namespace App\Controller;', file_get_contents($path . DS . 'src' . DS . 'Controller' . DS . 'AppController.php'));
+        // The .gitkeep placeholders, which keep the empty directories in git, are copied
+        $this->assertFileExists($path . DS . 'src' . DS . 'Controller' . DS . 'Component' . DS . static::GITKEEP);
+        $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
+        $this->assertFileExists($path . DS . 'tmp' . DS . 'cache' . DS . 'models' . DS . static::GITKEEP);
     }
 
     /**
@@ -152,12 +174,10 @@ class ProjectTaskTest extends CakeTestCase
         $this->Task->execute();
 
         $this->assertTrue(is_dir($this->Task->args[0]), 'No project dir');
-        $File = new File($path . DS . 'webroot' . DS . 'index.php');
-        $contents = $File->read();
-        $this->assertMatchesRegularExpression('/define\(\'VENDORS\', .*?DS/', $contents);
-        $File = new File($path . DS . 'webroot' . DS . 'test.php');
-        $contents = $File->read();
-        $this->assertMatchesRegularExpression('/define\(\'VENDORS\', .*?DS/', $contents);
+        $contents = file_get_contents($path . DS . 'config' . DS . 'core.php');
+        $this->assertStringNotContainsString('DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi', $contents);
+        $this->assertStringNotContainsString("'2659758734'", $contents);
+        $this->assertStringContainsString("\$prefix = 'bake_test_app_';", $contents);
     }
 
     /**
@@ -173,23 +193,22 @@ class ProjectTaskTest extends CakeTestCase
         $files = [
             'webroot' . DS . 'index.php',
             'webroot' . DS . 'test.php',
-            'Console' . DS . 'cake',
+            'bin' . DS . 'cake',
         ];
         foreach ($files as $file) {
             $contents = file_get_contents($path . $file);
             $this->assertDoesNotMatchRegularExpression("/require_once\\s+'Cake'/", $contents, $file);
-            $this->assertStringNotContainsString("'vendors'", $contents, $file);
-            $this->assertStringContainsString("define('VENDORS', ROOT . DS . 'vendor' . DS);", $contents, $file);
             $this->assertStringContainsString("require_once VENDORS . 'autoload.php';", $contents, $file);
         }
         foreach (['index.php', 'test.php'] as $file) {
             $contents = file_get_contents($path . 'webroot' . DS . $file);
             $this->assertStringContainsString(
-                "InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php'",
+                "InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'bootstrap.php'",
                 $contents,
                 $file,
             );
         }
+        $this->assertStringContainsString("define('VENDORS', ROOT . DS . 'vendor' . DS);", file_get_contents($path . 'config' . DS . 'define.php'));
     }
 
     /**
@@ -212,16 +231,14 @@ class ProjectTaskTest extends CakeTestCase
 
         $this->assertTrue(is_dir($this->Task->args[0]), 'No project dir');
         $contents = file_get_contents($path . DS . 'webroot' . DS . 'index.php');
-        $this->assertMatchesRegularExpression('#define\(\'VENDORS#', $contents);
-
-        $contents = file_get_contents($path . DS . 'webroot' . DS . 'test.php');
-        $this->assertMatchesRegularExpression('#define\(\'VENDORS#', $contents);
+        $this->assertStringContainsString("require_once VENDORS . 'autoload.php';", $contents);
 
         ini_set('include_path', $restore);
     }
 
     /**
-     * test bake() method with -empty flag,  directory creation and empty files.
+     * test bake() method with -empty flag: every empty directory of the skeleton keeps its
+     * .gitkeep placeholder.
      *
      * @return void
      */
@@ -231,31 +248,91 @@ class ProjectTaskTest extends CakeTestCase
         $this->_setupTestProject();
         $path = $this->Task->path . 'bake_test_app';
 
-        $empty = [
-            'Console' . DS . 'Command' . DS . 'Task' => 'empty',
-            'Controller' . DS . 'Component' => 'empty',
-            'Lib' => 'empty',
-            'Model' . DS . 'Behavior' => 'empty',
-            'Model' . DS . 'Datasource' => 'empty',
-            'Plugin' => 'empty',
-            'Test' . DS . 'Case' . DS . 'Model' . DS . 'Behavior' => 'empty',
-            'Test' . DS . 'Case' . DS . 'Controller' . DS . 'Component' => 'empty',
-            'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' => 'empty',
-            'Test' . DS . 'Fixture' => 'empty',
-            'Vendor' => 'empty',
-            'View' . DS . 'Scaffolds' => 'empty',
-            'tmp' . DS . 'cache' . DS . 'models' => 'empty',
-            'tmp' . DS . 'cache' . DS . 'persistent' => 'empty',
-            'tmp' . DS . 'cache' . DS . 'views' => 'empty',
-            'tmp' . DS . 'logs' => 'empty',
-            'tmp' . DS . 'sessions' => 'empty',
-            'tmp' . DS . 'tests' => 'empty',
-            'webroot' . DS . 'js' => 'empty',
-            'webroot' . DS . 'files' => 'empty',
+        $dirs = [
+            'logs',
+            'resources' . DS . 'locales' . DS . 'eng' . DS . 'LC_MESSAGES',
+            'src' . DS . 'Console' . DS . 'Command' . DS . 'Task',
+            'src' . DS . 'Console' . DS . 'Templates',
+            'src' . DS . 'Controller' . DS . 'Component',
+            'src' . DS . 'Model' . DS . 'Behavior',
+            'src' . DS . 'Model' . DS . 'Datasource',
+            'src' . DS . 'View' . DS . 'Scaffolds',
+            'tests' . DS . 'Fixture',
+            'tests' . DS . 'TestCase' . DS . 'Controller' . DS . 'Component',
+            'tests' . DS . 'TestCase' . DS . 'EndToEnd',
+            'tests' . DS . 'TestCase' . DS . 'Model' . DS . 'Behavior',
+            'tests' . DS . 'TestCase' . DS . 'View' . DS . 'Helper',
+            'tmp' . DS . 'cache' . DS . 'models',
+            'tmp' . DS . 'cache' . DS . 'persistent',
+            'tmp' . DS . 'cache' . DS . 'views',
+            'tmp' . DS . 'sessions',
+            'tmp' . DS . 'tests',
+            'webroot' . DS . 'js',
+            'webroot' . DS . 'files',
         ];
 
-        foreach ($empty as $dir => $file) {
-            $this->assertTrue(is_file($path . DS . $dir . DS . $file), sprintf('Missing %s file in %s', $file, $dir));
+        foreach ($dirs as $dir) {
+            $this->assertTrue(is_file($path . DS . $dir . DS . static::GITKEEP), sprintf('Missing %s file in %s', static::GITKEEP, $dir));
+        }
+    }
+
+    /**
+     * Creates a skeleton with an "empty" placeholder, as older skeletons have, and a .gitkeep one.
+     *
+     * @return string The path of the skeleton.
+     */
+    protected function _setupSkeletonWithEmptyFiles(): string
+    {
+        $skel = $this->Task->path . 'bake_test_skel';
+        $Folder = new Folder();
+        $Folder->create($skel . DS . 'logs');
+        $Folder->create($skel . DS . 'webroot' . DS . 'js');
+        touch($skel . DS . 'logs' . DS . 'empty');
+        touch($skel . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
+
+        return $skel;
+    }
+
+    /**
+     * test that the "empty" placeholders of a skeleton are left out, and the .gitkeep ones copied,
+     * without the -empty flag.
+     *
+     * @return void
+     */
+    public function testBakeSkipsEmptyPlaceholders(): void
+    {
+        $skel = $this->_setupSkeletonWithEmptyFiles();
+        $path = $this->Task->path . 'bake_test_app';
+        try {
+            $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
+            $this->Task->bake($path, $skel);
+
+            $this->assertTrue(is_dir($path . DS . 'logs'));
+            $this->assertFileDoesNotExist($path . DS . 'logs' . DS . 'empty');
+            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
+        } finally {
+            (new Folder($skel))->delete();
+        }
+    }
+
+    /**
+     * test that the -empty flag also copies the "empty" placeholders of a skeleton.
+     *
+     * @return void
+     */
+    public function testBakeEmptyFlagCopiesEmptyPlaceholders(): void
+    {
+        $this->Task->params['empty'] = true;
+        $skel = $this->_setupSkeletonWithEmptyFiles();
+        $path = $this->Task->path . 'bake_test_app';
+        try {
+            $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
+            $this->Task->bake($path, $skel);
+
+            $this->assertFileExists($path . DS . 'logs' . DS . 'empty');
+            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
+        } finally {
+            (new Folder($skel))->delete();
         }
     }
 
@@ -272,9 +349,10 @@ class ProjectTaskTest extends CakeTestCase
         $result = $this->Task->securitySalt($path);
         $this->assertTrue($result);
 
-        $File = new File($path . 'Config' . DS . 'core.php');
+        $File = new File($path . 'config' . DS . 'core.php');
         $contents = $File->read();
         $this->assertDoesNotMatchRegularExpression('/DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi/', $contents, 'Default Salt left behind. %s');
+        $this->assertMatchesRegularExpression("/Configure::write\\('Security.salt', env\\('SECURITY_SALT'\\) \\?: '[0-9a-f]{40,}'\\);/", $contents);
     }
 
     /**
@@ -290,9 +368,10 @@ class ProjectTaskTest extends CakeTestCase
         $result = $this->Task->securityCipherSeed($path);
         $this->assertTrue($result);
 
-        $File = new File($path . 'Config' . DS . 'core.php');
+        $File = new File($path . 'config' . DS . 'core.php');
         $contents = $File->read();
-        $this->assertDoesNotMatchRegularExpression('/76859309657453542496749683645/', $contents, 'Default CipherSeed left behind. %s');
+        $this->assertDoesNotMatchRegularExpression("/'2659758734'/", $contents, 'Default CipherSeed left behind. %s');
+        $this->assertMatchesRegularExpression("/Configure::write\\('Security.cipherSeed', env\\('SECURITY_CIPHER_SEED'\\) \\?: '[1-9][0-9]{0,9}'\\);/", $contents);
     }
 
     /**
@@ -308,14 +387,14 @@ class ProjectTaskTest extends CakeTestCase
         $result = $this->Task->cachePrefix($path);
         $this->assertTrue($result);
 
-        $File = new File($path . 'Config' . DS . 'core.php');
+        $File = new File($path . 'config' . DS . 'core.php');
         $contents = $File->read();
         $this->assertMatchesRegularExpression('/\$prefix = \'.+\';/', $contents, '$prefix is not defined');
         $this->assertDoesNotMatchRegularExpression('/\$prefix = \'myapp_\';/', $contents, 'Default cache prefix left behind. %s');
     }
 
     /**
-     * Test that index.php is generated correctly.
+     * The dispatchers of the skeleton load CakePHP with Composer, so corePath() replaces nothing.
      *
      * @return void
      */
@@ -324,14 +403,9 @@ class ProjectTaskTest extends CakeTestCase
         $this->_setupTestProject();
 
         $path = $this->Task->path . 'bake_test_app' . DS;
-        $this->Task->corePath($path);
-
-        $File = new File($path . 'webroot' . DS . 'index.php');
-        $contents = $File->read();
-        $this->assertDoesNotMatchRegularExpression('/define\(\'CAKE_CORE_INCLUDE_PATH\', ROOT/', $contents);
-        $File = new File($path . 'webroot' . DS . 'test.php');
-        $contents = $File->read();
-        $this->assertDoesNotMatchRegularExpression('/define\(\'CAKE_CORE_INCLUDE_PATH\', ROOT/', $contents);
+        $before = file_get_contents($path . 'webroot' . DS . 'index.php');
+        $this->assertFalse($this->Task->corePath($path));
+        $this->assertSame($before, file_get_contents($path . 'webroot' . DS . 'index.php'));
     }
 
     /**
@@ -354,7 +428,7 @@ class ProjectTaskTest extends CakeTestCase
         $skel = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->bake($this->Task->path . 'bake_test_app', $skel);
 
-        $this->Task->configPath = $this->Task->path . 'bake_test_app' . DS . 'Config' . DS;
+        $this->Task->configPath = $this->Task->path . 'bake_test_app' . DS . 'config' . DS;
 
         $result = $this->Task->getPrefix();
         $this->assertEquals('super_duper_admin_', $result);
@@ -450,7 +524,7 @@ class ProjectTaskTest extends CakeTestCase
         $skel = CakePlugin::path('Bake') . DS . 'Console' . DS . 'Templates' . DS . 'skel';
         $this->Task->bake($this->Task->path . 'bake_test_app', $skel);
 
-        $this->Task->configPath = $this->Task->path . 'bake_test_app' . DS . 'Config' . DS;
+        $this->Task->configPath = $this->Task->path . 'bake_test_app' . DS . 'config' . DS;
 
         $result = $this->Task->getPrefix();
         $this->assertEquals('ninja_', $result);
@@ -474,14 +548,13 @@ class ProjectTaskTest extends CakeTestCase
 
         $this->Task->execute();
         $this->assertTrue(is_dir($path), 'No project dir');
-        $this->assertTrue(is_dir($path . DS . 'Controller'), 'No controllers dir ');
-        $this->assertTrue(is_dir($path . DS . 'Controller' . DS . 'Component'), 'No components dir ');
-        $this->assertTrue(is_dir($path . DS . 'Model'), 'No models dir');
-        $this->assertTrue(is_dir($path . DS . 'View'), 'No views dir');
-        $this->assertTrue(is_dir($path . DS . 'View' . DS . 'Helper'), 'No helpers dir');
-        $this->assertTrue(is_dir($path . DS . 'Test'), 'No tests dir');
-        $this->assertTrue(is_dir($path . DS . 'Test' . DS . 'Case'), 'No cases dir');
-        $this->assertTrue(is_dir($path . DS . 'Test' . DS . 'Fixture'), 'No fixtures dir');
+        $this->assertTrue(is_dir($path . DS . 'src' . DS . 'Controller'), 'No controllers dir ');
+        $this->assertTrue(is_dir($path . DS . 'src' . DS . 'Controller' . DS . 'Component'), 'No components dir ');
+        $this->assertTrue(is_dir($path . DS . 'src' . DS . 'Model'), 'No models dir');
+        $this->assertTrue(is_dir($path . DS . 'templates'), 'No templates dir');
+        $this->assertTrue(is_dir($path . DS . 'src' . DS . 'View' . DS . 'Helper'), 'No helpers dir');
+        $this->assertTrue(is_dir($path . DS . 'tests' . DS . 'TestCase'), 'No test cases dir');
+        $this->assertTrue(is_dir($path . DS . 'tests' . DS . 'Fixture'), 'No fixtures dir');
     }
 
     /**
@@ -494,12 +567,9 @@ class ProjectTaskTest extends CakeTestCase
         $this->_setupTestProject();
 
         $path = $this->Task->path . 'bake_test_app' . DS;
-        $result = $this->Task->consolePath($path);
-        $this->assertFalse($result);
-
-        $File = new File($path . 'Console' . DS . 'cake');
-        $contents = $File->read();
-        $this->assertDoesNotMatchRegularExpression('/__CAKE_PATH__/', $contents, 'Console path placeholder left behind.');
+        // bin/cake loads CakePHP with Composer; there is no Console/cake with a placeholder
+        $this->assertFalse($this->Task->consolePath($path));
+        $this->assertStringNotContainsString('__CAKE_PATH__', file_get_contents($path . 'bin' . DS . 'cake'));
     }
 
     /**

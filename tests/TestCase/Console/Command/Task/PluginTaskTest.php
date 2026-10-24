@@ -138,6 +138,9 @@ class PluginTaskTest extends CakeTestCase
         ];
         foreach ($directories as $dir) {
             $this->assertTrue(is_dir($path . DS . $dir), 'Missing directory for ' . $dir);
+            // The placeholder that keeps the directory in git
+            $this->assertFileExists($path . DS . $dir . DS . '.gitkeep');
+            $this->assertFileDoesNotExist($path . DS . $dir . DS . 'empty');
         }
 
         $Folder = new Folder($this->Task->path . 'BakeTestPlugin');

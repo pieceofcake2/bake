@@ -148,6 +148,10 @@ class TestTask extends BakeTask
 
         $realType = $this->mapType($type, $plugin);
         $fullClassName = $this->getRealClassName($type, $className);
+        $namespace = $this->_namespace();
+        if ($namespace !== null) {
+            return $this->_bakeNamespaced($type, $className, $fullClassName, $namespace);
+        }
 
         if ($this->typeCanDetectFixtures($type) && $this->isLoadableClass($realType, $fullClassName)) {
             $this->out(__d('cake_console', 'Bake is detecting possible fixtures...'));
@@ -171,14 +175,8 @@ class TestTask extends BakeTask
             $uses = $this->_classmapUses($type, $fullClassName, $uses);
         }
 
-        $this->out("\n" . __d('cake_console', 'Baking test case for %s %s ...', $className, $type), 1, Shell::QUIET);
-
-        $this->Template->set('fixtures', $this->_fixtures);
-        $this->Template->set('plugin', $plugin);
-        $this->Template->set(compact(
-            'className',
+        return $this->_writeTest($type, $className, compact(
             'methods',
-            'type',
             'fullClassName',
             'mock',
             'realType',
@@ -186,7 +184,101 @@ class TestTask extends BakeTask
             'postConstruct',
             'construction',
             'uses',
-        ));
+        ) + ['namespace' => null, 'imports' => []]);
+    }
+
+    /**
+     * Completes the final steps for a test case of a namespaced class.
+     *
+     * The test case is in the namespace of the tests (`App\Test\TestCase\Model` for
+     * `App\Model\Post`) and imports the classes it uses with `use` statements.
+     *
+     * @param string $type Type of object to bake test case for ie. Model, Controller
+     * @param string $className the 'cake name' for the class ie. Posts for the PostsController
+     * @param string $fullClassName The class name of the class under test, without the namespace.
+     * @param string $namespace The namespace of the application or the plugin, e.g. `App`.
+     * @return string|bool
+     */
+    protected function _bakeNamespaced($type, $className, $fullClassName, $namespace)
+    {
+        $package = $this->mapType($type, '');
+        $subNamespace = str_replace('/', '\\', $package);
+        $testedClass = $namespace . '\\' . $subNamespace . '\\' . $fullClassName;
+        $testNamespace = $namespace . '\\Test\\TestCase\\' . $subNamespace;
+        $exists = $this->_classExists($testedClass);
+
+        if ($this->typeCanDetectFixtures($type) && $exists) {
+            $this->out(__d('cake_console', 'Bake is detecting possible fixtures...'));
+            ClassRegistry::flush();
+            if (strtolower($type) === 'model') {
+                $testSubject = ClassRegistry::init($testedClass);
+            } else {
+                $testSubject = new $testedClass();
+            }
+            $this->generateFixtureList($testSubject);
+        } elseif ($this->interactive) {
+            $this->getUserFixtures();
+        }
+
+        $methods = [];
+        if ($exists) {
+            $methods = $this->getTestableMethods($testedClass);
+        }
+        $mock = $this->hasMockClass($type);
+        [$preConstruct, $construction, $postConstruct] = $this->generateConstructor($type, $fullClassName, '');
+
+        $imports = [];
+        $lowerType = strtolower($type);
+        $baseClass = $lowerType === 'controller' ? 'Cake\\TestSuite\\ControllerTestCase' : 'Cake\\TestSuite\\CakeTestCase';
+        $this->_importClass($baseClass, $testNamespace, $imports);
+        if ($lowerType !== 'controller') {
+            $this->_importClass($testedClass, $testNamespace, $imports);
+        }
+        if ($lowerType === 'model') {
+            $this->_importClass('Cake\\Utility\\ClassRegistry', $testNamespace, $imports);
+            $construction = "ClassRegistry::init({$fullClassName}::class);\n";
+        }
+        if ($lowerType === 'component') {
+            $this->_importClass('Cake\\Controller\\ComponentCollection', $testNamespace, $imports);
+        }
+        if ($lowerType === 'helper') {
+            $this->_importClass('Cake\\View\\View', $testNamespace, $imports);
+        }
+
+        return $this->_writeTest($type, $className, [
+            'methods' => $methods,
+            'fullClassName' => $fullClassName,
+            'mock' => $mock,
+            'realType' => $this->mapType($type, $this->plugin ? $this->plugin . '.' : null),
+            'preConstruct' => $preConstruct,
+            'postConstruct' => $postConstruct,
+            'construction' => $construction,
+            'uses' => [],
+            'namespace' => $testNamespace,
+            'imports' => $this->_sortImports($imports),
+        ]);
+    }
+
+    /**
+     * Generates the test case from the template and writes it.
+     *
+     * @param string $type Type of object to bake test case for ie. Model, Controller
+     * @param string $className the 'cake name' for the class ie. Posts for the PostsController
+     * @param array $vars The template variables.
+     * @return string|bool The test case, or false when the file was not written.
+     */
+    protected function _writeTest($type, $className, array $vars)
+    {
+        $plugin = null;
+        if ($this->plugin) {
+            $plugin = $this->plugin . '.';
+        }
+
+        $this->out("\n" . __d('cake_console', 'Baking test case for %s %s ...', $className, $type), 1, Shell::QUIET);
+
+        $this->Template->set('fixtures', $this->_fixtures);
+        $this->Template->set('plugin', $plugin);
+        $this->Template->set(compact('className', 'type') + $vars);
         $out = $this->Template->generate('classes', 'test');
 
         $filename = $this->testCaseFileName($type, $className);

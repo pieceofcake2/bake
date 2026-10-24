@@ -175,10 +175,12 @@ class BakeShell extends AppShell
         $modelExists = false;
         $model = $this->_modelName($name);
 
-        App::uses('AppModel', 'Model');
-        App::uses($model, 'Model');
-        if (class_exists($model)) {
-            $object = new $model();
+        if (!Configure::read('App.namespace')) {
+            App::uses('AppModel', 'Model');
+        }
+        $modelClass = $this->_appClass($model, 'Model');
+        if ($modelClass !== null) {
+            $object = new $modelClass();
             $modelExists = true;
         } else {
             $object = new Model(['name' => $name, 'ds' => $this->connection]);
@@ -201,8 +203,7 @@ class BakeShell extends AppShell
                     $this->Controller->bakeTest($controller);
                 }
             }
-            App::uses($controller . 'Controller', 'Controller');
-            if (class_exists($controller . 'Controller')) {
+            if ($this->_appClass($controller, 'Controller', 'Controller') !== null) {
                 $this->View->args = [$name];
                 $this->View->execute();
             }
@@ -214,6 +215,27 @@ class BakeShell extends AppShell
         }
 
         $this->_stop();
+    }
+
+    /**
+     * Finds a class of the application.
+     *
+     * The classes of a namespaced application are in App.namespace, which App::className()
+     * looks in; global classes are declared with App::uses() in the package.
+     *
+     * @param string $name The class name without the suffix, e.g. `Post` or `Posts`.
+     * @param string $package The package of the class, e.g. `Model`.
+     * @param string $suffix The suffix of the class name, e.g. `Controller`.
+     * @return string|null The class name, or null when the class does not exist.
+     */
+    protected function _appClass($name, $package, $suffix = '')
+    {
+        if (Configure::read('App.namespace')) {
+            return App::className($name, $package, $suffix);
+        }
+        App::uses($name . $suffix, $package);
+
+        return class_exists($name . $suffix) ? $name . $suffix : null;
     }
 
     /**

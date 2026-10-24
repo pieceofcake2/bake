@@ -13,17 +13,3 @@ composer.lock
 
 # Cache
 .phpunit.result.cache
-
-#
-/Console/Templates/skel/tmp/cache/models/*
-!/Console/Templates/skel/tmp/cache/models/emoty
-/Console/Templates/skel/tmp/cache/persistent/*
-!/Console/Templates/skel/tmp/cache/persistent/emoty
-/Console/Templates/skel/tmp/cache/views/*
-!/Console/Templates/skel/tmp/cache/views/emoty
-/Console/Templates/skel/tmp/logs/*
-!/Console/Templates/skel/tmp/logs/emoty
-/Console/Templates/skel/tmp/sessions/*
-!/Console/Templates/skel/tmp/sessions/emoty
-/Console/Templates/skel/tmp/tests/*
-!/Console/Templates/skel/tmp/tests/emoty

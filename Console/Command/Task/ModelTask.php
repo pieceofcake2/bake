@@ -902,6 +902,7 @@ class ModelTask extends BakeTask
             'pluginPath' => $pluginPath,
             'appUses' => $this->_needsAppUses(),
         ]);
+        $this->Template->set($this->_namespaceVars($data));
         $out = $this->Template->generate('classes', 'model');
 
         $path = $this->getPath();
@@ -911,6 +912,44 @@ class ModelTask extends BakeTask
         ClassRegistry::flush();
 
         return $out;
+    }
+
+    /**
+     * Gets the template variables for the namespace of a model.
+     *
+     * - `namespace`: the namespace of the model, e.g. `App\Model`, or null for a global class.
+     * - `imports`: the classes of the `use` statements.
+     * - `classNames`: the names to write for the classes of the associations and the behaviors
+     *   (`Comment` for `Comment::class`), by the names of the settings. A class that does not
+     *   exist yet keeps its name in a string, which CakePHP resolves when the application runs.
+     *
+     * @param array $data The template variables of the model.
+     * @return array
+     */
+    protected function _namespaceVars($data)
+    {
+        $namespace = $this->_namespace();
+        if ($namespace === null) {
+            return ['namespace' => null, 'imports' => [], 'classNames' => []];
+        }
+        $modelNamespace = $namespace . '\\Model';
+        $models = [];
+        foreach ((array)$data['associations'] as $associations) {
+            foreach ((array)$associations as $relation) {
+                $models[] = $relation['className'];
+            }
+        }
+        $imports = [];
+        $classNames = [
+            'model' => $this->_settingClasses($models, 'Model', '', $modelNamespace, $imports),
+            'behavior' => $this->_settingClasses((array)$data['actsAs'], 'Model/Behavior', 'Behavior', $modelNamespace, $imports),
+        ];
+
+        return [
+            'namespace' => $modelNamespace,
+            'imports' => $this->_sortImports($imports),
+            'classNames' => $classNames,
+        ];
     }
 
     /**

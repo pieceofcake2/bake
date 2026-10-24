@@ -201,6 +201,8 @@ class ViewTaskTest extends CakeTestCase
         CakePlugin::load('Bake', [
             'path' => dirname(__DIR__, 5) . DS,
         ]);
+        // ViewTaskComment belongs to TestTest.ViewTaskArticle; CakePHP 2.13 looks the plugin up
+        CakePlugin::load('TestTest', ['path' => APP . 'Plugin' . DS . 'TestTest' . DS]);
 
         $out = $this->getMock('ConsoleOutput', [], [], '', false);
         $in = $this->getMock('ConsoleInput', [], [], '', false);
@@ -360,7 +362,7 @@ class ViewTaskTest extends CakeTestCase
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'view.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'view.php');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'view.ctp',
@@ -396,7 +398,7 @@ class ViewTaskTest extends CakeTestCase
     {
         $this->Task->controllerName = 'ViewTaskComments';
 
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'index.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'index.php');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'index.ctp',
@@ -416,7 +418,7 @@ class ViewTaskTest extends CakeTestCase
         $this->Task->Template->templatePaths['legacy'] = CakePlugin::path('Bake') . 'Console' . DS . 'Templates' . DS . 'legacy' . DS;
         $this->Task->Template->params['theme'] = 'legacy';
 
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'legacy_index.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'View' . DS . 'legacy_index.php');
         $this->Task->expects($this->once())->method('createFile')
             ->with(
                 TMP . 'ViewTaskComments' . DS . 'index.ctp',
@@ -809,7 +811,7 @@ class ViewTaskTest extends CakeTestCase
         $this->assertEquals('form', $result);
 
         $this->Task->Template->templatePaths = [
-            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
+            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
         ];
         $this->Task->Template->params['theme'] = 'test';
 

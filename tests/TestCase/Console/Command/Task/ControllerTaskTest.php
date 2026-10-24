@@ -342,15 +342,15 @@ class ControllerTaskTest extends CakeTestCase
         $this->Task->expects($this->any())->method('createFile')->will($this->returnValue(true));
 
         $result = $this->Task->bake('Articles', null, $helpers, $components);
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'NoActions.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'NoActions.php');
         $this->assertTextEquals($expected, $result);
 
         $result = $this->Task->bake('Articles', null, [], []);
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'NoHelpersOrComponents.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'NoHelpersOrComponents.php');
         $this->assertTextEquals($expected, $result);
 
         $result = $this->Task->bake('Articles', 'scaffold', $helpers, $components);
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'Scaffold.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'Scaffold.php');
         $this->assertTextEquals($expected, $result);
     }
 
@@ -402,11 +402,11 @@ class ControllerTaskTest extends CakeTestCase
     public function testBakeActionsUsingSessions(): void
     {
         $result = $this->Task->bakeActions('BakeArticles', null, true);
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'ActionsUsingSessions.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'ActionsUsingSessions.php');
         $this->assertTextEquals($expected, $result);
 
         $result = $this->Task->bakeActions('BakeArticles', 'admin_', true);
-        $this->assertStringContainsString('function admin_index() {', $result);
+        $this->assertStringContainsString("function admin_index()\n    {", $result);
         $this->assertStringContainsString('function admin_add()', $result);
         $this->assertStringContainsString('function admin_view($id = null)', $result);
         $this->assertStringContainsString('function admin_edit($id = null)', $result);
@@ -421,7 +421,7 @@ class ControllerTaskTest extends CakeTestCase
     public function testBakeActionsWithNoSessions(): void
     {
         $result = $this->Task->bakeActions('BakeArticles', null, false);
-        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'ActionsWithNoSessions.ctp');
+        $expected = file_get_contents(dirname(__DIR__, 4) . DS . 'bake_compare' . DS . 'Controller' . DS . 'ActionsWithNoSessions.php');
         $this->assertTextEquals($expected, $result);
     }
 
@@ -727,7 +727,7 @@ class ControllerTaskTest extends CakeTestCase
 
         $this->Task->expects($this->once())->method('createFile')->with(
             '/my/path/BakeArticlesController.php',
-            $this->stringContains("public \$components = array('Paginator', 'Session', 'Flash');"),
+            $this->stringContains("public \$components = ['Paginator', 'Session', 'Flash'];"),
         )->will($this->returnValue(true));
 
         $this->Task->execute();

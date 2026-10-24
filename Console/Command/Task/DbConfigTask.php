@@ -329,55 +329,39 @@ class DbConfigTask extends AppShell
         }
 
         $configs = array_merge($oldConfigs, $configs);
-        $out = "<?php\n";
-        $out .= "class DATABASE_CONFIG {\n\n";
-
+        $properties = [];
         foreach ($configs as $config) {
             $config += $this->_defaultConfig;
             $name = $config['name'];
-            $datasource = $config['datasource'];
-            $persistent = $config['persistent'];
-            $host = $config['host'];
-            $port = $config['port'];
-            $login = $config['login'];
-            $password = $config['password'];
-            $database = $config['database'];
-            $prefix = $config['prefix'];
-            $schema = $config['schema'];
-            $encoding = $config['encoding'];
-
-            $datasource = $this->_normalizeDatasource($datasource);
+            $datasource = $this->_normalizeDatasource($config['datasource']);
             if (!str_contains($datasource, 'Database/')) {
                 $datasource = "Database/{$datasource}";
             }
-            $out .= "\tpublic \${$name} = array(\n";
-            $out .= "\t\t'datasource' => '{$datasource}',\n";
-            $out .= "\t\t'persistent' => {$persistent},\n";
-            $out .= "\t\t'host' => '{$host}',\n";
-
-            if ($port) {
-                $out .= "\t\t'port' => {$port},\n";
+            $keys = [
+                'datasource' => "'{$datasource}'",
+                'persistent' => $config['persistent'],
+                'host' => "'{$config['host']}'",
+                'port' => $config['port'] ?: null,
+                'login' => "'{$config['login']}'",
+                'password' => "'{$config['password']}'",
+                'database' => "'{$config['database']}'",
+                'schema' => $config['schema'] ? "'{$config['schema']}'" : null,
+                'prefix' => $config['prefix'] ? "'{$config['prefix']}'" : null,
+                'encoding' => $config['encoding'] ? "'{$config['encoding']}'" : null,
+            ];
+            $property = "    public \${$name} = [\n";
+            foreach ($keys as $key => $value) {
+                if ($value === null) {
+                    continue;
+                }
+                $property .= "        '{$key}' => {$value},\n";
             }
-
-            $out .= "\t\t'login' => '{$login}',\n";
-            $out .= "\t\t'password' => '{$password}',\n";
-            $out .= "\t\t'database' => '{$database}',\n";
-
-            if ($schema) {
-                $out .= "\t\t'schema' => '{$schema}',\n";
-            }
-
-            if ($prefix) {
-                $out .= "\t\t'prefix' => '{$prefix}',\n";
-            }
-
-            if ($encoding) {
-                $out .= "\t\t'encoding' => '{$encoding}'\n";
-            }
-
-            $out .= "\t);\n";
+            $properties[] = $property . "    ];\n";
         }
 
+        $out = "<?php\n";
+        $out .= "class DATABASE_CONFIG\n{\n";
+        $out .= implode("\n", $properties);
         $out .= "}\n";
         $filename = $this->path . 'database.php';
 

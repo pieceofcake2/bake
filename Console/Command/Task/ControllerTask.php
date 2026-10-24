@@ -140,8 +140,7 @@ class ControllerTask extends BakeTask
         foreach ($this->_tables as $table) {
             $model = $this->_modelName($table);
             $controller = $this->_controllerName($model);
-            App::uses($model, 'Model');
-            if (class_exists($model)) {
+            if ($this->_appClass($model, 'Model') !== null) {
                 $actions = $this->bakeActions($controller);
                 if ($admin) {
                     $this->out(__d('cake_console', 'Adding %s methods', $admin));
@@ -333,10 +332,16 @@ class ControllerTask extends BakeTask
         if ($plugin) {
             $plugin .= '.';
         }
-        App::uses($modelImport, $plugin . 'Model');
         $modelObj = null;
-        if (class_exists($modelImport)) {
-            $modelObj = ClassRegistry::init($currentModelName);
+        if ($this->_namespace() !== null) {
+            if ($this->_appClass($modelImport, 'Model', '', true) !== null) {
+                $modelObj = ClassRegistry::init($plugin . $currentModelName);
+            }
+        } else {
+            App::uses($modelImport, $plugin . 'Model');
+            if (class_exists($modelImport)) {
+                $modelObj = ClassRegistry::init($currentModelName);
+            }
         }
         if (!$modelObj instanceof Model) {
             $this->err(__d('cake_console', 'You must have a model for this class to build basic methods. Please try again.'));
@@ -403,6 +408,7 @@ class ControllerTask extends BakeTask
         }
 
         $this->Template->set(compact('controllerName', 'actions', 'helpers', 'components', 'isScaffold'));
+        $this->Template->set($this->_namespaceVars($controllerName, $actions, $helpers, $components, $isScaffold));
         $contents = $this->Template->generate('classes', 'controller');
 
         $path = $this->getPath();
@@ -412,6 +418,71 @@ class ControllerTask extends BakeTask
         }
 
         return false;
+    }
+
+    /**
+     * Gets the template variables for the namespace of a controller.
+     *
+     * - `namespace`: the namespace of the controller, e.g. `App\Controller`, or null for a global class.
+     * - `imports`: the classes of the `use` statements: the model, the components, the helpers
+     *   and the classes that the actions throw and return.
+     * - `classNames`: the names to write for the classes of the components and helpers
+     *   (`PaginatorComponent` for `PaginatorComponent::class`), by their names in the settings.
+     *   A class that does not exist keeps its name in a string.
+     *
+     * @param string $controllerName Controller name
+     * @param string $actions The baked actions, or 'scaffold'
+     * @param array $helpers Helpers to use in controller
+     * @param array $components Components to use in controller
+     * @param bool $isScaffold Whether the controller uses scaffolding
+     * @return array
+     */
+    protected function _namespaceVars($controllerName, $actions, $helpers, $components, $isScaffold)
+    {
+        $namespace = $this->_namespace();
+        if ($namespace === null) {
+            return ['namespace' => null, 'imports' => [], 'classNames' => []];
+        }
+        $controllerNamespace = $namespace . '\\Controller';
+        if ($isScaffold) {
+            // A scaffold controller names no other class
+            return ['namespace' => $controllerNamespace, 'imports' => [], 'classNames' => []];
+        }
+        $imports = [];
+        $model = Inflector::singularize($controllerName);
+        $this->_importClass($namespace . '\\Model\\' . $model, $controllerNamespace, $imports);
+        $camelize = function ($name) {
+            return Inflector::camelize($name);
+        };
+        $classNames = [
+            'component' => $this->_settingClasses(
+                array_map($camelize, (array)$components),
+                'Controller/Component',
+                'Component',
+                $controllerNamespace,
+                $imports,
+            ),
+            'helper' => $this->_settingClasses(
+                array_map($camelize, (array)$helpers),
+                'View/Helper',
+                'Helper',
+                $controllerNamespace,
+                $imports,
+            ),
+        ];
+        // The classes that the actions throw and return
+        $actionClasses = ['NotFoundException' => 'Cake\\Error\\NotFoundException', 'CakeResponse' => 'Cake\\Network\\CakeResponse'];
+        foreach ($actionClasses as $shortName => $className) {
+            if (preg_match('/\b' . $shortName . '\b/', (string)$actions)) {
+                $this->_importClass($className, $controllerNamespace, $imports);
+            }
+        }
+
+        return [
+            'namespace' => $controllerNamespace,
+            'imports' => $this->_sortImports($imports),
+            'classNames' => $classNames,
+        ];
     }
 
     /**
