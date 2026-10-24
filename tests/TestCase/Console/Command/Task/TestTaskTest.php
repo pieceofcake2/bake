@@ -700,14 +700,20 @@ class TestTaskTest extends CakeTestCase
      */
     public function testInteractiveWithPlugin(): void
     {
+        // The test app of the core in the CakePHP 2 layout is in test_legacy_app/ since pieceofcake2/cakephp 2.13
+        $plugin = 'TestPlugin';
         $testApp = CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Plugin' . DS;
+        if (is_dir(CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app')) {
+            $plugin = 'TestLegacyPlugin';
+            $testApp = CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Plugin' . DS;
+        }
         App::build([
             'Plugin' => [$testApp],
         ], App::RESET);
-        CakePlugin::load('TestPlugin');
+        CakePlugin::load($plugin);
 
-        $this->Task->plugin = 'TestPlugin';
-        $path = $testApp . 'TestPlugin' . DS . 'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' . DS . 'OtherHelperTest.php';
+        $this->Task->plugin = $plugin;
+        $path = $testApp . $plugin . DS . 'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' . DS . 'OtherHelperTest.php';
         $this->Task->expects($this->any())
             ->method('in')
             ->will($this->onConsecutiveCalls(

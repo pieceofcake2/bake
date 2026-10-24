@@ -169,6 +169,18 @@ class TemplateTaskTest extends CakeTestCase
     }
 
     /**
+     * Gets the test app of the core in the CakePHP 2 layout, in test_legacy_app/ since pieceofcake2/cakephp 2.13.
+     *
+     * @return string
+     */
+    protected function _coreTestApp(): string
+    {
+        $legacyApp = CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS;
+
+        return is_dir($legacyApp) ? $legacyApp : CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS;
+    }
+
+    /**
      * test generate
      *
      * @return void
@@ -177,7 +189,7 @@ class TemplateTaskTest extends CakeTestCase
     {
         App::build([
             'Console' => [
-                CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS,
+                $this->_coreTestApp() . 'Console' . DS,
             ],
         ]);
         $this->Task->initialize();
@@ -198,7 +210,7 @@ class TemplateTaskTest extends CakeTestCase
     {
         App::build([
             'Console' => [
-                CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS,
+                $this->_coreTestApp() . 'Console' . DS,
                 CAKE_CORE_INCLUDE_PATH . DS . 'console' . DS,
             ],
         ]);
