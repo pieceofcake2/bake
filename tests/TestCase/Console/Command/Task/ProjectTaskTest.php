@@ -34,6 +34,13 @@ App::uses('File', 'Utility');
 class ProjectTaskTest extends CakeTestCase
 {
     /**
+     * The placeholder file that keeps an empty directory in git
+     *
+     * @var string
+     */
+    public const GITKEEP = '.gitkeep';
+
+    /**
      * setUp method
      *
      * @return void
@@ -148,9 +155,9 @@ class ProjectTaskTest extends CakeTestCase
         }
         $this->assertStringContainsString('namespace App\Controller;', file_get_contents($path . DS . 'src' . DS . 'Controller' . DS . 'AppController.php'));
         // The .gitkeep placeholders, which keep the empty directories in git, are copied
-        $this->assertFileExists($path . DS . 'src' . DS . 'Controller' . DS . 'Component' . DS . '.gitkeep');
-        $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
-        $this->assertFileExists($path . DS . 'tmp' . DS . 'cache' . DS . 'models' . DS . '.gitkeep');
+        $this->assertFileExists($path . DS . 'src' . DS . 'Controller' . DS . 'Component' . DS . static::GITKEEP);
+        $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
+        $this->assertFileExists($path . DS . 'tmp' . DS . 'cache' . DS . 'models' . DS . static::GITKEEP);
     }
 
     /**
@@ -265,7 +272,7 @@ class ProjectTaskTest extends CakeTestCase
         ];
 
         foreach ($dirs as $dir) {
-            $this->assertTrue(is_file($path . DS . $dir . DS . '.gitkeep'), sprintf('Missing .gitkeep file in %s', $dir));
+            $this->assertTrue(is_file($path . DS . $dir . DS . static::GITKEEP), sprintf('Missing %s file in %s', static::GITKEEP, $dir));
         }
     }
 
@@ -277,10 +284,11 @@ class ProjectTaskTest extends CakeTestCase
     protected function _setupSkeletonWithEmptyFiles(): string
     {
         $skel = $this->Task->path . 'bake_test_skel';
-        new Folder($skel . DS . 'logs', true);
-        new Folder($skel . DS . 'webroot' . DS . 'js', true);
+        $Folder = new Folder();
+        $Folder->create($skel . DS . 'logs');
+        $Folder->create($skel . DS . 'webroot' . DS . 'js');
         touch($skel . DS . 'logs' . DS . 'empty');
-        touch($skel . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+        touch($skel . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
 
         return $skel;
     }
@@ -301,7 +309,7 @@ class ProjectTaskTest extends CakeTestCase
 
             $this->assertTrue(is_dir($path . DS . 'logs'));
             $this->assertFileDoesNotExist($path . DS . 'logs' . DS . 'empty');
-            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
         } finally {
             (new Folder($skel))->delete();
         }
@@ -322,7 +330,7 @@ class ProjectTaskTest extends CakeTestCase
             $this->Task->bake($path, $skel);
 
             $this->assertFileExists($path . DS . 'logs' . DS . 'empty');
-            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . static::GITKEEP);
         } finally {
             (new Folder($skel))->delete();
         }
