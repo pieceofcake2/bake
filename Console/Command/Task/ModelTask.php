@@ -894,7 +894,8 @@ class ModelTask extends BakeTask
         $this->Template->set([
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
-            'appUses' => $this->_needsParentUses(),
+            // Templates of earlier versions call App::uses() for the parent class unless it is false
+            'appUses' => false,
         ]);
         $out = $this->Template->generate('classes', 'model');
 

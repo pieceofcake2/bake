@@ -33,8 +33,7 @@
      *
      * - `handler` - callback - The callback to handle errors. You can set this to any callable type,
      *   including anonymous functions.
-     *   Make sure that a custom handler class can be loaded, e.g. with the Composer classmap of the
-     *   application (App::uses('MyHandler', 'Error'); before pieceofcake2/cakephp 2.13)
+     *   Make sure that Composer loads a custom handler class, e.g. with the classmap of the application
      * - `level` - integer - The level of errors you are interested in capturing.
      * - `trace` - boolean - Include stack traces for errors in log files.
      *
@@ -56,8 +55,7 @@
      *
      * - `handler` - callback - The callback to handle exceptions. You can set this to any callback type,
      *   including anonymous functions.
-     *   Make sure that a custom handler class can be loaded, e.g. with the Composer classmap of the
-     *   application (App::uses('MyHandler', 'Error'); before pieceofcake2/cakephp 2.13)
+     *   Make sure that Composer loads a custom handler class, e.g. with the classmap of the application
      * - `renderer` - string - The class responsible for rendering uncaught exceptions. If you choose a custom class you
      *   should place the file for that class in app/Lib/Error. This class needs to implement a render method.
      * - `log` - boolean - Should Exceptions be logged?

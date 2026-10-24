@@ -78,21 +78,13 @@ The files are written to the directories of your application, so a modern applic
 `src/Model/`, `src/Controller/` and `templates/`, and a legacy application gets
 `app/Model/`, `app/Controller/` and `app/View/`.
 
-The baked classes and tests call `App::uses()` only for the classes that CakePHP and Composer
-do not find without it:
-
-- With pieceofcake2/cakephp 2.13 and later, which deprecates `App::uses()`, the baked classes
-  have no `App::uses()` calls: CakePHP finds `AppController`, `AppModel` and the ones of a
-  plugin. A test of a component, helper or behavior baked for a legacy application or into a
-  plugin loads the class under test with `App::uses()`, because Composer does not load it.
-  A modern application autoloads `src/` with the Composer classmap, so its tests have no
-  `App::uses()` calls; run `composer dump-autoload` when the class under test is new, as Bake
-  reminds you.
-- With pieceofcake2/cakephp 2.12, a modern application autoloads `src/` and the CakePHP classes
-  with the Composer classmap, so the baked classes and tests have no `App::uses()` calls, except
-  for the class under test of a component, helper or behavior test (a class baked just now is
-  not in the classmap until `composer dump-autoload` runs). Classes baked for a legacy
-  application or into a plugin keep their `App::uses()` calls.
+The baked classes and tests do not call `App::uses()`, which pieceofcake2/cakephp 2.13
+deprecates. CakePHP finds `AppController`, `AppModel` and the ones of a plugin, and the models
+and controllers under test are loaded by `ClassRegistry::init()` and `ControllerTestCase`.
+A test of a component, helper or behavior creates the class under test directly, so Composer
+must load it: a modern application autoloads `src/` with the classmap of its `composer.json`.
+For a legacy application or a plugin, add the directories of the classes to the classmap. Run
+`composer dump-autoload` when the class is new; Bake reminds you when it bakes such a test.
 
 The classes of Bake itself are loaded by Composer (`Console/Command/` is in the classmap of its
 `composer.json`).

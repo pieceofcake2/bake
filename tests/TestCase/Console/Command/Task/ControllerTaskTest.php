@@ -71,7 +71,7 @@ class ControllerTaskTest extends CakeTestCase
         $in = $this->getMock('ConsoleInput', [], [], '', false);
         $this->Task = $this->getMock(
             'ControllerTask',
-            ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest', '_usesIsDeprecated'],
+            ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest'],
             [$out, $out, $in],
         );
         $this->Task->name = 'Controller';
@@ -370,29 +370,9 @@ class ControllerTaskTest extends CakeTestCase
         $this->assertEquals($path, $createFileCalls[1]['path']);
         $this->assertStringContainsString('ArticlesController extends ControllerTestAppController', $createFileCalls[1]['content']);
 
-        $this->assertStringContainsString("App::uses('ControllerTestAppController', 'ControllerTest.Controller');", $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertEquals('ControllerTest', $this->Task->Template->templateVars['plugin']);
         $this->assertEquals('ControllerTest.', $this->Task->Template->templateVars['pluginPath']);
-
-        CakePlugin::unload();
-    }
-
-    /**
-     * test that the controllers of a plugin do not call App::uses() on CakePHP 2.13 and later
-     *
-     * @return void
-     */
-    public function testBakeWithPluginWithoutAppUses(): void
-    {
-        $this->Task->plugin = 'ControllerTest';
-        CakePlugin::load('ControllerTest', ['path' => APP . 'Plugin' . DS . 'ControllerTest' . DS]);
-        $this->Task->expects($this->any())->method('_usesIsDeprecated')->will($this->returnValue(true));
-        $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
-
-        $result = $this->Task->bake('Articles', '--actions--', [], [], []);
-
-        $this->assertStringContainsString('ArticlesController extends ControllerTestAppController', $result);
-        $this->assertStringNotContainsString('App::uses(', $result);
 
         CakePlugin::unload();
     }

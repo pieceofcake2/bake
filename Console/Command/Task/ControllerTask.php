@@ -389,7 +389,8 @@ class ControllerTask extends BakeTask
         $this->Template->set([
             'plugin' => $this->plugin,
             'pluginPath' => empty($this->plugin) ? '' : $this->plugin . '.',
-            'appUses' => $this->_needsParentUses(),
+            // Templates of earlier versions call App::uses() for the parent class unless it is false
+            'appUses' => false,
         ]);
 
         if (!in_array('Paginator', (array)$components)) {

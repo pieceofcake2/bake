@@ -795,13 +795,8 @@ class ViewTaskTest extends CakeTestCase
         $result = $this->Task->getTemplate('admin_add');
         $this->assertEquals('form', $result);
 
-        // The test app of the core in the CakePHP 2 layout is in test_legacy_app/ since pieceofcake2/cakephp 2.13
-        $coreTestApp = CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS;
-        if (!is_dir($coreTestApp)) {
-            $coreTestApp = CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS;
-        }
         $this->Task->Template->templatePaths = [
-            'test' => $coreTestApp . 'Console' . DS . 'Templates' . DS . 'test' . DS,
+            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
         ];
         $this->Task->Template->params['theme'] = 'test';
 

@@ -18,9 +18,6 @@
 
 echo "<?php\n";
 ?>
-<?php foreach ($uses as $dependency): ?>
-App::uses('<?php echo $dependency[0]; ?>', '<?php echo $dependency[1]; ?>');
-<?php endforeach; ?>
 
 /**
  * <?php echo $fullClassName; ?> Test Case
