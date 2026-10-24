@@ -20,7 +20,6 @@ define('ROOT', VENDORS . 'pieceofcake2' . DS . 'app');
 
 require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'tests' . DS . 'bootstrap.php';
 
-App::uses('CakePlugin', 'Core');
 CakePlugin::load('Bake', [
     'path' => dirname(__DIR__) . DS,
 ]);

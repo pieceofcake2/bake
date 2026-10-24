@@ -15,10 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('BakeTask', 'Bake.Console/Command/Task');
-App::uses('AppModel', 'Model');
-
 /**
  * Task class for creating and updating controller files.
  *
@@ -140,8 +136,7 @@ class ControllerTask extends BakeTask
         foreach ($this->_tables as $table) {
             $model = $this->_modelName($table);
             $controller = $this->_controllerName($model);
-            App::uses($model, 'Model');
-            if (class_exists($model)) {
+            if (static::classExists($model, 'Model')) {
                 $actions = $this->bakeActions($controller);
                 if ($admin) {
                     $this->out(__d('cake_console', 'Adding %s methods', $admin));
@@ -333,9 +328,8 @@ class ControllerTask extends BakeTask
         if ($plugin) {
             $plugin .= '.';
         }
-        App::uses($modelImport, $plugin . 'Model');
         $modelObj = null;
-        if (class_exists($modelImport)) {
+        if (static::classExists($modelImport, $plugin . 'Model')) {
             $modelObj = ClassRegistry::init($currentModelName);
         }
         if (!$modelObj instanceof Model) {
@@ -395,7 +389,7 @@ class ControllerTask extends BakeTask
         $this->Template->set([
             'plugin' => $this->plugin,
             'pluginPath' => empty($this->plugin) ? '' : $this->plugin . '.',
-            'appUses' => $this->_needsAppUses(),
+            'appUses' => $this->_needsParentUses(),
         ]);
 
         if (!in_array('Paginator', (array)$components)) {

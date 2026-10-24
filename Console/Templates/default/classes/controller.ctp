@@ -19,7 +19,7 @@
  */
 
 echo "<?php\n";
-// Applications with the modern layout autoload AppController with the Composer classmap.
+// Only needed on CakePHP 2.12, for the legacy layout and plugins (BakeTask::_needsParentUses()).
 if (!isset($appUses) || $appUses) {
 	echo "App::uses('{$plugin}AppController', '{$pluginPath}Controller');\n";
 }

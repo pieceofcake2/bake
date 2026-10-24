@@ -80,11 +80,22 @@ bin/cake bake plugin MyPlugin
 `src/Controller/` と `templates/` に、レガシー構成のアプリケーションでは `app/Model/`、`app/Controller/` と
 `app/View/` に書き込まれます。
 
-モダン構成のアプリケーションは、`src/` と CakePHP のクラスを Composer のクラスマップでオートロードするので、
-bake したクラスとテストには `App::uses()` の呼び出しがありません。例外は、コンポーネント、ヘルパー、ビヘイビアの
-テストでのテスト対象のクラスです (bake したばかりのクラスは、`composer dump-autoload` を実行するまでクラスマップに
-含まれないためです)。レガシー構成のアプリケーション向けや、プラグインの中に bake したクラスでは、`App::uses()` の
-呼び出しが残ります。
+bake したクラスとテストは、CakePHP と Composer がそれなしでは見つけられないクラスにだけ `App::uses()` を
+呼び出します。
+
+- `App::uses()` を非推奨にした pieceofcake2/cakephp 2.13 以降では、bake したクラスに `App::uses()` の呼び出しは
+  ありません。`AppController`、`AppModel` とプラグインのそれらは CakePHP が見つけます。レガシー構成のアプリケーション
+  向けや、プラグインの中に bake したコンポーネント、ヘルパー、ビヘイビアのテストは、Composer が読み込まないテスト
+  対象のクラスを `App::uses()` で読み込みます。モダン構成のアプリケーションは `src/` を Composer のクラスマップで
+  オートロードするので、そのテストには `App::uses()` の呼び出しがありません。テスト対象のクラスが新しいときは、
+  Bake が案内するとおり `composer dump-autoload` を実行してください。
+- pieceofcake2/cakephp 2.12 では、モダン構成のアプリケーションは `src/` と CakePHP のクラスを Composer のクラス
+  マップでオートロードするので、bake したクラスとテストには `App::uses()` の呼び出しがありません。例外は、
+  コンポーネント、ヘルパー、ビヘイビアのテストでのテスト対象のクラスです (bake したばかりのクラスは、
+  `composer dump-autoload` を実行するまでクラスマップに含まれないためです)。レガシー構成のアプリケーション向けや、
+  プラグインの中に bake したクラスでは、`App::uses()` の呼び出しが残ります。
+
+Bake 自身のクラスは Composer が読み込みます (`composer.json` のクラスマップに `Console/Command/` があります)。
 
 各コマンドの引数とオプションは `--help` で確認できます。
 

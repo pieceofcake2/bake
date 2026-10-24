@@ -19,23 +19,6 @@ use PHPUnit\Framework\Constraint\LogicalNot;
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('ShellDispatcher', 'Console');
-App::uses('Shell', 'Console');
-App::uses('CakeSchema', 'Model');
-App::uses('ClassRegistry', 'Utility');
-App::uses('Helper', 'View/Helper');
-App::uses('ProjectTask', 'Bake.Console/Command/Task');
-App::uses('ControllerTask', 'Bake.Console/Command/Task');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('TestTask', 'Bake.Console/Command/Task');
-App::uses('Model', 'Model');
-
-App::uses('BakeArticle', 'Model');
-App::uses('BakeComment', 'Model');
-App::uses('BakeTags', 'Model');
 $imported = class_exists('BakeArticle') || class_exists('BakeComment') || class_exists('BakeTag');
 
 if (!$imported) {
@@ -88,7 +71,7 @@ class ControllerTaskTest extends CakeTestCase
         $in = $this->getMock('ConsoleInput', [], [], '', false);
         $this->Task = $this->getMock(
             'ControllerTask',
-            ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest'],
+            ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $this->Task->name = 'Controller';
@@ -390,6 +373,26 @@ class ControllerTaskTest extends CakeTestCase
         $this->assertStringContainsString("App::uses('ControllerTestAppController', 'ControllerTest.Controller');", $result);
         $this->assertEquals('ControllerTest', $this->Task->Template->templateVars['plugin']);
         $this->assertEquals('ControllerTest.', $this->Task->Template->templateVars['pluginPath']);
+
+        CakePlugin::unload();
+    }
+
+    /**
+     * test that the controllers of a plugin do not call App::uses() on CakePHP 2.13 and later
+     *
+     * @return void
+     */
+    public function testBakeWithPluginWithoutAppUses(): void
+    {
+        $this->Task->plugin = 'ControllerTest';
+        CakePlugin::load('ControllerTest', ['path' => APP . 'Plugin' . DS . 'ControllerTest' . DS]);
+        $this->Task->expects($this->any())->method('_usesIsDeprecated')->will($this->returnValue(true));
+        $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
+
+        $result = $this->Task->bake('Articles', '--actions--', [], [], []);
+
+        $this->assertStringContainsString('ArticlesController extends ControllerTestAppController', $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
 
         CakePlugin::unload();
     }

@@ -21,14 +21,6 @@ use PHPUnit\Framework\Constraint\IsAnything;
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('Shell', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('FixtureTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-
 /**
  * ModelTaskTest class
  *
@@ -65,7 +57,7 @@ class ModelTaskTest extends CakeTestCase
 
         $this->Task = $this->getMock(
             'ModelTask',
-            ['in', 'err', 'createFile', '_stop', '_checkUnitTest'],
+            ['in', 'err', 'createFile', '_stop', '_checkUnitTest', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $this->_setupOtherMocks();
@@ -83,7 +75,7 @@ class ModelTaskTest extends CakeTestCase
 
         $this->Task = $this->getMock(
             'ModelTask',
-            ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest'],
+            ['in', 'out', 'err', 'hr', 'createFile', '_stop', '_checkUnitTest', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $this->_setupOtherMocks();
@@ -238,7 +230,7 @@ class ModelTaskTest extends CakeTestCase
         $in = $this->getMock('ConsoleInput', [], [], '', false);
         $this->Task = $this->getMock(
             'ModelTask',
-            ['in', 'err', '_stop', '_checkUnitTest', 'getAllTables'],
+            ['in', 'err', '_stop', '_checkUnitTest', 'getAllTables', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $this->_setupOtherMocks();
@@ -273,7 +265,7 @@ class ModelTaskTest extends CakeTestCase
         $in = $this->getMock('ConsoleInput', [], [], '', false);
         $this->Task = $this->getMock(
             'ModelTask',
-            ['in', 'err', '_stop', '_checkUnitTest', 'getAllTables'],
+            ['in', 'err', '_stop', '_checkUnitTest', 'getAllTables', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $this->_setupOtherMocks();
@@ -1021,6 +1013,24 @@ STRINGEND;
 
         $this->assertEquals(count(ClassRegistry::keys()), 0);
         $this->assertEquals(count(ClassRegistry::mapKeys()), 0);
+    }
+
+    /**
+     * test that the models of a plugin do not call App::uses() on CakePHP 2.13 and later
+     *
+     * @return void
+     */
+    public function testBakeWithPluginWithoutAppUses(): void
+    {
+        $this->Task->plugin = 'ControllerTest';
+        CakePlugin::load('ControllerTest', ['path' => APP . 'Plugin' . DS . 'ControllerTest' . DS]);
+        $this->Task->expects($this->any())->method('_usesIsDeprecated')->will($this->returnValue(true));
+        $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
+
+        $result = $this->Task->bake('BakeArticle', []);
+
+        $this->assertStringContainsString('BakeArticle extends ControllerTestAppModel', $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
     }
 
     /**

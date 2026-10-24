@@ -15,10 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('BakeTask', 'Bake.Console/Command/Task');
-App::uses('Model', 'Model');
-
 /**
  * Task class for creating and updating fixtures files.
  *
@@ -232,7 +228,6 @@ class FixtureTask extends BakeTask
      */
     public function bake($model, $useTable = false, $importOptions = [])
     {
-        App::uses('CakeSchema', 'Model');
         $table = $schema = $records = $import = $modelImport = null;
         $importBits = [];
 

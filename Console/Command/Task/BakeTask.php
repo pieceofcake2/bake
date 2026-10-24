@@ -15,8 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-
 /**
  * Base class for Bake Tasks.
  *
@@ -97,6 +95,65 @@ class BakeTask extends AppShell
         }
 
         return basename(rtrim(APP, DS)) !== 'src';
+    }
+
+    /**
+     * Checks whether baked controllers and models need `App::uses()` for their parent class
+     * (`AppController`, `AppModel` or the ones of the plugin).
+     *
+     * pieceofcake2/cakephp 2.13 and later find these classes without `App::uses()`, which they deprecate.
+     *
+     * @return bool
+     */
+    protected function _needsParentUses()
+    {
+        return $this->_needsAppUses() && !$this->_usesIsDeprecated();
+    }
+
+    /**
+     * Checks whether `App::uses()` is deprecated, as in pieceofcake2/cakephp 2.13 and later.
+     *
+     * @return bool
+     */
+    protected function _usesIsDeprecated()
+    {
+        return static::usesIsDeprecated();
+    }
+
+    /**
+     * Checks whether `App::uses()` is deprecated, as in pieceofcake2/cakephp 2.13 and later.
+     *
+     * @return bool
+     */
+    public static function usesIsDeprecated()
+    {
+        return version_compare(Configure::version(), '2.13', '>=');
+    }
+
+    /**
+     * Checks whether a class of the application or of a plugin exists, e.g. the model of a
+     * controller to bake. Composer may not load it: the application may use the legacy layout,
+     * the class may be in a plugin, or it may have been baked in this run.
+     *
+     * @param string $className The class name, e.g. `Post` or `PostsController`.
+     * @param string $location The package, with the plugin for a class of a plugin, e.g. `Model` or `MyPlugin.Controller`.
+     * @return bool
+     */
+    public static function classExists($className, $location)
+    {
+        if (static::usesIsDeprecated()) {
+            // Registers the package of the class as App::uses() does, without its deprecation
+            [$plugin, $package] = pluginSplit($location, true);
+            App::className($plugin . $className, $package);
+        } else {
+            // 2.12 registers the base classes of the application only when the core loads a class
+            App::uses('AppController', 'Controller');
+            App::uses('AppModel', 'Model');
+            App::uses('AppHelper', 'View/Helper');
+            App::uses($className, $location);
+        }
+
+        return class_exists($className);
     }
 
     /**

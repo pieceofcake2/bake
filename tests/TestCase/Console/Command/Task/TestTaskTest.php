@@ -18,16 +18,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('Shell', 'Console');
-App::uses('Folder', 'Utility');
-App::uses('TestTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('Controller', 'Controller');
-App::uses('Model', 'Model');
-
 /**
  * Test Article model
  *
@@ -208,7 +198,7 @@ class TestTaskTest extends CakeTestCase
 
         $this->Task = $this->getMock(
             'TestTask',
-            ['in', 'err', 'createFile', '_stop', 'isLoadableClass'],
+            ['in', 'err', 'createFile', '_stop', 'isLoadableClass', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $this->Task->name = 'Test';
@@ -515,7 +505,7 @@ class TestTaskTest extends CakeTestCase
         $in = $this->getMock('ConsoleInput', [], [], '', false);
         $Task = $this->getMock(
             'TestTask',
-            ['in', 'err', 'createFile', '_stop', 'isLoadableClass', '_needsAppUses'],
+            ['in', 'err', 'createFile', '_stop', 'isLoadableClass', '_needsAppUses', '_usesIsDeprecated'],
             [$out, $out, $in],
         );
         $Task->name = 'Test';
@@ -527,6 +517,50 @@ class TestTaskTest extends CakeTestCase
 
         $this->assertStringContainsString("App::uses('Component', 'Controller')", $result);
         $this->assertStringContainsString("App::uses('ComponentCollection', 'Controller')", $result);
+        $this->assertStringContainsString("App::uses('ExampleComponent', 'Controller/Component')", $result);
+    }
+
+    /**
+     * test that tests baked for the modern layout do not call App::uses() on CakePHP 2.13 and later
+     *
+     * @return void
+     */
+    public function testBakeComponentTestWithoutAppUses(): void
+    {
+        $this->Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
+        $this->Task->expects($this->any())->method('_usesIsDeprecated')->will($this->returnValue(true));
+
+        $result = $this->Task->bake('Component', 'Example');
+
+        $this->assertStringNotContainsString('App::uses(', $result);
+        $this->assertStringContainsString('$this->Example = new ExampleComponent($Collection)', $result);
+    }
+
+    /**
+     * test that tests baked for the legacy layout or a plugin only load the class under test
+     * with App::uses() on CakePHP 2.13 and later
+     *
+     * @return void
+     */
+    public function testBakeComponentTestWithAppUsesOfClassUnderTest(): void
+    {
+        $out = $this->getMock('ConsoleOutput', [], [], '', false);
+        $in = $this->getMock('ConsoleInput', [], [], '', false);
+        $Task = $this->getMock(
+            'TestTask',
+            ['in', 'err', 'createFile', '_stop', 'isLoadableClass', '_needsAppUses', '_usesIsDeprecated'],
+            [$out, $out, $in],
+        );
+        $Task->name = 'Test';
+        $Task->Template = new TemplateTask($out, $out, $in);
+        $Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
+        $Task->expects($this->any())->method('_needsAppUses')->will($this->returnValue(true));
+        $Task->expects($this->any())->method('_usesIsDeprecated')->will($this->returnValue(true));
+
+        $result = $Task->bake('Component', 'Example');
+
+        $this->assertStringNotContainsString("App::uses('Component', 'Controller')", $result);
+        $this->assertStringNotContainsString("App::uses('ComponentCollection', 'Controller')", $result);
         $this->assertStringContainsString("App::uses('ExampleComponent', 'Controller/Component')", $result);
     }
 

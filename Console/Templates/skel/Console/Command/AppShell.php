@@ -6,8 +6,6 @@
  * @since         CakePHP(tm) v 2.0
  */
 
-App::uses('Shell', 'Console');
-
 /**
  * Application Shell
  *

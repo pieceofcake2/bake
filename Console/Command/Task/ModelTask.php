@@ -15,12 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('BakeTask', 'Bake.Console/Command/Task');
-App::uses('ConnectionManager', 'Model');
-App::uses('Model', 'Model');
-App::uses('Validation', 'Utility');
-
 /**
  * Task class for creating and updating model files.
  *
@@ -900,7 +894,7 @@ class ModelTask extends BakeTask
         $this->Template->set([
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
-            'appUses' => $this->_needsAppUses(),
+            'appUses' => $this->_needsParentUses(),
         ]);
         $out = $this->Template->generate('classes', 'model');
 

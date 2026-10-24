@@ -15,10 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('Controller', 'Controller');
-App::uses('BakeTask', 'Bake.Console/Command/Task');
-
 /**
  * Task class for creating and updating view files.
  *
@@ -193,8 +189,7 @@ class ViewTask extends BakeTask
         foreach ($tables as $table) {
             $model = $this->_modelName($table);
             $this->controllerName = $this->_controllerName($model);
-            App::uses($model, 'Model');
-            if (class_exists($model)) {
+            if (static::classExists($model, 'Model')) {
                 $vars = $this->_loadController();
                 if (!$actions) {
                     $actions = $this->_methodsToBake();
@@ -281,8 +276,7 @@ class ViewTask extends BakeTask
         }
 
         $controllerClassName = $this->controllerName . 'Controller';
-        App::uses($controllerClassName, $plugin . 'Controller');
-        if (!class_exists($controllerClassName)) {
+        if (!static::classExists($controllerClassName, $plugin . 'Controller')) {
             $file = $controllerClassName . '.php';
             $this->err(__d('cake_console', "The file '%s' could not be found.\nIn order to bake a view, you'll need to first create the controller.", $file));
             $this->_stop();

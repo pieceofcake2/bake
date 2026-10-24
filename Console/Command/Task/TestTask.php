@@ -15,10 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('BakeTask', 'Bake.Console/Command/Task');
-App::uses('ClassRegistry', 'Utility');
-
 if (!defined('TESTS')) {
     define('TESTS', APP . 'Test' . DS);
 }
@@ -60,8 +56,6 @@ class TestTask extends BakeTask
 
     /**
      * Mapping between packages, and their baseclass + package.
-     * This is used to generate App::uses() call to autoload base
-     * classes if a developer has forgotten to do so.
      *
      * @var array
      */
@@ -156,19 +150,19 @@ class TestTask extends BakeTask
         } elseif ($this->interactive) {
             $this->getUserFixtures();
         }
-        [$baseClass, $baseType] = $this->getBaseType($type);
-        App::uses($baseClass, $baseType);
-        App::uses($fullClassName, $realType);
-
         $methods = [];
-        if (class_exists($fullClassName)) {
+        if (static::classExists($fullClassName, $realType)) {
             $methods = $this->getTestableMethods($fullClassName);
         }
         $mock = $this->hasMockClass($type);
         [$preConstruct, $construction, $postConstruct] = $this->generateConstructor($type, $fullClassName, $plugin);
         $uses = $this->generateUses($type, $realType, $fullClassName);
-        if (!$this->_needsAppUses()) {
+        if (!$this->_needsAppUses() || $this->_usesIsDeprecated()) {
             $uses = $this->_classmapUses($type, $fullClassName, $uses);
+        }
+        if ($uses && !$this->_needsAppUses() && $this->_usesIsDeprecated()) {
+            $uses = [];
+            $this->out(__d('cake_console', 'Run `composer dump-autoload` if Composer does not load %s yet.', $fullClassName));
         }
 
         $this->out("\n" . __d('cake_console', 'Baking test case for %s %s ...', $className, $type), 1, Shell::QUIET);
@@ -286,15 +280,14 @@ class TestTask extends BakeTask
      */
     public function isLoadableClass($package, $class)
     {
-        App::uses($class, $package);
         [$plugin,] = pluginSplit($package);
         if ($plugin) {
-            App::uses("{$plugin}AppController", $package);
-            App::uses("{$plugin}AppModel", $package);
-            App::uses("{$plugin}AppHelper", $package);
+            static::classExists("{$plugin}AppController", $package);
+            static::classExists("{$plugin}AppModel", $package);
+            static::classExists("{$plugin}AppHelper", $package);
         }
 
-        return class_exists($class);
+        return static::classExists($class, $package);
     }
 
     /**
@@ -308,7 +301,7 @@ class TestTask extends BakeTask
     public function buildTestSubject($type, $class)
     {
         ClassRegistry::flush();
-        App::uses($class, $type);
+        static::classExists($class, $type);
         $class = $this->getRealClassName($type, $class);
         if (strtolower($type) === 'model') {
             $instance = ClassRegistry::init($class);

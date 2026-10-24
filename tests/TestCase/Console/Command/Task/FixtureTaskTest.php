@@ -16,16 +16,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('Shell', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-App::uses('Folder', 'Utility');
-App::uses('FixtureTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('DbConfigTask', 'Bake.Console/Command/Task');
-
 /**
  * FixtureTaskTest class
  *
