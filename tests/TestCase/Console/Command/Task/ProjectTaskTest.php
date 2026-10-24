@@ -147,7 +147,10 @@ class ProjectTaskTest extends CakeTestCase
             $this->assertFileExists($path . DS . $file);
         }
         $this->assertStringContainsString('namespace App\Controller;', file_get_contents($path . DS . 'src' . DS . 'Controller' . DS . 'AppController.php'));
-        $this->assertFileDoesNotExist($path . DS . 'src' . DS . 'Controller' . DS . 'Component' . DS . 'empty');
+        // The .gitkeep placeholders, which keep the empty directories in git, are copied
+        $this->assertFileExists($path . DS . 'src' . DS . 'Controller' . DS . 'Component' . DS . '.gitkeep');
+        $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+        $this->assertFileExists($path . DS . 'tmp' . DS . 'cache' . DS . 'models' . DS . '.gitkeep');
     }
 
     /**
@@ -227,7 +230,8 @@ class ProjectTaskTest extends CakeTestCase
     }
 
     /**
-     * test bake() method with -empty flag,  directory creation and empty files.
+     * test bake() method with -empty flag: every empty directory of the skeleton keeps its
+     * .gitkeep placeholder.
      *
      * @return void
      */
@@ -237,30 +241,31 @@ class ProjectTaskTest extends CakeTestCase
         $this->_setupTestProject();
         $path = $this->Task->path . 'bake_test_app';
 
-        $empty = [
-            'logs' => 'empty',
-            'resources' . DS . 'locales' . DS . 'eng' . DS . 'LC_MESSAGES' => 'empty',
-            'src' . DS . 'Console' . DS . 'Command' . DS . 'Task' => 'empty',
-            'src' . DS . 'Console' . DS . 'Templates' => 'empty',
-            'src' . DS . 'Controller' . DS . 'Component' => 'empty',
-            'src' . DS . 'Model' . DS . 'Behavior' => 'empty',
-            'src' . DS . 'Model' . DS . 'Datasource' => 'empty',
-            'src' . DS . 'View' . DS . 'Scaffolds' => 'empty',
-            'tests' . DS . 'Fixture' => 'empty',
-            'tests' . DS . 'TestCase' . DS . 'Controller' . DS . 'Component' => 'empty',
-            'tests' . DS . 'TestCase' . DS . 'Model' . DS . 'Behavior' => 'empty',
-            'tests' . DS . 'TestCase' . DS . 'View' . DS . 'Helper' => 'empty',
-            'tmp' . DS . 'cache' . DS . 'models' => 'empty',
-            'tmp' . DS . 'cache' . DS . 'persistent' => 'empty',
-            'tmp' . DS . 'cache' . DS . 'views' => 'empty',
-            'tmp' . DS . 'sessions' => 'empty',
-            'tmp' . DS . 'tests' => 'empty',
-            'webroot' . DS . 'js' => 'empty',
-            'webroot' . DS . 'files' => 'empty',
+        $dirs = [
+            'logs',
+            'resources' . DS . 'locales' . DS . 'eng' . DS . 'LC_MESSAGES',
+            'src' . DS . 'Console' . DS . 'Command' . DS . 'Task',
+            'src' . DS . 'Console' . DS . 'Templates',
+            'src' . DS . 'Controller' . DS . 'Component',
+            'src' . DS . 'Model' . DS . 'Behavior',
+            'src' . DS . 'Model' . DS . 'Datasource',
+            'src' . DS . 'View' . DS . 'Scaffolds',
+            'tests' . DS . 'Fixture',
+            'tests' . DS . 'TestCase' . DS . 'Controller' . DS . 'Component',
+            'tests' . DS . 'TestCase' . DS . 'EndToEnd',
+            'tests' . DS . 'TestCase' . DS . 'Model' . DS . 'Behavior',
+            'tests' . DS . 'TestCase' . DS . 'View' . DS . 'Helper',
+            'tmp' . DS . 'cache' . DS . 'models',
+            'tmp' . DS . 'cache' . DS . 'persistent',
+            'tmp' . DS . 'cache' . DS . 'views',
+            'tmp' . DS . 'sessions',
+            'tmp' . DS . 'tests',
+            'webroot' . DS . 'js',
+            'webroot' . DS . 'files',
         ];
 
-        foreach ($empty as $dir => $file) {
-            $this->assertTrue(is_file($path . DS . $dir . DS . $file), sprintf('Missing %s file in %s', $file, $dir));
+        foreach ($dirs as $dir) {
+            $this->assertTrue(is_file($path . DS . $dir . DS . '.gitkeep'), sprintf('Missing .gitkeep file in %s', $dir));
         }
     }
 
