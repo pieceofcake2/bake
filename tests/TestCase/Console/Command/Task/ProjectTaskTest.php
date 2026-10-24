@@ -270,6 +270,65 @@ class ProjectTaskTest extends CakeTestCase
     }
 
     /**
+     * Creates a skeleton with an "empty" placeholder, as older skeletons have, and a .gitkeep one.
+     *
+     * @return string The path of the skeleton.
+     */
+    protected function _setupSkeletonWithEmptyFiles(): string
+    {
+        $skel = $this->Task->path . 'bake_test_skel';
+        new Folder($skel . DS . 'logs', true);
+        new Folder($skel . DS . 'webroot' . DS . 'js', true);
+        touch($skel . DS . 'logs' . DS . 'empty');
+        touch($skel . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+
+        return $skel;
+    }
+
+    /**
+     * test that the "empty" placeholders of a skeleton are left out, and the .gitkeep ones copied,
+     * without the -empty flag.
+     *
+     * @return void
+     */
+    public function testBakeSkipsEmptyPlaceholders(): void
+    {
+        $skel = $this->_setupSkeletonWithEmptyFiles();
+        $path = $this->Task->path . 'bake_test_app';
+        try {
+            $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
+            $this->Task->bake($path, $skel);
+
+            $this->assertTrue(is_dir($path . DS . 'logs'));
+            $this->assertFileDoesNotExist($path . DS . 'logs' . DS . 'empty');
+            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+        } finally {
+            (new Folder($skel))->delete();
+        }
+    }
+
+    /**
+     * test that the -empty flag also copies the "empty" placeholders of a skeleton.
+     *
+     * @return void
+     */
+    public function testBakeEmptyFlagCopiesEmptyPlaceholders(): void
+    {
+        $this->Task->params['empty'] = true;
+        $skel = $this->_setupSkeletonWithEmptyFiles();
+        $path = $this->Task->path . 'bake_test_app';
+        try {
+            $this->Task->expects($this->once())->method('in')->will($this->returnValue('y'));
+            $this->Task->bake($path, $skel);
+
+            $this->assertFileExists($path . DS . 'logs' . DS . 'empty');
+            $this->assertFileExists($path . DS . 'webroot' . DS . 'js' . DS . '.gitkeep');
+        } finally {
+            (new Folder($skel))->delete();
+        }
+    }
+
+    /**
      * test generation of Security.salt
      *
      * @return void

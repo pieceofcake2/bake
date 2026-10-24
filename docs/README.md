@@ -229,8 +229,9 @@ cd /path/to/myapp
 composer install
 ```
 
-`--empty` keeps the `empty` files that keep the empty directories in Git. Use `--skel` to copy
-another directory. `composer create-project pieceofcake2/app` creates the same application.
+The `.gitkeep` files that keep the empty directories in Git are copied too. `--empty` also
+copies the `empty` placeholder files of a skeleton that has them (such as an older skeleton given
+with `--skel`). Use `--skel` to copy another directory. `composer create-project pieceofcake2/app` creates the same application.
 For the former form (global classes, `.ctp` templates), see
 [pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy).
 
@@ -247,7 +248,7 @@ For the former form (global classes, `.ctp` templates), see
 | `--count`, `-n` | fixture | Number of records to generate (default: 1). |
 | `--records`, `-r` | fixture | Import records from the live table (`--count` records, default 10). |
 | `--schema`, `-s` | fixture | Import the schema instead of writing it into the fixture. |
-| `--empty` | project | Create empty files in each directory, for example to keep them in Git. |
+| `--empty` | project | Also copy the `empty` placeholder files of a skeleton that has them (`.gitkeep` files are always copied). |
 | `--skel` | project | Directory to copy the new application from. |
 
 ## Bake Themes

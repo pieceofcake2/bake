@@ -228,8 +228,9 @@ cd /path/to/myapp
 composer install
 ```
 
-`--empty` を付けると、空のディレクトリを Git に残すための `empty` ファイルもコピーします。別のディレクトリをコピー
-するには `--skel` を使います。`composer create-project pieceofcake2/app` でも同じアプリケーションができます。
+空のディレクトリを Git に残すための `.gitkeep` ファイルもコピーします。`--empty` を付けると、`empty` という
+プレースホルダーのファイルがあるスケルトン (`--skel` で指定した以前のスケルトンなど) では、そのファイルもコピーします。
+別のディレクトリをコピーするには `--skel` を使います。`composer create-project pieceofcake2/app` でも同じアプリケーションができます。
 以前の形 (グローバルなクラス、`.ctp` テンプレート) については
 [pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy) を参照してください。
 
@@ -248,7 +249,7 @@ composer install
 | `--count`、`-n` | fixture | 生成するレコードの数 (デフォルト: 1)。 |
 | `--records`、`-r` | fixture | 実際のテーブルからレコードをインポートします (`--count` 件、デフォルト 10)。 |
 | `--schema`、`-s` | fixture | スキーマをフィクスチャに書き込む代わりにインポートします。 |
-| `--empty` | project | 各ディレクトリに空のファイルを作成します。たとえば Git でディレクトリを残すためです。 |
+| `--empty` | project | `empty` というプレースホルダーのファイルがあるスケルトンでは、そのファイルもコピーします (`.gitkeep` は常にコピーします)。 |
 | `--skel` | project | 新しいアプリケーションのコピー元のディレクトリ。 |
 
 <a id="bake-themes"></a>

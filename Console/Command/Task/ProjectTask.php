@@ -141,7 +141,9 @@ class ProjectTask extends AppShell
      *
      * @param string $path Project path
      * @param string $skel Path to copy from
-     * @param array $skip array of directories to skip when copying
+     * @param array $skip Names of the files and directories to skip when copying. The `empty`
+     *   placeholders of older skeletons are skipped unless the `empty` param is set; the `.gitkeep`
+     *   placeholders are always copied, so that the empty directories are kept in git.
      * @return mixed
      */
     public function bake($path, $skel = null, $skip = ['empty'])
@@ -484,7 +486,8 @@ class ProjectTask extends AppShell
             'help' => __d('cake_console', 'Application directory to make, if it starts with "/" the path is absolute.'),
         ])->addOption('empty', [
             'boolean' => true,
-            'help' => __d('cake_console', 'Create empty files in each of the directories. Good if you are using git'),
+            'help' => __d('cake_console', 'Also copy the "empty" placeholder files of a skeleton that has them. ' .
+                'The .gitkeep placeholders, which keep the empty directories in git, are always copied.'),
         ])->addOption('theme', [
             'short' => 't',
             'help' => __d('cake_console', 'Theme to use when baking code.'),
