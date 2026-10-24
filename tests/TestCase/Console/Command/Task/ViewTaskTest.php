@@ -21,19 +21,6 @@ use PHPUnit\Framework\Constraint\IsAnything;
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('Shell', 'Console');
-App::uses('ViewTask', 'Bake.Console/Command/Task');
-App::uses('ControllerTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('ProjectTask', 'Bake.Console/Command/Task');
-App::uses('DbConfigTask', 'Bake.Console/Command/Task');
-App::uses('Model', 'Model');
-App::uses('Controller', 'Controller');
-App::uses('AppController', 'Controller');
-
 /**
  * Test View Task Comment Model
  *
@@ -809,7 +796,7 @@ class ViewTaskTest extends CakeTestCase
         $this->assertEquals('form', $result);
 
         $this->Task->Template->templatePaths = [
-            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
+            'test' => CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS . 'Templates' . DS . 'test' . DS,
         ];
         $this->Task->Template->params['theme'] = 'test';
 

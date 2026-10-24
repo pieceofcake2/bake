@@ -18,14 +18,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('Shell', 'Console');
-App::uses('ProjectTask', 'Bake.Console/Command/Task');
-App::uses('Folder', 'Utility');
-App::uses('File', 'Utility');
-
 /**
  * ProjectTask Test class
  *

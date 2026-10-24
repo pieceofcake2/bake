@@ -19,10 +19,6 @@
  */
 
 echo "<?php\n";
-// Applications with the modern layout autoload AppController with the Composer classmap.
-if (!isset($appUses) || $appUses) {
-	echo "App::uses('{$plugin}AppController', '{$pluginPath}Controller');\n";
-}
 ?>
 /**
  * <?php echo $controllerName; ?> Controller

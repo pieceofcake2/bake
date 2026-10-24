@@ -15,10 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('BakeTask', 'Bake.Console/Command/Task');
-App::uses('ClassRegistry', 'Utility');
-
 if (!defined('TESTS')) {
     define('TESTS', APP . 'Test' . DS);
 }
@@ -60,8 +56,6 @@ class TestTask extends BakeTask
 
     /**
      * Mapping between packages, and their baseclass + package.
-     * This is used to generate App::uses() call to autoload base
-     * classes if a developer has forgotten to do so.
      *
      * @var array
      */
@@ -156,19 +150,21 @@ class TestTask extends BakeTask
         } elseif ($this->interactive) {
             $this->getUserFixtures();
         }
-        [$baseClass, $baseType] = $this->getBaseType($type);
-        App::uses($baseClass, $baseType);
-        App::uses($fullClassName, $realType);
-
         $methods = [];
-        if (class_exists($fullClassName)) {
+        if (static::classExists($fullClassName, $realType)) {
             $methods = $this->getTestableMethods($fullClassName);
         }
         $mock = $this->hasMockClass($type);
         [$preConstruct, $construction, $postConstruct] = $this->generateConstructor($type, $fullClassName, $plugin);
-        $uses = $this->generateUses($type, $realType, $fullClassName);
-        if (!$this->_needsAppUses()) {
-            $uses = $this->_classmapUses($type, $fullClassName, $uses);
+        // Templates of earlier versions call App::uses() for each of $uses
+        $uses = [];
+        if (!in_array(strtolower($type), ['model', 'controller'], true)) {
+            // Models and controllers are loaded by ClassRegistry::init() and ControllerTestCase::generate()
+            $this->out(__d(
+                'cake_console',
+                'The test uses %s directly, so Composer must load it: add its directory to the classmap of composer.json if needed, and run `composer dump-autoload`.',
+                $fullClassName,
+            ));
         }
 
         $this->out("\n" . __d('cake_console', 'Baking test case for %s %s ...', $className, $type), 1, Shell::QUIET);
@@ -286,15 +282,14 @@ class TestTask extends BakeTask
      */
     public function isLoadableClass($package, $class)
     {
-        App::uses($class, $package);
         [$plugin,] = pluginSplit($package);
         if ($plugin) {
-            App::uses("{$plugin}AppController", $package);
-            App::uses("{$plugin}AppModel", $package);
-            App::uses("{$plugin}AppHelper", $package);
+            static::classExists("{$plugin}AppController", $package);
+            static::classExists("{$plugin}AppModel", $package);
+            static::classExists("{$plugin}AppHelper", $package);
         }
 
-        return class_exists($class);
+        return static::classExists($class, $package);
     }
 
     /**
@@ -308,7 +303,7 @@ class TestTask extends BakeTask
     public function buildTestSubject($type, $class)
     {
         ClassRegistry::flush();
-        App::uses($class, $type);
+        static::classExists($class, $type);
         $class = $this->getRealClassName($type, $class);
         if (strtolower($type) === 'model') {
             $instance = ClassRegistry::init($class);
@@ -575,31 +570,6 @@ class TestTask extends BakeTask
         $uses[] = [$className, $realType];
 
         return $uses;
-    }
-
-    /**
-     * Filters the uses() calls for applications autoloaded by the Composer classmap.
-     *
-     * The CakePHP classes and the existing application classes are autoloaded, and
-     * models and controllers are loaded by ClassRegistry::init() and
-     * ControllerTestCase::generate(). Only the class under test of other types is
-     * kept, because a class baked just now is not in the classmap until
-     * `composer dump-autoload` runs.
-     *
-     * @param string $type The type of object the test is generated for, e.g. Component.
-     * @param string $fullClassName The class name of the class under test.
-     * @param array $uses The uses() calls from generateUses().
-     * @return array
-     */
-    protected function _classmapUses($type, $fullClassName, array $uses)
-    {
-        if (in_array(strtolower($type), ['model', 'controller'], true)) {
-            return [];
-        }
-
-        return array_values(array_filter($uses, function ($use) use ($fullClassName) {
-            return $use[0] === $fullClassName;
-        }));
     }
 
     /**

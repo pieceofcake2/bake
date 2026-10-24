@@ -78,11 +78,16 @@ The files are written to the directories of your application, so a modern applic
 `src/Model/`, `src/Controller/` and `templates/`, and a legacy application gets
 `app/Model/`, `app/Controller/` and `app/View/`.
 
-A modern application autoloads `src/` and the CakePHP classes with the Composer classmap,
-so the baked classes and tests have no `App::uses()` calls, except for the class under test
-of a component, helper or behavior test (a class baked just now is not in the classmap
-until `composer dump-autoload` runs). Classes baked for a legacy application or into a
-plugin keep their `App::uses()` calls.
+The baked classes and tests do not call `App::uses()`, which pieceofcake2/cakephp 2.13
+deprecates. CakePHP finds `AppController`, `AppModel` and the ones of a plugin, and the models
+and controllers under test are loaded by `ClassRegistry::init()` and `ControllerTestCase`.
+A test of a component, helper or behavior creates the class under test directly, so Composer
+must load it: a modern application autoloads `src/` with the classmap of its `composer.json`.
+For a legacy application or a plugin, add the directories of the classes to the classmap. Run
+`composer dump-autoload` when the class is new; Bake reminds you when it bakes such a test.
+
+The classes of Bake itself are loaded by Composer (`Console/Command/` is in the classmap of its
+`composer.json`).
 
 Use `--help` to see the arguments and options of each command:
 

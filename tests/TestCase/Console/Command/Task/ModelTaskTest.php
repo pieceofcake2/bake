@@ -21,14 +21,6 @@ use PHPUnit\Framework\Constraint\IsAnything;
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('Shell', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('FixtureTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-
 /**
  * ModelTaskTest class
  *
@@ -1017,7 +1009,7 @@ STRINGEND;
             ->with($path, $this->stringContains('BakeArticle extends ControllerTestAppModel'));
 
         $result = $this->Task->bake('BakeArticle', []);
-        $this->assertStringContainsString("App::uses('ControllerTestAppModel', 'ControllerTest.Model');", $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
 
         $this->assertEquals(count(ClassRegistry::keys()), 0);
         $this->assertEquals(count(ClassRegistry::mapKeys()), 0);

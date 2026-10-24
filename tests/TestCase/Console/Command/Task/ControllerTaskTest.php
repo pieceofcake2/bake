@@ -19,23 +19,6 @@ use PHPUnit\Framework\Constraint\LogicalNot;
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('ShellDispatcher', 'Console');
-App::uses('Shell', 'Console');
-App::uses('CakeSchema', 'Model');
-App::uses('ClassRegistry', 'Utility');
-App::uses('Helper', 'View/Helper');
-App::uses('ProjectTask', 'Bake.Console/Command/Task');
-App::uses('ControllerTask', 'Bake.Console/Command/Task');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('TestTask', 'Bake.Console/Command/Task');
-App::uses('Model', 'Model');
-
-App::uses('BakeArticle', 'Model');
-App::uses('BakeComment', 'Model');
-App::uses('BakeTags', 'Model');
 $imported = class_exists('BakeArticle') || class_exists('BakeComment') || class_exists('BakeTag');
 
 if (!$imported) {
@@ -387,7 +370,7 @@ class ControllerTaskTest extends CakeTestCase
         $this->assertEquals($path, $createFileCalls[1]['path']);
         $this->assertStringContainsString('ArticlesController extends ControllerTestAppController', $createFileCalls[1]['content']);
 
-        $this->assertStringContainsString("App::uses('ControllerTestAppController', 'ControllerTest.Controller');", $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertEquals('ControllerTest', $this->Task->Template->templateVars['plugin']);
         $this->assertEquals('ControllerTest.', $this->Task->Template->templateVars['pluginPath']);
 

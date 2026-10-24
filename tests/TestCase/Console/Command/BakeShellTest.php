@@ -16,19 +16,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('ShellDispatcher', 'Console');
-App::uses('Shell', 'Console');
-App::uses('BakeShell', 'Bake.Console/Command');
-App::uses('ModelTask', 'Bake.Console/Command/Task');
-App::uses('ControllerTask', 'Bake.Console/Command/Task');
-App::uses('DbConfigTask', 'Bake.Console/Command/Task');
-App::uses('FixtureTask', 'Bake.Console/Command/Task');
-App::uses('TestTask', 'Bake.Console/Command/Task');
-App::uses('ViewTask', 'Bake.Console/Command/Task');
-App::uses('Controller', 'Controller');
-
 if (!class_exists('UsersController')) {
     class UsersController extends Controller
     {
@@ -86,8 +73,7 @@ class BakeShellTest extends CakeTestCase
      */
     public function testAllWithModelName(): void
     {
-        App::uses('User', 'Model');
-        $userExists = class_exists('User');
+        $userExists = BakeTask::classExists('User', 'Model');
         $this->skipIf($userExists, 'User class exists, cannot test `bake all [param]`.');
 
         $this->Shell->Model = $this->getMock('ModelTask', [], [&$this->Dispatcher]);

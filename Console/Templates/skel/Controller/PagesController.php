@@ -9,8 +9,6 @@
  * @since         CakePHP(tm) v 0.2.9
  */
 
-App::uses('AppController', 'Controller');
-
 /**
  * Static content controller
  *

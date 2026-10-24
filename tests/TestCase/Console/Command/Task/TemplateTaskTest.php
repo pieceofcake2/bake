@@ -18,12 +18,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('Shell', 'Console');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-
 /**
  * TemplateTaskTest class
  *
@@ -183,7 +177,7 @@ class TemplateTaskTest extends CakeTestCase
     {
         App::build([
             'Console' => [
-                CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS,
+                CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS,
             ],
         ]);
         $this->Task->initialize();
@@ -204,7 +198,7 @@ class TemplateTaskTest extends CakeTestCase
     {
         App::build([
             'Console' => [
-                CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Console' . DS,
+                CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Console' . DS,
                 CAKE_CORE_INCLUDE_PATH . DS . 'console' . DS,
             ],
         ]);

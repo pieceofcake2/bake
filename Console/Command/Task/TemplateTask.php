@@ -15,9 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('Folder', 'Utility');
-
 /**
  * Template Task can generate templated output Used in other Tasks.
  * Acts like a simplified View class.

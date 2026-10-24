@@ -15,8 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-
 /**
  * Task class for creating and updating the database configuration file.
  *
@@ -420,7 +418,6 @@ class DbConfigTask extends AppShell
      */
     public function getConfig()
     {
-        App::uses('ConnectionManager', 'Model');
         $configs = ConnectionManager::enumConnectionObjects();
 
         $useDbConfig = key($configs);

@@ -10,8 +10,6 @@
  * @since         CakePHP(tm) v 0.2.9
  */
 
-App::uses('Helper', 'View');
-
 /**
  * Application helper
  *

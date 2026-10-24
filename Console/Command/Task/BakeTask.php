@@ -15,8 +15,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-
 /**
  * Base class for Bake Tasks.
  *
@@ -82,21 +80,21 @@ class BakeTask extends AppShell
     }
 
     /**
-     * Checks whether baked application classes need `App::uses()` to load the classes they use.
+     * Checks whether a class of the application or of a plugin exists, e.g. the model of a
+     * controller to bake. Composer may not load it: the application may use the legacy layout,
+     * the class may be in a plugin, or it may have been baked in this run. `App::className()`
+     * registers its package, so CakePHP finds it.
      *
-     * Applications with the modern layout (`src/`) autoload their own classes and the
-     * CakePHP classes with the Composer classmap, so `App::uses()` is only needed in
-     * the legacy `app/` layout and for the classes of a plugin.
-     *
+     * @param string $className The class name, e.g. `Post` or `PostsController`.
+     * @param string $location The package, with the plugin for a class of a plugin, e.g. `Model` or `MyPlugin.Controller`.
      * @return bool
      */
-    protected function _needsAppUses()
+    public static function classExists($className, $location)
     {
-        if (!empty($this->plugin)) {
-            return true;
-        }
+        [$plugin, $package] = pluginSplit($location, true);
+        App::className($plugin . $className, $package);
 
-        return basename(rtrim(APP, DS)) !== 'src';
+        return class_exists($className);
     }
 
     /**

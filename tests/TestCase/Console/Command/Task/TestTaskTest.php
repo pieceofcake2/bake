@@ -18,16 +18,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('ShellDispatcher', 'Console');
-App::uses('ConsoleOutput', 'Console');
-App::uses('ConsoleInput', 'Console');
-App::uses('Shell', 'Console');
-App::uses('Folder', 'Utility');
-App::uses('TestTask', 'Bake.Console/Command/Task');
-App::uses('TemplateTask', 'Bake.Console/Command/Task');
-App::uses('Controller', 'Controller');
-App::uses('Model', 'Model');
-
 /**
  * Test Article model
  *
@@ -490,10 +480,7 @@ class TestTaskTest extends CakeTestCase
 
         $result = $this->Task->bake('Component', 'Example');
 
-        // The CakePHP classes are autoloaded by the Composer classmap in the modern layout
-        $this->assertStringNotContainsString("App::uses('Component', 'Controller')", $result);
-        $this->assertStringNotContainsString("App::uses('ComponentCollection', 'Controller')", $result);
-        $this->assertStringContainsString("App::uses('ExampleComponent', 'Controller/Component')", $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertStringContainsString('class ExampleComponentTest extends CakeTestCase', $result);
 
         $this->assertStringContainsString('function setUp()', $result);
@@ -505,29 +492,28 @@ class TestTaskTest extends CakeTestCase
     }
 
     /**
-     * test that tests baked for the legacy layout or a plugin keep all App::uses() calls.
+     * test that baking a component test reminds that Composer must load the component,
+     * and that baking a model test does not
      *
      * @return void
      */
-    public function testBakeComponentTestWithAppUses(): void
+    public function testBakeTestRemindsComposerAutoload(): void
     {
-        $out = $this->getMock('ConsoleOutput', [], [], '', false);
-        $in = $this->getMock('ConsoleInput', [], [], '', false);
-        $Task = $this->getMock(
-            'TestTask',
-            ['in', 'err', 'createFile', '_stop', 'isLoadableClass', '_needsAppUses'],
-            [$out, $out, $in],
-        );
-        $Task->name = 'Test';
-        $Task->Template = new TemplateTask($out, $out, $in);
-        $Task->expects($this->once())->method('createFile')->will($this->returnValue(true));
-        $Task->expects($this->any())->method('_needsAppUses')->will($this->returnValue(true));
+        $this->Task->expects($this->exactly(2))->method('createFile')->will($this->returnValue(true));
+        $written = [];
+        $this->Task->stdout->expects($this->any())
+            ->method('write')
+            ->willReturnCallback(function ($message) use (&$written): void {
+                $written[] = implode("\n", (array)$message);
+            });
 
-        $result = $Task->bake('Component', 'Example');
+        $this->Task->bake('Component', 'Example');
+        $this->assertStringContainsString('The test uses ExampleComponent directly', implode("\n", $written));
+        $this->assertStringContainsString('composer dump-autoload', implode("\n", $written));
 
-        $this->assertStringContainsString("App::uses('Component', 'Controller')", $result);
-        $this->assertStringContainsString("App::uses('ComponentCollection', 'Controller')", $result);
-        $this->assertStringContainsString("App::uses('ExampleComponent', 'Controller/Component')", $result);
+        $written = [];
+        $this->Task->bake('Model', 'TestTaskArticle');
+        $this->assertStringNotContainsString('composer dump-autoload', implode("\n", $written));
     }
 
     /**
@@ -541,7 +527,7 @@ class TestTaskTest extends CakeTestCase
 
         $result = $this->Task->bake('Behavior', 'Example');
 
-        $this->assertStringContainsString("App::uses('ExampleBehavior', 'Model/Behavior')", $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertStringContainsString('class ExampleBehaviorTest extends CakeTestCase', $result);
 
         $this->assertStringContainsString('function setUp()', $result);
@@ -562,7 +548,7 @@ class TestTaskTest extends CakeTestCase
 
         $result = $this->Task->bake('Helper', 'Example');
 
-        $this->assertStringContainsString("App::uses('ExampleHelper', 'View/Helper')", $result);
+        $this->assertStringNotContainsString('App::uses(', $result);
         $this->assertStringContainsString('class ExampleHelperTest extends CakeTestCase', $result);
 
         $this->assertStringContainsString('function setUp()', $result);
@@ -666,14 +652,14 @@ class TestTaskTest extends CakeTestCase
      */
     public function testInteractiveWithPlugin(): void
     {
-        $testApp = CORE_ROOT . DS . 'tests' . DS . 'test_app' . DS . 'Plugin' . DS;
+        $testApp = CORE_ROOT . DS . 'tests' . DS . 'test_legacy_app' . DS . 'Plugin' . DS;
         App::build([
             'Plugin' => [$testApp],
         ], App::RESET);
-        CakePlugin::load('TestPlugin');
+        CakePlugin::load('TestLegacyPlugin');
 
-        $this->Task->plugin = 'TestPlugin';
-        $path = $testApp . 'TestPlugin' . DS . 'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' . DS . 'OtherHelperTest.php';
+        $this->Task->plugin = 'TestLegacyPlugin';
+        $path = $testApp . 'TestLegacyPlugin' . DS . 'Test' . DS . 'Case' . DS . 'View' . DS . 'Helper' . DS . 'OtherHelperTest.php';
         $this->Task->expects($this->any())
             ->method('in')
             ->will($this->onConsecutiveCalls(

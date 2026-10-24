@@ -19,9 +19,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-App::uses('AppShell', 'Console/Command');
-App::uses('Model', 'Model');
-
 /**
  * Command-line code generation utility to automate programmer chores.
  *
@@ -175,9 +172,7 @@ class BakeShell extends AppShell
         $modelExists = false;
         $model = $this->_modelName($name);
 
-        App::uses('AppModel', 'Model');
-        App::uses($model, 'Model');
-        if (class_exists($model)) {
+        if (BakeTask::classExists($model, 'Model')) {
             $object = new $model();
             $modelExists = true;
         } else {
@@ -201,8 +196,7 @@ class BakeShell extends AppShell
                     $this->Controller->bakeTest($controller);
                 }
             }
-            App::uses($controller . 'Controller', 'Controller');
-            if (class_exists($controller . 'Controller')) {
+            if (BakeTask::classExists($controller . 'Controller', 'Controller')) {
                 $this->View->args = [$name];
                 $this->View->execute();
             }
