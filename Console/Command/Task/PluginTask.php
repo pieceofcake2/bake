@@ -138,7 +138,7 @@ class PluginTask extends AppShell
                 $dirPath = $this->path . $plugin . DS . $directory;
                 $Folder->create($dirPath);
                 // Keeps the empty directory in git, as in the application skeleton
-                new File($dirPath . DS . '.gitkeep', true);
+                (new File($dirPath . DS . '.gitkeep'))->create();
             }
 
             foreach ($Folder->messages() as $message) {
