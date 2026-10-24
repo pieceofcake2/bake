@@ -169,7 +169,7 @@ class LayoutDetectionTest extends CakeTestCase
      */
     public function testCakePhp2Layout(): void
     {
-        $this->_files(['app/View/Pages/home.ctp', 'app/Test/Case/empty', 'app/Test/Fixture/empty']);
+        $this->_files(['app/View/Pages/home.ctp', 'app/Test/Case/.gitkeep', 'app/Test/Fixture/.gitkeep']);
 
         $this->assertSame(['app' . DS . 'View' . DS . 'Posts' . DS . 'index.ctp'], $this->_bakeView('app/View/'));
         $expected = [
@@ -187,7 +187,7 @@ class LayoutDetectionTest extends CakeTestCase
      */
     public function testModernLayoutWithCtpViews(): void
     {
-        $this->_files(['templates/Layouts/default.ctp', 'templates/Pages/home.ctp', 'tests/TestCase/empty', 'tests/Fixture/empty']);
+        $this->_files(['templates/Layouts/default.ctp', 'templates/Pages/home.ctp', 'tests/TestCase/.gitkeep', 'tests/Fixture/.gitkeep']);
 
         $this->assertSame(['templates' . DS . 'Posts' . DS . 'index.ctp'], $this->_bakeView(static::TEMPLATES));
         $expected = [
@@ -232,7 +232,7 @@ class LayoutDetectionTest extends CakeTestCase
      */
     public function testNamespacedPlugin(): void
     {
-        $this->_files(['src/Controller/empty']);
+        $this->_files(['src/Controller/.gitkeep']);
         $this->_loadPlugin();
 
         $this->assertSame(['templates' . DS . 'Posts' . DS . 'index.php'], $this->_bakeView(null, 'BakeLayoutPlugin'));
@@ -258,7 +258,7 @@ class LayoutDetectionTest extends CakeTestCase
      */
     public function testGlobalPlugin(): void
     {
-        $this->_files(['Controller/empty', 'View/Elements/empty']);
+        $this->_files(['Controller/.gitkeep', 'View/Elements/.gitkeep']);
         $this->_loadPlugin();
 
         $this->assertSame(['View' . DS . 'Posts' . DS . 'index.ctp'], $this->_bakeView(null, 'BakeLayoutPlugin'));
@@ -284,7 +284,7 @@ class LayoutDetectionTest extends CakeTestCase
      */
     public function testGlobalPluginWithTemplates(): void
     {
-        $this->_files(['Controller/empty', 'templates/element/box.ctp', 'tests/TestCase/empty']);
+        $this->_files(['Controller/.gitkeep', 'templates/element/box.ctp', 'tests/TestCase/.gitkeep']);
         $this->_loadPlugin();
 
         $this->assertSame(['templates' . DS . 'Posts' . DS . 'index.ctp'], $this->_bakeView(null, 'BakeLayoutPlugin'));
